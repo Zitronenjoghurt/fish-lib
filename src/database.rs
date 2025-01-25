@@ -53,8 +53,7 @@ impl Database {
             .revert_all_migrations(MIGRATIONS)
             .map_err(|e| format!("Failed to rollback migrations: {}", e))?;
 
-        let mut new_connection = self.get_connection()?;
-        new_connection
+        connection
             .run_pending_migrations(MIGRATIONS)
             .map_err(|e| format!("Failed to re-run migrations: {}", e))?;
 

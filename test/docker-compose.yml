@@ -20,6 +20,7 @@ services:
       - .env
     depends_on:
       - db
+    privileged: true
 
 volumes:
   postgres_data_test:
