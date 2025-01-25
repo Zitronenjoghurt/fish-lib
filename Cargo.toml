@@ -6,7 +6,8 @@ edition = "2021"
 repository = "https://github.com/Zitronenjoghurt/fish-lib"
 
 [dependencies]
-diesel = { version = "2.2.6", features = ["postgres", "r2d2"] }
+chrono = "0.4.39"
+diesel = { version = "2.2.6", features = ["postgres", "r2d2", "chrono"] }
 diesel_migrations = { version = "2.2.0", features = ["postgres"] }
 lazy_static = "1.5.0"
 serde = { version = "1.0.217", features = ["derive"] }

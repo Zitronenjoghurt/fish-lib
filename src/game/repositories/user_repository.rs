@@ -2,6 +2,7 @@ use crate::get_db_connection;
 use crate::models::user::{NewUser, User};
 use crate::schema::fish_users;
 use crate::traits::repository::Repository;
+use chrono::Utc;
 use diesel::prelude::*;
 use std::error::Error;
 
@@ -43,8 +44,9 @@ impl Repository<User> for UserRepository {
         Ok(user)
     }
 
-    fn save(entity: &User) -> Result<User, Box<dyn Error>> {
+    fn save(mut entity: User) -> Result<User, Box<dyn Error>> {
         let mut connection = get_db_connection()?;
+        entity.updated_at = Utc::now();
 
         let updated_user = diesel::update(fish_users::table)
             .filter(fish_users::id.eq(entity.id))

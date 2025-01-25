@@ -1,4 +1,5 @@
 use crate::traits::model::Model;
+use chrono::{DateTime, Utc};
 use diesel::prelude::*;
 
 #[derive(Debug, Clone, PartialEq, Queryable, Selectable, AsChangeset)]
@@ -7,6 +8,8 @@ use diesel::prelude::*;
 pub struct User {
     pub id: i64,
     pub external_id: i64,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 impl Model for User {

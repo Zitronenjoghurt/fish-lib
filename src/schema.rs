@@ -2,6 +2,8 @@ diesel::table! {
     fish_users (id) {
         id -> BigInt,
         external_id -> BigInt,
+        created_at -> Timestamptz,
+        updated_at -> Timestamptz
     }
 }
 
@@ -10,6 +12,8 @@ diesel::table! {
         id -> BigInt,
         user_id -> BigInt,
         data_id -> Integer,
+        created_at -> Timestamptz,
+        updated_at -> Timestamptz
     }
 }
 

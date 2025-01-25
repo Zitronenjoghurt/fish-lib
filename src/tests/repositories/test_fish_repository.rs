@@ -38,10 +38,10 @@ fn test_save() {
     let mut fish = FishRepository::create_from(&user, 1).unwrap();
     fish.data_id = 2;
 
-    FishRepository::save(&fish).unwrap();
+    FishRepository::save(fish.clone()).unwrap();
     let found_fish = FishRepository::find(fish.id).unwrap().unwrap();
     assert_eq!(found_fish.data_id, 2);
-    assert_eq!(fish, found_fish);
+    assert_eq!(fish.created_at, found_fish.created_at);
 }
 
 #[test]

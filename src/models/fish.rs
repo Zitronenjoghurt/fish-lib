@@ -1,4 +1,5 @@
 use crate::traits::model::Model;
+use chrono::{DateTime, Utc};
 use diesel::{AsChangeset, Insertable, Queryable, Selectable};
 
 #[derive(Debug, Clone, PartialEq, Queryable, Selectable, AsChangeset)]
@@ -8,6 +9,8 @@ pub struct Fish {
     pub id: i64,
     pub user_id: i64,
     pub data_id: i32,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 impl Model for Fish {

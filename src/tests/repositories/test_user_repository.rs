@@ -26,10 +26,10 @@ fn test_save() {
     let mut user = UserRepository::create_from(1337).unwrap();
     user.external_id = 1338;
 
-    UserRepository::save(&user).unwrap();
+    UserRepository::save(user.clone()).unwrap();
     assert_eq!(UserRepository::find_by_external_id(1337).unwrap(), None);
     let found_user = UserRepository::find_by_external_id(1338).unwrap().unwrap();
-    assert_eq!(user, found_user);
+    assert_eq!(user.created_at, found_user.created_at);
 }
 
 #[test]
