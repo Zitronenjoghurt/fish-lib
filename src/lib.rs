@@ -40,7 +40,7 @@ pub fn get_db_connection(
 }
 
 pub fn clear_db() -> Result<(), Box<dyn std::error::Error>> {
-    DB.read().expect("Failed to get write lock on DB").clear()
+    DB.write().expect("Failed to get write lock on DB").clear()
 }
 
 pub fn get_config() -> Arc<Config> {
