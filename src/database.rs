@@ -53,6 +53,9 @@ impl Database {
             .revert_all_migrations(MIGRATIONS)
             .map_err(|e| format!("Failed to rollback migrations: {}", e))?;
 
+        // I hate this but...
+        std::thread::sleep(std::time::Duration::from_millis(100));
+
         connection
             .run_pending_migrations(MIGRATIONS)
             .map_err(|e| format!("Failed to re-run migrations: {}", e))?;
