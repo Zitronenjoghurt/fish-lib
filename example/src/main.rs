@@ -1,7 +1,7 @@
 use dotenv::dotenv;
 use fish_lib::config::Config;
-use fish_lib::game::repositories::fish_repository::add_fish;
-use fish_lib::game::repositories::user_repository::add_user;
+use fish_lib::game::repositories::fish_repository::FishRepository;
+use fish_lib::game::repositories::user_repository::UserRepository;
 use fish_lib::{connect_db, set_config};
 use std::env;
 use std::path::Path;
@@ -30,8 +30,8 @@ fn main() {
     init_config();
     init_db();
 
-    let user = add_user(1337).unwrap();
-    let fish = add_fish(&user).unwrap();
+    let user = UserRepository::create_from(1337).unwrap();
+    let fish = FishRepository::create_from_user(&user).unwrap();
 
     println!("{:?}", user);
     println!("{:?}", fish);
