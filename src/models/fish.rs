@@ -1,20 +1,16 @@
-use crate::database::DatabaseEntity;
+use diesel::{Insertable, Queryable, Selectable};
 
-#[cfg(feature = "db-diesel")]
-use crate::schema::fish::dsl::fish;
-
-#[derive(Debug, Clone)]
-pub struct Fish<ID> {
-    pub id: ID,
+#[derive(Debug, Clone, Queryable, Selectable)]
+#[diesel(table_name = crate::schema::fishes)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct Fish {
+    pub id: i64,
+    pub user_id: i64,
 }
 
-impl<ID> DatabaseEntity for Fish<ID> {
-    type ID = ID;
-
-    #[cfg(feature = "db-diesel")]
-    type Table = fish;
-
-    fn get_id(&self) -> &Self::ID {
-        &self.id
-    }
+#[derive(Insertable)]
+#[diesel(table_name = crate::schema::fishes)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct NewFish {
+    pub user_id: i64,
 }

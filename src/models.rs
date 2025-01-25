@@ -1,2 +1,2 @@
+pub mod fish;
 pub mod user;
-mod fish;

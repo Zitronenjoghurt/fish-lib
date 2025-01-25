@@ -1,0 +1,28 @@
+name: Example Tests
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  docker-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start container
+        run: |
+          cd example
+          make up
+
+      - name: Run tests
+        run: |
+          cd example
+          make test
+
+      - name: Cleanup
+        if: always()
+        run: |
+          cd example
+          make clean

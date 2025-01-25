@@ -1,0 +1,21 @@
+name: fish-lib-example
+
+services:
+  db:
+    image: postgres:17
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+
+  app:
+    build:
+      context: ..
+      dockerfile: example/Dockerfile
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

@@ -1,4 +1,4 @@
-name: Rust
+name: Library Test & Coverage
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build
-        run: cargo build --all-features --verbose
+        run: cargo build --verbose
 
       - name: Cache tarpaulin
         uses: actions/cache@v4.0.2
@@ -30,7 +30,7 @@ jobs:
         run: cargo install cargo-tarpaulin
 
       - name: Run tests
-        run: cargo test --all-features
+        run: cargo test
 
       - name: Generate code coverage
         run: cargo tarpaulin --verbose --all-features --workspace --timeout 120 --out Xml
