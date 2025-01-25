@@ -1,5 +1,6 @@
 use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
-use diesel::{sql_query, PgConnection, RunQueryDsl};
+use diesel::sql_types::Text;
+use diesel::{PgConnection, QueryableByName, RunQueryDsl};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
@@ -49,19 +50,23 @@ impl Database {
     pub fn clear(&self) -> Result<(), Box<dyn std::error::Error>> {
         let mut connection = self.get_connection()?;
 
-        sql_query("
-            DO $$
-            DECLARE
-                statements CURSOR FOR
-                    SELECT tablename FROM pg_tables
-                    WHERE schemaname = 'public';
-            BEGIN
-                EXECUTE 'SET CONSTRAINTS ALL DEFERRED';
-                FOR stmt IN statements LOOP
-                    EXECUTE 'TRUNCATE TABLE ' || quote_ident(stmt.tablename) || ' RESTART IDENTITY CASCADE';
-                END LOOP;
-            END $$;
-        ").execute(&mut connection)?;
+        #[derive(QueryableByName, Debug)]
+        struct TableName {
+            #[diesel(sql_type = Text)]
+            tablename: String,
+        }
+
+        let table_names: Vec<String> =
+            diesel::sql_query("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")
+                .load::<TableName>(&mut connection)?
+                .into_iter()
+                .map(|table| table.tablename)
+                .collect();
+
+        for table in table_names {
+            diesel::sql_query(format!("TRUNCATE TABLE {} RESTART IDENTITY CASCADE", table))
+                .execute(&mut connection)?;
+        }
 
         Ok(())
     }
