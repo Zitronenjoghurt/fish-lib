@@ -1,7 +1,7 @@
 use crate::traits::model::Model;
-use diesel::{Insertable, Queryable, Selectable};
+use diesel::{AsChangeset, Insertable, Queryable, Selectable};
 
-#[derive(Debug, Clone, PartialEq, Queryable, Selectable)]
+#[derive(Debug, Clone, PartialEq, Queryable, Selectable, AsChangeset)]
 #[diesel(table_name = crate::schema::fish_fishes)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Fish {

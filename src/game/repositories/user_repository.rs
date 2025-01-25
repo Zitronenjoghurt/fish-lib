@@ -42,4 +42,25 @@ impl Repository<User> for UserRepository {
             .optional()?;
         Ok(user)
     }
+
+    fn save(entity: &User) -> Result<User, Box<dyn Error>> {
+        let mut connection = get_db_connection()?;
+
+        let updated_user = diesel::update(fish_users::table)
+            .filter(fish_users::id.eq(entity.id))
+            .set(entity)
+            .get_result::<User>(&mut connection)?;
+
+        Ok(updated_user)
+    }
+
+    fn delete(entity: &User) -> Result<bool, Box<dyn Error>> {
+        let mut connection = get_db_connection()?;
+
+        let deleted_count = diesel::delete(fish_users::table)
+            .filter(fish_users::id.eq(entity.id))
+            .execute(&mut connection)?;
+
+        Ok(deleted_count > 0)
+    }
 }

@@ -20,6 +20,16 @@ impl FishRepository {
         };
         Self::create(fish)
     }
+
+    pub fn find_by_user(owner_user: &User) -> Result<Vec<Fish>, Box<dyn Error>> {
+        let mut connection = get_db_connection()?;
+
+        let fish = fish_fishes::table
+            .filter(fish_fishes::user_id.eq(owner_user.id))
+            .load::<Fish>(&mut connection)?;
+
+        Ok(fish)
+    }
 }
 
 impl Repository<Fish> for FishRepository {
@@ -40,5 +50,26 @@ impl Repository<Fish> for FishRepository {
             .first::<Fish>(&mut connection)
             .optional()?;
         Ok(user)
+    }
+
+    fn save(entity: &Fish) -> Result<Fish, Box<dyn Error>> {
+        let mut connection = get_db_connection()?;
+
+        let updated_fish = diesel::update(fish_fishes::table)
+            .filter(fish_fishes::id.eq(entity.id))
+            .set(entity)
+            .get_result::<Fish>(&mut connection)?;
+
+        Ok(updated_fish)
+    }
+
+    fn delete(entity: &Fish) -> Result<bool, Box<dyn Error>> {
+        let mut connection = get_db_connection()?;
+
+        let deleted_count = diesel::delete(fish_fishes::table)
+            .filter(fish_fishes::id.eq(entity.id))
+            .execute(&mut connection)?;
+
+        Ok(deleted_count > 0)
     }
 }
