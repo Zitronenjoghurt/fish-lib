@@ -1,15 +1,13 @@
 use crate::config::Config;
 use crate::database::Database;
-use crate::entities::fish_stats::FishStats;
 use diesel::r2d2::{ConnectionManager, PooledConnection};
 use diesel::PgConnection;
 use lazy_static::lazy_static;
-use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 
 pub mod config;
+pub mod data;
 pub mod database;
-pub mod entities;
 pub mod game;
 pub mod models;
 pub mod schema;
@@ -53,9 +51,4 @@ pub fn set_config(new_config: Config) {
 
 pub fn reset_config() {
     set_config(Config::default());
-}
-
-pub fn config_set_fish(fish: HashMap<u32, FishStats>) -> Arc<Config> {
-    set_config((*get_config()).clone().with_fish(fish));
-    get_config()
 }

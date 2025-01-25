@@ -7,6 +7,7 @@ use diesel::{Insertable, Queryable, Selectable};
 pub struct Fish {
     pub id: i64,
     pub user_id: i64,
+    pub data_id: i32,
 }
 
 impl Model for Fish {
@@ -28,4 +29,5 @@ impl Model for Fish {
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct NewFish {
     pub user_id: i64,
+    pub data_id: i32,
 }

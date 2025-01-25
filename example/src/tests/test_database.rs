@@ -7,7 +7,7 @@ fn test_database() {
     setup_test();
 
     let user = UserRepository::create_from(1337).unwrap();
-    let fish = FishRepository::create_from_user(&user).unwrap();
+    let fish = FishRepository::create_from(&user, 1).unwrap();
 
     assert_eq!(user.external_id, 1337);
     assert_eq!(fish.user_id, user.id);

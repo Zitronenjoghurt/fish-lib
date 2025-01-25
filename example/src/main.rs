@@ -10,7 +10,7 @@ use std::path::Path;
 mod tests;
 
 fn init_config() {
-    let fish_json_file = Path::new("./example_data/fish_stats.json");
+    let fish_json_file = Path::new("./../example_data/fish_stats.json");
 
     let config = Config::builder()
         .fish_json_file(fish_json_file)
@@ -31,7 +31,7 @@ fn main() {
     init_db();
 
     let user = UserRepository::create_from(1337).unwrap();
-    let fish = FishRepository::create_from_user(&user).unwrap();
+    let fish = FishRepository::create_from(&user, 1).unwrap();
 
     println!("{:?}", user);
     println!("{:?}", fish);

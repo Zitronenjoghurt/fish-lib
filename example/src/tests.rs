@@ -1,12 +1,10 @@
-use dotenv::dotenv;
-use fish_lib::{clear_db, connect_db};
-use std::env;
+use crate::{init_config, init_db};
+use fish_lib::clear_db;
 
 mod test_database;
 
 pub fn setup_test() {
-    dotenv().ok();
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    connect_db(&database_url).unwrap();
+    init_config();
+    init_db();
     clear_db().unwrap();
 }

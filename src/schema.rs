@@ -9,6 +9,7 @@ diesel::table! {
     fish_fishes (id) {
         id -> BigInt,
         user_id -> BigInt,
+        data_id -> Integer,
     }
 }
 
