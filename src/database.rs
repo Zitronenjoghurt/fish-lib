@@ -50,6 +50,8 @@ impl Database {
     pub fn clear(&self) -> Result<(), Box<dyn std::error::Error>> {
         let mut connection = self.get_connection()?;
 
+        println!("Attempting to clear database...");
+
         #[derive(QueryableByName, Debug)]
         struct TableName {
             #[diesel(sql_type = Text)]
@@ -63,9 +65,16 @@ impl Database {
                 .map(|table| table.tablename)
                 .collect();
 
+        println!("Tables to truncate: {:?}", table_names);
+
         for table in table_names {
-            diesel::sql_query(format!("TRUNCATE TABLE {} RESTART IDENTITY CASCADE", table))
-                .execute(&mut connection)?;
+            println!("Truncating table: {}", table);
+            match diesel::sql_query(format!("TRUNCATE TABLE {} RESTART IDENTITY CASCADE", table))
+                .execute(&mut connection)
+            {
+                Ok(_) => println!("Successfully truncated {}", table),
+                Err(e) => println!("Error truncating {}: {:?}", table, e),
+            }
         }
 
         Ok(())
