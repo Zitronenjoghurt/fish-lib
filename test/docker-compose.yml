@@ -14,6 +14,8 @@ services:
     build:
       context: ..
       dockerfile: test/Dockerfile
+    security_opt:
+      - seccomp=unconfined # adjusted so tarpaulin works properly
     env_file:
       - .env
     depends_on:
