@@ -13,7 +13,10 @@ diesel::table! {
         user_id -> BigInt,
         data_id -> Integer,
         created_at -> Timestamptz,
-        updated_at -> Timestamptz
+        updated_at -> Timestamptz,
+        size_baby_mm -> Float,
+        size_adult_mm -> Float,
+        lifespan_days -> Float
     }
 }
 

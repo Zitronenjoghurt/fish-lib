@@ -1,5 +1,11 @@
 {
   "1": {
-    "name": "salmon"
+    "name": "salmon",
+    "min_size_baby_mm": 40,
+    "max_size_baby_mm": 50,
+    "min_size_adult_mm": 400,
+    "max_size_adult_mm": 500,
+    "min_lifespan_days": 480,
+    "max_lifespan_days": 720
   }
 }

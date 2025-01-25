@@ -15,7 +15,7 @@ services:
       context: ..
       dockerfile: test/Dockerfile
     volumes:
-      - ../src:/app/src
+      - ..:/app
     security_opt:
       - seccomp=unconfined # adjusted so tarpaulin works properly
     env_file:

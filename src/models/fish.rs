@@ -11,6 +11,9 @@ pub struct Fish {
     pub data_id: i32,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub size_baby_mm: f32,
+    pub size_adult_mm: f32,
+    pub lifespan_days: f32,
 }
 
 impl Model for Fish {
@@ -33,4 +36,7 @@ impl Model for Fish {
 pub struct NewFish {
     pub user_id: i64,
     pub data_id: i32,
+    pub size_baby_mm: f32,
+    pub size_adult_mm: f32,
+    pub lifespan_days: f32,
 }

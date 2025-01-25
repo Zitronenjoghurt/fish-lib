@@ -14,6 +14,7 @@ pub mod schema;
 #[cfg(test)]
 mod tests;
 mod traits;
+mod utils;
 
 lazy_static! {
     static ref DB: RwLock<Database> = RwLock::new(Database::new());
