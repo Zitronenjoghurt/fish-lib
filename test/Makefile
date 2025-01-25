@@ -1,10 +1,7 @@
-.PHONY: up run test clean
+.PHONY: up test clean
 
 up:
 	docker compose up -d --build
-
-run:
-	docker compose exec -T app cargo run
 
 test:
 	docker compose exec -T app cargo test

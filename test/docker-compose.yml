@@ -1,0 +1,23 @@
+name: fish-lib-test
+
+services:
+  db:
+    image: postgres:17
+    volumes:
+      - postgres_data_test:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    env_file:
+      - .env
+
+  app:
+    build:
+      context: ..
+      dockerfile: test/Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+volumes:
+  postgres_data_test:

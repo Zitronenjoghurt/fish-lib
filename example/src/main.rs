@@ -1,18 +1,38 @@
 use dotenv::dotenv;
-use fish_lib::connect_db;
+use fish_lib::config::Config;
 use fish_lib::game::repositories::fish_repository::add_fish;
 use fish_lib::game::repositories::user_repository::add_user;
+use fish_lib::{connect_db, set_config};
 use std::env;
+use std::path::Path;
 
 #[cfg(test)]
 mod tests;
 
-fn main() {
+fn init_config() {
+    let fish_json_file = Path::new("./example_data/fish_stats.json");
+
+    let config = Config::builder()
+        .fish_json_file(fish_json_file)
+        .unwrap()
+        .build();
+
+    set_config(config);
+}
+
+fn init_db() {
     dotenv().ok();
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-
     connect_db(&database_url).unwrap();
+}
 
-    let new_user = add_user(1337).unwrap();
-    add_fish(&new_user).unwrap();
+fn main() {
+    init_config();
+    init_db();
+
+    let user = add_user(1337).unwrap();
+    let fish = add_fish(&user).unwrap();
+
+    println!("{:?}", user);
+    println!("{:?}", fish);
 }

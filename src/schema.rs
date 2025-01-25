@@ -1,16 +1,16 @@
 diesel::table! {
-    users (id) {
+    fish_users (id) {
         id -> BigInt,
         external_id -> BigInt,
     }
 }
 
 diesel::table! {
-    fishes (id) {
+    fish_fishes (id) {
         id -> BigInt,
         user_id -> BigInt,
     }
 }
 
-diesel::joinable!(fishes -> users (user_id));
-diesel::allow_tables_to_appear_in_same_query!(fishes, users);
+diesel::joinable!(fish_fishes -> fish_users (user_id));
+diesel::allow_tables_to_appear_in_same_query!(fish_fishes, fish_users);

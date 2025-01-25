@@ -1,5 +1,4 @@
 name: Library Test & Coverage
-
 on:
   push:
     branches: [ "main" ]
@@ -8,37 +7,46 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build
-        run: cargo build --verbose
-
-      - name: Cache tarpaulin
-        uses: actions/cache@v4.0.2
-        id: cache-tarpaulin
-        with:
-          path: ~/.cargo/bin/cargo-tarpaulin
-          key: ${{ runner.os }}-cargo-tarpaulin
+      - name: Start container
+        run: |
+          cd test
+          make up
 
       - name: Install tarpaulin
-        if: steps.cache-tarpaulin.outputs.cache-hit != 'true'
-        run: cargo install cargo-tarpaulin
+        run: |
+          cd test
+          docker compose exec -T app cargo install cargo-tarpaulin
 
       - name: Run tests
-        run: cargo test
+        run: |
+          cd test
+          make test
 
-      - name: Generate code coverage
-        run: cargo tarpaulin --verbose --all-features --workspace --timeout 120 --out Xml
+      - name: Generate coverage
+        run: |
+          cd test
+          docker compose exec -T app cargo tarpaulin --verbose --all-features --workspace --timeout 120 --out Xml
+
+      - name: Copy coverage from container
+        run: |
+          cd test
+          docker compose cp app:/app/cobertura.xml ./cobertura.xml
 
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v5
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
-          files: ./cobertura.xml
+          files: test/cobertura.xml
           fail_ci_if_error: true
+
+      - name: Cleanup
+        if: always()
+        run: |
+          cd test
+          make clean

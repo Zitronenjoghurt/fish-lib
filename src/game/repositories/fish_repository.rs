@@ -9,7 +9,7 @@ pub fn add_fish(owner_user: &User) -> Result<Fish, Box<dyn std::error::Error>> {
     };
 
     let mut connection = get_db_connection()?;
-    let fish = diesel::insert_into(crate::schema::fishes::table)
+    let fish = diesel::insert_into(crate::schema::fish_fishes::table)
         .values(&new_fish)
         .get_result::<Fish>(&mut connection)?;
 
