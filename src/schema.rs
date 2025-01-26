@@ -20,5 +20,18 @@ diesel::table! {
     }
 }
 
+diesel::table! {
+    fish_ponds (id) {
+        id -> BigInt,
+        user_id -> BigInt,
+        created_at -> Timestamptz,
+        updated_at -> Timestamptz,
+        capacity -> Integer
+    }
+}
+
 diesel::joinable!(fish_fishes -> fish_users (user_id));
 diesel::allow_tables_to_appear_in_same_query!(fish_fishes, fish_users);
+
+diesel::joinable!(fish_ponds -> fish_users (user_id));
+diesel::allow_tables_to_appear_in_same_query!(fish_ponds, fish_users);

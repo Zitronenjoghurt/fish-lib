@@ -57,11 +57,11 @@ impl Repository<Fish> for FishRepository {
 
     fn find(id: i64) -> Result<Option<Fish>, Box<dyn Error>> {
         let mut connection = get_db_connection()?;
-        let user = fish_fishes::table
+        let fish = fish_fishes::table
             .find(id)
             .first::<Fish>(&mut connection)
             .optional()?;
-        Ok(user)
+        Ok(fish)
     }
 
     fn save(mut entity: Fish) -> Result<Fish, Box<dyn Error>> {
