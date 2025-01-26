@@ -3,6 +3,7 @@ use crate::get_config;
 use crate::models::fish::Fish;
 use crate::models::fishing_history_entry::{FishingHistoryEntry, NewFishingHistoryEntry};
 use crate::traits::repository::Repository;
+use chrono::{DateTime, Utc};
 use std::error::Error;
 
 pub struct FishingHistoryService;
@@ -18,7 +19,7 @@ impl FishingHistoryService {
 
         if let Some(mut entry) = existing_entry {
             let size_mm = fish.get_size_mm(time_multiplier);
-            entry.register_catch(size_mm);
+            entry.register_catch(size_mm, fish.created_at);
             let saved_entry = FishingHistoryEntryRepository::save(entry)?;
             Ok(saved_entry)
         } else {
@@ -34,5 +35,24 @@ impl FishingHistoryService {
             let saved_entry = FishingHistoryEntryRepository::create(new_entry)?;
             Ok(saved_entry)
         }
+    }
+
+    pub fn register_sell(
+        fish: &Fish,
+        sell_time: DateTime<Utc>,
+    ) -> Result<FishingHistoryEntry, Box<dyn Error>> {
+        let mut existing_entry = FishingHistoryEntryRepository::find_by_user_and_species_id(
+            fish.user_id,
+            fish.species_id,
+        )?
+        .ok_or_else(|| {
+            format!(
+            "Can't register selling of a fish that wasn't caught yet. user_id: {}, species_id: {}",
+            fish.user_id, fish.species_id
+        )
+        })?;
+
+        existing_entry.register_sell(sell_time);
+        FishingHistoryEntryRepository::save(existing_entry)
     }
 }

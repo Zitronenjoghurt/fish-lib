@@ -41,7 +41,10 @@ diesel::table! {
         caught_count -> Integer,
         sold_count -> Integer,
         smallest_catch_mm -> Float,
-        largest_catch_mm -> Float
+        largest_catch_mm -> Float,
+        last_catch -> Timestamptz,
+        first_sell -> Nullable<Timestamptz>,
+        last_sell -> Nullable<Timestamptz>,
     }
 }
 

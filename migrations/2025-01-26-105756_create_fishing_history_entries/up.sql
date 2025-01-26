@@ -9,5 +9,8 @@ CREATE TABLE IF NOT EXISTS fish_fishing_history_entries
     caught_count      INTEGER     NOT NULL,
     sold_count        INTEGER     NOT NULL,
     smallest_catch_mm REAL        NOT NULL,
-    largest_catch_mm  REAL        NOT NULL
+    largest_catch_mm  REAL        NOT NULL,
+    last_catch        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    first_sell        TIMESTAMPTZ          DEFAULT NULL,
+    last_sell         TIMESTAMPTZ          DEFAULT NULL
 );

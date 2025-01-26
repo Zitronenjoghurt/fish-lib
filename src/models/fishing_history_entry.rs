@@ -15,16 +15,32 @@ pub struct FishingHistoryEntry {
     pub sold_count: i32,
     pub smallest_catch_mm: f32,
     pub largest_catch_mm: f32,
+    pub last_catch: DateTime<Utc>,
+    pub first_sell: Option<DateTime<Utc>>,
+    pub last_sell: Option<DateTime<Utc>>,
 }
 
 impl FishingHistoryEntry {
-    pub fn register_catch(&mut self, size_mm: f32) {
+    pub fn first_catch(&self) -> DateTime<Utc> {
+        self.created_at
+    }
+
+    pub fn register_catch(&mut self, size_mm: f32, catch_time: DateTime<Utc>) {
         if size_mm < self.smallest_catch_mm {
             self.smallest_catch_mm = size_mm;
         } else if size_mm > self.largest_catch_mm {
             self.largest_catch_mm = size_mm;
         }
+        self.last_catch = catch_time;
         self.caught_count = self.caught_count.saturating_add(1);
+    }
+
+    pub fn register_sell(&mut self, sell_time: DateTime<Utc>) {
+        if self.sold_count == 0 {
+            self.first_sell = Some(sell_time);
+        }
+        self.last_sell = Some(sell_time);
+        self.sold_count = self.sold_count.saturating_add(1);
     }
 }
 
