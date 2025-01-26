@@ -13,6 +13,10 @@ fn mock_config() {
         max_size_baby_mm: 30,
         min_size_adult_mm: 20,
         max_size_adult_mm: 60,
+        min_weight_baby_g: 20,
+        max_weight_baby_g: 60,
+        min_weight_adult_g: 40,
+        max_weight_adult_g: 120,
         min_lifespan_days: 1,
         max_lifespan_days: 4,
         lifespan_adult_ratio: 0.35,
@@ -165,7 +169,80 @@ fn test_size_calculation() {
     let size3_accelerated = fish3.get_size_mm(3.0);
     assert!(
         (size3_accelerated - 35.0).abs() < 0.001,
-        "Expected size3 to be approximately 35.0, got {}",
-        size3
+        "Expected size3_accelerated to be approximately 35.0, got {}",
+        size3_accelerated
+    );
+}
+
+#[test]
+fn test_weight_calculation() {
+    setup_test();
+    mock_config();
+
+    let now = Utc::now();
+    let yesterday = now - Duration::days(1);
+
+    let fish = Fish {
+        id: 0,
+        user_id: 0,
+        species_id: 0,
+        created_at: now,
+        updated_at: now,
+        size_baby_ratio: 0.5,
+        size_adult_ratio: 0.5,
+        lifespan_days_ratio: 0.0,
+        catch_age: 0.5,
+    };
+
+    let fish2 = Fish {
+        id: 0,
+        user_id: 0,
+        species_id: 0,
+        created_at: yesterday,
+        updated_at: yesterday,
+        size_baby_ratio: 0.5,
+        size_adult_ratio: 0.5,
+        lifespan_days_ratio: 0.0,
+        catch_age: 0.5,
+    };
+
+    let fish3 = Fish {
+        id: 0,
+        user_id: 0,
+        species_id: 0,
+        created_at: yesterday,
+        updated_at: yesterday,
+        size_baby_ratio: 0.5,
+        size_adult_ratio: 0.5,
+        lifespan_days_ratio: 1.0,
+        catch_age: 0.0,
+    };
+
+    let weight = fish.get_weight_g(1.0);
+    assert!(
+        (weight - 60.0).abs() < 0.001,
+        "Expected weight to be approximately 60.0, got {}",
+        weight
+    );
+
+    let weight2 = fish2.get_weight_g(1.0);
+    assert!(
+        (weight2 - 80.0).abs() < 0.001,
+        "Expected weight2 to be approximately 80.0, got {}",
+        weight2
+    );
+
+    let weight3 = fish3.get_weight_g(1.0);
+    assert!(
+        (weight3 - 50.0).abs() < 0.001,
+        "Expected weight3 to be approximately 50.0, got {}",
+        weight3
+    );
+
+    let weight3_accelerated = fish3.get_weight_g(3.0);
+    assert!(
+        (weight3_accelerated - 70.0).abs() < 0.001,
+        "Expected weight3_accelerated to be approximately 70.0, got {}",
+        weight3_accelerated
     );
 }

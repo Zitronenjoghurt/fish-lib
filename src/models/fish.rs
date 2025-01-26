@@ -55,6 +55,17 @@ impl Fish {
         size_baby_mm + (size_adult_mm - size_baby_mm) * current_age
     }
 
+    pub fn get_weight_g(&self, time_multiplier: f32) -> f32 {
+        let data = get_config()
+            .get_fish_data(self.species_id)
+            .unwrap_or_else(|| panic!("Missing fish data for species id '{}'", self.species_id));
+        let weight_baby_g = data.get_baby_weight_by_ratio(self.size_baby_ratio);
+        let weight_adult_g = data.get_adult_weight_by_ratio(self.size_adult_ratio);
+
+        let current_age = self.get_age(time_multiplier);
+        weight_baby_g + (weight_adult_g - weight_baby_g) * current_age
+    }
+
     pub fn get_total_size_ratio(&self, time_multiplier: f32) -> f32 {
         let data = get_config()
             .get_fish_data(self.species_id)

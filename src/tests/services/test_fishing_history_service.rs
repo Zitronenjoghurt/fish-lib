@@ -1,15 +1,42 @@
+use crate::config::Config;
+use crate::data::fish_data::FishData;
 use crate::game::repositories::fish_repository::FishRepository;
 use crate::game::repositories::fishing_history_entry_repository::FishingHistoryEntryRepository;
 use crate::game::services::fishing_history_service::FishingHistoryService;
 use crate::game::services::user_service::UserService;
 use crate::models::fish::NewFish;
+use crate::set_config;
 use crate::tests::setup_test;
 use crate::traits::repository::Repository;
 use chrono::Utc;
+use std::collections::HashMap;
+
+fn mock_config() {
+    let fish_data = FishData {
+        name: "salmon".to_string(),
+        min_size_baby_mm: 40,
+        max_size_baby_mm: 50,
+        min_size_adult_mm: 400,
+        max_size_adult_mm: 500,
+        min_weight_baby_g: 20,
+        max_weight_baby_g: 30,
+        min_weight_adult_g: 220,
+        max_weight_adult_g: 350,
+        min_lifespan_days: 480,
+        max_lifespan_days: 720,
+        lifespan_adult_ratio: 0.35,
+    };
+    let mut fish_data_map = HashMap::new();
+    fish_data_map.insert(1, fish_data);
+
+    let config = Config::builder().fish(fish_data_map).build();
+    set_config(config);
+}
 
 #[test]
 fn test_register_catch() {
     setup_test();
+    mock_config();
 
     let user = UserService::create_and_save_user(1337).unwrap();
     let new_fish = NewFish {
@@ -94,6 +121,7 @@ fn test_register_catch() {
 #[test]
 fn test_register_sell() {
     setup_test();
+    mock_config();
 
     let user = UserService::create_and_save_user(1337).unwrap();
     let new_fish = NewFish {

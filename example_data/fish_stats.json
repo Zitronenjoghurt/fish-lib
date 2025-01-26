@@ -5,6 +5,10 @@
     "max_size_baby_mm": 50,
     "min_size_adult_mm": 400,
     "max_size_adult_mm": 500,
+    "min_weight_baby_g": 20,
+    "max_weight_baby_g": 30,
+    "min_weight_adult_g": 220,
+    "max_weight_adult_g": 350,
     "min_lifespan_days": 480,
     "max_lifespan_days": 720
   }

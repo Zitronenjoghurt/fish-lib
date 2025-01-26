@@ -1,4 +1,6 @@
+use crate::get_config;
 use crate::traits::model::Model;
+use crate::utils::math::float_interpolate;
 use chrono::{DateTime, Utc};
 use diesel::{AsChangeset, Insertable, Queryable, Selectable};
 
@@ -21,7 +23,7 @@ pub struct FishingHistoryEntry {
 }
 
 impl FishingHistoryEntry {
-    pub fn first_catch(&self) -> DateTime<Utc> {
+    pub fn get_first_catch(&self) -> DateTime<Utc> {
         self.created_at
     }
 
@@ -41,6 +43,50 @@ impl FishingHistoryEntry {
         }
         self.last_sell = Some(sell_time);
         self.sold_count = self.sold_count.saturating_add(1);
+    }
+
+    pub fn get_smallest_size_mm(&self) -> f32 {
+        let data = get_config()
+            .get_fish_data(self.species_id)
+            .unwrap_or_else(|| panic!("Missing fish data for species id '{}'", self.species_id));
+        float_interpolate(
+            data.min_size_baby_mm as f32,
+            data.max_size_adult_mm as f32,
+            self.smallest_catch_size_ratio,
+        )
+    }
+
+    pub fn get_largest_size_mm(&self) -> f32 {
+        let data = get_config()
+            .get_fish_data(self.species_id)
+            .unwrap_or_else(|| panic!("Missing fish data for species id '{}'", self.species_id));
+        float_interpolate(
+            data.min_size_baby_mm as f32,
+            data.max_size_adult_mm as f32,
+            self.largest_catch_size_ratio,
+        )
+    }
+
+    pub fn get_smallest_weight_g(&self) -> f32 {
+        let data = get_config()
+            .get_fish_data(self.species_id)
+            .unwrap_or_else(|| panic!("Missing fish data for species id '{}'", self.species_id));
+        float_interpolate(
+            data.min_weight_baby_g as f32,
+            data.max_weight_adult_g as f32,
+            self.smallest_catch_size_ratio,
+        )
+    }
+
+    pub fn get_largest_weight_g(&self) -> f32 {
+        let data = get_config()
+            .get_fish_data(self.species_id)
+            .unwrap_or_else(|| panic!("Missing fish data for species id '{}'", self.species_id));
+        float_interpolate(
+            data.min_weight_baby_g as f32,
+            data.max_weight_adult_g as f32,
+            self.largest_catch_size_ratio,
+        )
     }
 }
 
