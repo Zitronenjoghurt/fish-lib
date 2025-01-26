@@ -15,9 +15,9 @@ diesel::table! {
         species_id -> Integer,
         created_at -> Timestamptz,
         updated_at -> Timestamptz,
-        size_baby_mm -> Float,
-        size_adult_mm -> Float,
-        lifespan_days -> Float,
+        size_baby_ratio -> Float,
+        size_adult_ratio -> Float,
+        lifespan_days_ratio -> Float,
         catch_age -> Float
     }
 }
@@ -41,8 +41,8 @@ diesel::table! {
         updated_at -> Timestamptz,
         caught_count -> Integer,
         sold_count -> Integer,
-        smallest_catch_mm -> Float,
-        largest_catch_mm -> Float,
+        smallest_catch_size_ratio -> Float,
+        largest_catch_size_ratio -> Float,
         last_catch -> Timestamptz,
         first_sell -> Nullable<Timestamptz>,
         last_sell -> Nullable<Timestamptz>,

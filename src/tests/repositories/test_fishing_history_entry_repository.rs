@@ -12,8 +12,8 @@ fn new_user_and_entry() -> (User, FishingHistoryEntry) {
         species_id: 1,
         caught_count: 1,
         sold_count: 0,
-        smallest_catch_mm: 10.0,
-        largest_catch_mm: 10.0,
+        smallest_catch_size_ratio: 0.5,
+        largest_catch_size_ratio: 0.75,
     };
     let entry = FishingHistoryEntryRepository::create(new_entry).unwrap();
     (user, entry)

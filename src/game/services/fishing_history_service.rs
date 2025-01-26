@@ -18,19 +18,19 @@ impl FishingHistoryService {
         let time_multiplier = get_config().settings.time_speed_multiplier;
 
         if let Some(mut entry) = existing_entry {
-            let size_mm = fish.get_size_mm(time_multiplier);
-            entry.register_catch(size_mm, fish.created_at);
+            let total_size_ratio = fish.get_total_size_ratio(time_multiplier);
+            entry.register_catch(total_size_ratio, fish.created_at);
             let saved_entry = FishingHistoryEntryRepository::save(entry)?;
             Ok(saved_entry)
         } else {
-            let size_mm = fish.get_size_mm(time_multiplier);
+            let total_size_ratio = fish.get_total_size_ratio(time_multiplier);
             let new_entry = NewFishingHistoryEntry {
                 user_id: fish.user_id,
                 species_id: fish.species_id,
                 caught_count: 1,
                 sold_count: 0,
-                smallest_catch_mm: size_mm,
-                largest_catch_mm: size_mm,
+                smallest_catch_size_ratio: total_size_ratio,
+                largest_catch_size_ratio: total_size_ratio,
             };
             let saved_entry = FishingHistoryEntryRepository::create(new_entry)?;
             Ok(saved_entry)

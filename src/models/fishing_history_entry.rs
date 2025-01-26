@@ -13,8 +13,8 @@ pub struct FishingHistoryEntry {
     pub updated_at: DateTime<Utc>,
     pub caught_count: i32,
     pub sold_count: i32,
-    pub smallest_catch_mm: f32,
-    pub largest_catch_mm: f32,
+    pub smallest_catch_size_ratio: f32,
+    pub largest_catch_size_ratio: f32,
     pub last_catch: DateTime<Utc>,
     pub first_sell: Option<DateTime<Utc>>,
     pub last_sell: Option<DateTime<Utc>>,
@@ -25,11 +25,11 @@ impl FishingHistoryEntry {
         self.created_at
     }
 
-    pub fn register_catch(&mut self, size_mm: f32, catch_time: DateTime<Utc>) {
-        if size_mm < self.smallest_catch_mm {
-            self.smallest_catch_mm = size_mm;
-        } else if size_mm > self.largest_catch_mm {
-            self.largest_catch_mm = size_mm;
+    pub fn register_catch(&mut self, total_size_ratio: f32, catch_time: DateTime<Utc>) {
+        if total_size_ratio < self.smallest_catch_size_ratio {
+            self.smallest_catch_size_ratio = total_size_ratio;
+        } else if total_size_ratio > self.largest_catch_size_ratio {
+            self.largest_catch_size_ratio = total_size_ratio;
         }
         self.last_catch = catch_time;
         self.caught_count = self.caught_count.saturating_add(1);
@@ -66,6 +66,6 @@ pub struct NewFishingHistoryEntry {
     pub species_id: i32,
     pub caught_count: i32,
     pub sold_count: i32,
-    pub smallest_catch_mm: f32,
-    pub largest_catch_mm: f32,
+    pub smallest_catch_size_ratio: f32,
+    pub largest_catch_size_ratio: f32,
 }

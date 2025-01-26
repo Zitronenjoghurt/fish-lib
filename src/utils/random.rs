@@ -12,3 +12,14 @@ pub fn random_normal(min: f32, max: f32) -> f32 {
 
     size.clamp(min, max)
 }
+
+pub fn random_normal_01() -> f32 {
+    let mut rng = thread_rng();
+    let mean = 0.5;
+    let std_dev = 1.0 / 6.0;
+
+    let normal = Normal::new(mean, std_dev).unwrap();
+    let size: f32 = normal.sample(&mut rng);
+
+    size.clamp(0.0, 1.0)
+}

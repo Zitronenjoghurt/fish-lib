@@ -37,6 +37,11 @@ impl ConfigBuilder {
         self.config
     }
 
+    pub fn fish(mut self, fish: HashMap<i32, FishData>) -> Self {
+        self.config.fish = fish.into_arc_map();
+        self
+    }
+
     pub fn fish_json(mut self, json_string: &str) -> Result<Self, serde_json::Error> {
         let fish: HashMap<i32, FishData> = serde_json::from_str(json_string)?;
         self.config.fish = fish.into_arc_map();
@@ -51,6 +56,11 @@ impl ConfigBuilder {
         let fish: HashMap<i32, FishData> = serde_json::from_reader(file)?;
         self.config.fish = fish.into_arc_map();
         Ok(self)
+    }
+
+    pub fn settings(mut self, settings: Settings) -> Self {
+        self.config.settings = Arc::new(settings);
+        self
     }
 
     pub fn settings_json(mut self, json_string: &str) -> Result<Self, serde_json::Error> {
