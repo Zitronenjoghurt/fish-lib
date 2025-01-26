@@ -7,6 +7,7 @@ repository = "https://github.com/Zitronenjoghurt/fish-lib"
 
 [dependencies]
 chrono = "0.4.39"
+chrono-tz = "0.10.1"
 diesel = { version = "2.2.6", features = ["postgres", "r2d2", "chrono"] }
 diesel_migrations = { version = "2.2.0", features = ["postgres"] }
 lazy_static = "1.5.0"

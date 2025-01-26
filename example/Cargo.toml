@@ -4,5 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+chrono = "0.4.39"
+chrono-tz = "0.10.1"
 dotenv = "0.15.0"
 fish-lib = { path = ".." }

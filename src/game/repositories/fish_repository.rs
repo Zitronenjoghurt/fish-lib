@@ -1,8 +1,8 @@
+use crate::get_db_connection;
 use crate::models::fish::{Fish, NewFish};
 use crate::models::user::User;
 use crate::schema::fish_fishes;
 use crate::traits::repository::Repository;
-use crate::get_db_connection;
 use chrono::Utc;
 use diesel::prelude::*;
 use std::error::Error;
@@ -10,11 +10,6 @@ use std::error::Error;
 pub struct FishRepository;
 
 impl FishRepository {
-    pub fn create_from(owner_user: &User, species_id: i32) -> Result<Fish, Box<dyn Error>> {
-        let fish = NewFish::generate(owner_user.id, species_id)?;
-        Self::create(fish)
-    }
-
     pub fn find_by_user(owner_user: &User) -> Result<Vec<Fish>, Box<dyn Error>> {
         let mut connection = get_db_connection()?;
 

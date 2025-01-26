@@ -1,7 +1,7 @@
 use crate::game::repositories::fish_repository::FishRepository;
 use crate::game::repositories::fishing_history_entry_repository::FishingHistoryEntryRepository;
-use crate::game::repositories::user_repository::UserRepository;
 use crate::game::services::fishing_history_service::FishingHistoryService;
+use crate::game::services::user_service::UserService;
 use crate::models::fish::NewFish;
 use crate::tests::setup_test;
 use crate::traits::repository::Repository;
@@ -11,7 +11,7 @@ use chrono::Utc;
 fn test_register_catch() {
     setup_test();
 
-    let user = UserRepository::create_from(1337).unwrap();
+    let user = UserService::create_and_save_user(1337).unwrap();
     let new_fish = NewFish {
         user_id: user.id,
         species_id: 1,
@@ -95,7 +95,7 @@ fn test_register_catch() {
 fn test_register_sell() {
     setup_test();
 
-    let user = UserRepository::create_from(1337).unwrap();
+    let user = UserService::create_and_save_user(1337).unwrap();
     let new_fish = NewFish {
         user_id: user.id,
         species_id: 1,

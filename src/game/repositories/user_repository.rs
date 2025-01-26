@@ -9,11 +9,6 @@ use std::error::Error;
 pub struct UserRepository;
 
 impl UserRepository {
-    pub fn create_from(external_id: i64) -> Result<User, Box<dyn Error>> {
-        let user = NewUser { external_id };
-        Self::create(user)
-    }
-
     pub fn find_by_external_id(external_id: i64) -> Result<Option<User>, Box<dyn Error>> {
         let mut connection = get_db_connection()?;
         let user = fish_users::table

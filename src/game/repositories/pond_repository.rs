@@ -10,14 +10,6 @@ use std::error::Error;
 pub struct PondRepository;
 
 impl PondRepository {
-    pub fn create_from(owner_user: &User, capacity: i32) -> Result<Pond, Box<dyn Error>> {
-        let pond = NewPond {
-            user_id: owner_user.id,
-            capacity,
-        };
-        Self::create(pond)
-    }
-
     pub fn find_by_user(owner_user: &User) -> Result<Vec<Pond>, Box<dyn Error>> {
         let mut connection = get_db_connection()?;
 

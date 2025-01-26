@@ -1,12 +1,12 @@
 use crate::game::repositories::fishing_history_entry_repository::FishingHistoryEntryRepository;
-use crate::game::repositories::user_repository::UserRepository;
+use crate::game::services::user_service::UserService;
 use crate::models::fishing_history_entry::{FishingHistoryEntry, NewFishingHistoryEntry};
 use crate::models::user::User;
 use crate::tests::setup_test;
 use crate::traits::repository::Repository;
 
 fn new_user_and_entry() -> (User, FishingHistoryEntry) {
-    let user = UserRepository::create_from(1337).unwrap();
+    let user = UserService::create_and_save_user(1337).unwrap();
     let new_entry = NewFishingHistoryEntry {
         user_id: user.id,
         species_id: 1,

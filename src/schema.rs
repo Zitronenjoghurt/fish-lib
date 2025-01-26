@@ -3,7 +3,8 @@ diesel::table! {
         id -> BigInt,
         external_id -> BigInt,
         created_at -> Timestamptz,
-        updated_at -> Timestamptz
+        updated_at -> Timestamptz,
+        timezone -> VarChar
     }
 }
 
