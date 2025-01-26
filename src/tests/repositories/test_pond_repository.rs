@@ -4,16 +4,6 @@ use crate::tests::setup_test;
 use crate::traits::repository::Repository;
 
 #[test]
-fn test_find() {
-    setup_test();
-    let user = UserRepository::create_from(1337).unwrap();
-
-    let pond = PondRepository::create_from(&user, 50).unwrap();
-    let found_pond = PondRepository::find(pond.id).unwrap().unwrap();
-    assert_eq!(pond, found_pond);
-}
-
-#[test]
 fn test_find_by_user() {
     setup_test();
     let user = UserRepository::create_from(1337).unwrap();
@@ -29,6 +19,16 @@ fn test_find_by_user() {
     let first_pond = all_user_ponds.first().unwrap();
     assert_eq!(first_pond.capacity, 50);
     assert_eq!(first_pond.user_id, user.id);
+}
+
+#[test]
+fn test_find() {
+    setup_test();
+    let user = UserRepository::create_from(1337).unwrap();
+
+    let pond = PondRepository::create_from(&user, 50).unwrap();
+    let found_pond = PondRepository::find(pond.id).unwrap().unwrap();
+    assert_eq!(pond, found_pond);
 }
 
 #[test]

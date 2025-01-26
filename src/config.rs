@@ -8,6 +8,7 @@ use std::sync::Arc;
 
 #[derive(Debug, Default, PartialEq)]
 pub struct Config {
+    /// Mapping fish to their species ID
     pub fish: HashMap<i32, Arc<FishData>>,
     pub settings: Arc<Settings>,
 }
@@ -17,8 +18,8 @@ impl Config {
         ConfigBuilder::default()
     }
 
-    pub fn get_fish_data(&self, data_id: i32) -> Option<Arc<FishData>> {
-        self.fish.get(&data_id).cloned()
+    pub fn get_fish_data(&self, species_id: i32) -> Option<Arc<FishData>> {
+        self.fish.get(&species_id).cloned()
     }
 }
 

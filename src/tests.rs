@@ -2,7 +2,9 @@ use crate::config::Config;
 use crate::{clear_db, connect_db, set_config};
 use std::path::Path;
 
+mod models;
 mod repositories;
+mod services;
 mod test_config;
 
 pub fn setup_test() {

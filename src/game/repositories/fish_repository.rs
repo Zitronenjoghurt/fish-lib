@@ -2,8 +2,7 @@ use crate::models::fish::{Fish, NewFish};
 use crate::models::user::User;
 use crate::schema::fish_fishes;
 use crate::traits::repository::Repository;
-use crate::utils::random::random_normal;
-use crate::{get_config, get_db_connection};
+use crate::get_db_connection;
 use chrono::Utc;
 use diesel::prelude::*;
 use std::error::Error;
@@ -11,25 +10,8 @@ use std::error::Error;
 pub struct FishRepository;
 
 impl FishRepository {
-    pub fn create_from(owner_user: &User, fish_data_id: i32) -> Result<Fish, Box<dyn Error>> {
-        let data = get_config()
-            .get_fish_data(fish_data_id)
-            .ok_or_else(|| format!("Fish data with id '{}' does not exist.", fish_data_id))?;
-
-        let size_baby_mm =
-            random_normal(data.min_size_baby_mm as f32, data.max_size_baby_mm as f32);
-        let size_adult_mm =
-            random_normal(data.min_size_adult_mm as f32, data.max_size_adult_mm as f32);
-        let lifespan_days =
-            random_normal(data.min_lifespan_days as f32, data.max_lifespan_days as f32);
-
-        let fish = NewFish {
-            user_id: owner_user.id,
-            data_id: fish_data_id,
-            size_baby_mm,
-            size_adult_mm,
-            lifespan_days,
-        };
+    pub fn create_from(owner_user: &User, species_id: i32) -> Result<Fish, Box<dyn Error>> {
+        let fish = NewFish::generate(owner_user.id, species_id)?;
         Self::create(fish)
     }
 

@@ -4,10 +4,10 @@ use serde::{Deserialize, Serialize};
 pub struct Settings {
     /// How much faster game speed is compared to real-time
     #[serde(default = "default_time_speed_multiplier")]
-    pub time_speed_multiplier: f64,
+    pub time_speed_multiplier: f32,
 }
 
-fn default_time_speed_multiplier() -> f64 {
+fn default_time_speed_multiplier() -> f32 {
     1.0
 }
 
