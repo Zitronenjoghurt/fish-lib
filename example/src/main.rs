@@ -1,9 +1,11 @@
+use chrono::{Duration, Utc};
 use chrono_tz::Tz;
 use dotenv::dotenv;
 use fish_lib::config::Config;
 use fish_lib::game::repositories::user_repository::UserRepository;
 use fish_lib::game::services::fish_service::FishService;
 use fish_lib::game::services::user_service::UserService;
+use fish_lib::game::systems::weather_system::WeatherSystem;
 use fish_lib::traits::repository::Repository;
 use fish_lib::{connect_db, set_config};
 use std::env;
@@ -47,4 +49,13 @@ fn main() {
     let mut user = UserRepository::find_by_external_id(1337).unwrap().unwrap();
     user.set_timezone(Tz::Europe__Berlin);
     UserRepository::save(user).unwrap();
+
+    let mut time = Utc::now();
+    let weather_system = WeatherSystem::new(1337);
+    loop {
+        let attributes = weather_system.get_weather_attributes(time);
+        println!("{:?}", time);
+        println!("{:?}", attributes);
+        time += Duration::hours(1);
+    }
 }

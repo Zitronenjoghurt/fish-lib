@@ -14,6 +14,8 @@ services:
     build:
       context: ..
       dockerfile: example/Dockerfile
+    volumes:
+      - ..:/app
     depends_on:
       - db
 

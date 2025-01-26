@@ -1,3 +1,4 @@
 {
-  "time_speed_multiplier": 5000
+  "time_speed_multiplier": 5000,
+  "weather_seed": 1337
 }
