@@ -1,4 +1,4 @@
-use crate::game::systems::weather_system::{WeatherAttributes, WeatherSystem};
+use crate::game::systems::weather_system::{WeatherAttributes, WeatherSystem, WeatherSystemConfig};
 use crate::get_config;
 use chrono::Utc;
 use lazy_static::lazy_static;
@@ -16,7 +16,7 @@ impl WeatherService {
     fn new() -> Self {
         let seed = get_config().settings.weather_seed;
         Self {
-            weather_system: WeatherSystem::new(seed),
+            weather_system: WeatherSystem::new(seed, WeatherSystemConfig::default()),
         }
     }
 
