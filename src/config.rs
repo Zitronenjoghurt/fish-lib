@@ -1,4 +1,5 @@
 use crate::data::fish_data::FishData;
+use crate::data::location_data::LocationData;
 use crate::data::settings::Settings;
 use crate::traits::into_arc_map::IntoArcMap;
 use std::collections::HashMap;
@@ -10,6 +11,7 @@ use std::sync::Arc;
 pub struct Config {
     /// Mapping fish to their species ID
     pub fish: HashMap<i32, Arc<FishData>>,
+    pub locations: HashMap<i32, Arc<LocationData>>,
     pub settings: Arc<Settings>,
 }
 
@@ -55,6 +57,27 @@ impl ConfigBuilder {
         let file = File::open(json_file_path)?;
         let fish: HashMap<i32, FishData> = serde_json::from_reader(file)?;
         self.config.fish = fish.into_arc_map();
+        Ok(self)
+    }
+
+    pub fn locations(mut self, locations: HashMap<i32, LocationData>) -> Self {
+        self.config.locations = locations.into_arc_map();
+        self
+    }
+
+    pub fn locations_json(mut self, json_string: &str) -> Result<Self, serde_json::Error> {
+        let locations: HashMap<i32, LocationData> = serde_json::from_str(json_string)?;
+        self.config.locations = locations.into_arc_map();
+        Ok(self)
+    }
+
+    pub fn locations_json_file(
+        mut self,
+        json_file_path: &Path,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
+        let file = File::open(json_file_path)?;
+        let locations: HashMap<i32, LocationData> = serde_json::from_reader(file)?;
+        self.config.locations = locations.into_arc_map();
         Ok(self)
     }
 

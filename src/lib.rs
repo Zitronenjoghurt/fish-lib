@@ -8,6 +8,7 @@ use std::sync::{Arc, RwLock};
 pub mod config;
 pub mod data;
 pub mod database;
+pub mod enums;
 pub mod game;
 pub mod models;
 pub mod schema;

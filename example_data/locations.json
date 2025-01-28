@@ -1,0 +1,22 @@
+{
+  "1": {
+    "name": "Central Europe",
+    "weather_seed": 8462874,
+    "spring": {
+      "min_temp_c": 5.0,
+      "max_temp_c": 20.0
+    },
+    "summer": {
+      "min_temp_c": 15.0,
+      "max_temp_c": 40.0
+    },
+    "autumn": {
+      "min_temp_c": 5.0,
+      "max_temp_c": 15.0
+    },
+    "winter": {
+      "min_temp_c": -15.0,
+      "max_temp_c": 5.0
+    }
+  }
+}

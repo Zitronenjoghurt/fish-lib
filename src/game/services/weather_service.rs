@@ -1,7 +1,10 @@
-use crate::game::systems::weather_system::{WeatherAttributes, WeatherSystem, WeatherSystemConfig};
+use crate::game::systems::weather_system::config::WeatherSystemConfig;
+use crate::game::systems::weather_system::weather::Weather;
+use crate::game::systems::weather_system::WeatherSystem;
 use crate::get_config;
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use lazy_static::lazy_static;
+use std::collections::HashMap;
 use std::sync::Arc;
 
 lazy_static! {
@@ -9,14 +12,26 @@ lazy_static! {
 }
 
 pub struct WeatherService {
-    weather_system: WeatherSystem,
+    // Weather systems by location id
+    weather_systems: HashMap<i32, WeatherSystem>,
 }
 
 impl WeatherService {
     fn new() -> Self {
-        let seed = get_config().settings.weather_seed;
+        let mut systems = HashMap::new();
+        get_config()
+            .locations
+            .iter()
+            .for_each(|(location_id, location_data)| {
+                let config = WeatherSystemConfig::builder()
+                    .with_location_data(location_data.clone())
+                    .build();
+                let system = WeatherSystem::new(config);
+                systems.insert(*location_id, system);
+            });
+
         Self {
-            weather_system: WeatherSystem::new(seed, WeatherSystemConfig::default()),
+            weather_systems: systems,
         }
     }
 
@@ -24,8 +39,15 @@ impl WeatherService {
         WEATHER_SERVICE.clone()
     }
 
-    pub fn get_current_weather(&self) -> WeatherAttributes {
+    pub fn get_weather(&self, location_id: i32, time: DateTime<Utc>) -> Option<Weather> {
+        let time_multiplier = get_config().settings.time_speed_multiplier;
+        self.weather_systems
+            .get(&location_id)
+            .map(|system| system.get_weather(time, time_multiplier))
+    }
+
+    pub fn get_current_weather(&self, location_id: i32) -> Option<Weather> {
         let time_now = Utc::now();
-        self.weather_system.get_weather_attributes(time_now)
+        self.get_weather(location_id, time_now)
     }
 }
