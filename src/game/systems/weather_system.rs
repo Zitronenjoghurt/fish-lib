@@ -100,6 +100,20 @@ impl WeatherSystem {
             .location_data
             .full_season_information(time, time_multiplier);
 
+        let raining_rain_intensity_met =
+            attributes.rain_intensity > season_data.rain_intensity_raining_threshold;
+        let raining_moisture_met = attributes.moisture > season_data.moisture_raining_threshold;
+        let raining_cloudiness_met =
+            attributes.cloudiness > season_data.cloudiness_raining_threshold;
+        let is_raining =
+            raining_cloudiness_met && raining_moisture_met && raining_rain_intensity_met;
+        let rain_strength = if is_raining {
+            (attributes.rain_intensity - season_data.rain_intensity_raining_threshold)
+                / (1.0 - season_data.rain_intensity_raining_threshold)
+        } else {
+            0.0
+        };
+
         Weather {
             location_name: self.config.location_data.name.clone(),
             season,
@@ -115,6 +129,8 @@ impl WeatherSystem {
             light_level: attributes.light,
             cloudiness: attributes.cloudiness,
             cloud_brightness: attributes.cloud_brightness,
+            is_raining,
+            rain_strength,
         }
     }
 }

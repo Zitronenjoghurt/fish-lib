@@ -72,16 +72,18 @@ fn main() {
         let weather = weather_service.get_weather(1, time).unwrap();
         println!("{:?}", time);
         println!(
-            "{:.2}°C | 💧 {:.2}% | ☀️ {:.2}% | ☁️ {:.2}% | {:?} ({:.2}%) | ({:.2} - {:.2}°C)",
+            "{:.2}°C | 💧 {:.2}% | ☀️ {:.2}% | ☁️ {:.2}% | Rain? {} ({:.2}%) {:?} ({:.2}%) | ({:.2} - {:.2}°C)",
             weather.temperature_c,
             weather.humidity * 100.0,
             weather.light_level * 100.0,
             weather.cloudiness * 100.0,
+            weather.is_raining,
+            weather.rain_strength * 100.0,
             weather.season,
             weather.season_progress * 100.0,
             weather.min_possible_temp_c,
             weather.max_possible_temp_c
         );
-        time += Duration::days(1);
+        time += Duration::hours(1);
     }
 }

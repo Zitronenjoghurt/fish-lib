@@ -12,4 +12,6 @@ pub struct Weather {
     pub light_level: f32,
     pub cloudiness: f32,
     pub cloud_brightness: f32,
+    pub is_raining: bool,
+    pub rain_strength: f32,
 }
