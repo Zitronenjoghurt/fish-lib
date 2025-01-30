@@ -8,3 +8,4 @@ chrono = "0.4.39"
 chrono-tz = "0.10.1"
 dotenv = "0.15.0"
 fish-lib = { path = ".." }
+plotters = "0.3.7"
