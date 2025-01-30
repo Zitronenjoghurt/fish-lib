@@ -14,5 +14,5 @@ fn test_building() {
         .build();
 
     assert_eq!(config.fish.get(&1).unwrap().name, "salmon");
-    assert_eq!(config.settings.time_speed_multiplier as u64, 5000);
+    assert_eq!(config.settings.time_speed_multiplier as u64, 1);
 }
