@@ -1,3 +1,4 @@
+use crate::data::encounter_data::EncounterData;
 use crate::utils::math::float_interpolate;
 use serde::{Deserialize, Serialize};
 
@@ -17,6 +18,8 @@ pub struct FishData {
     /// Time when fish becomes adult (0 to 1)
     #[serde(default = "default_lifespan_adult_ratio")]
     pub lifespan_adult_ratio: f32,
+    #[serde(default)]
+    pub encounters: Vec<EncounterData>,
 }
 
 fn default_lifespan_adult_ratio() -> f32 {

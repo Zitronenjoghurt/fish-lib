@@ -1,3 +1,4 @@
 {
-  "time_speed_multiplier": 1.0
+  "time_speed_multiplier": 1.0,
+  "rarity_exponent": 2.5
 }

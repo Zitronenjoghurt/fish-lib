@@ -1,0 +1,111 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "patternProperties": {
+    "^[0-9]+$": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "min_size_baby_mm": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_size_baby_mm": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "min_size_adult_mm": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_size_adult_mm": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "min_weight_baby_g": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_weight_baby_g": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "min_weight_adult_g": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_weight_adult_g": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "min_lifespan_days": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_lifespan_days": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "lifespan_adult_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.5
+        },
+        "encounters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "location_id": {
+                "type": "integer"
+              },
+              "min_time_hour": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 23
+              },
+              "max_time_hour": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 23
+              },
+              "rarity_level": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 255
+              },
+              "needs_rain": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            "required": [
+              "location_id",
+              "min_time_hour",
+              "max_time_hour",
+              "rarity_level"
+            ]
+          },
+          "default": []
+        }
+      },
+      "required": [
+        "name",
+        "min_size_baby_mm",
+        "max_size_baby_mm",
+        "min_size_adult_mm",
+        "max_size_adult_mm",
+        "min_weight_baby_g",
+        "max_weight_baby_g",
+        "min_weight_adult_g",
+        "max_weight_adult_g",
+        "min_lifespan_days",
+        "max_lifespan_days"
+      ]
+    }
+  },
+  "additionalProperties": false
+}
