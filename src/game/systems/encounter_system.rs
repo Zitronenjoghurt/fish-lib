@@ -1,6 +1,7 @@
 use crate::get_config;
 use chrono::{DateTime, Timelike};
 use chrono_tz::Tz;
+use rand::seq::SliceRandom;
 use rand::Rng;
 use std::collections::HashMap;
 
@@ -22,6 +23,7 @@ pub enum EncounterWeather {
 pub struct EncounterSystem {
     /// Hour -> Weather -> Location ID -> (Species ID, Rarity Level)
     encounters: HourlyEncounters,
+    cached_weights: HashMap<RarityLevel, u64>,
 }
 
 impl EncounterSystem {
@@ -52,17 +54,41 @@ impl EncounterSystem {
             }
         }
 
-        Self { encounters }
+        let rarity_exponent = get_config().settings.rarity_exponent;
+        let cached_weights = (0..=255)
+            .map(|level| (level, Self::rarity_level_weight(level, rarity_exponent)))
+            .collect();
+
+        Self {
+            encounters,
+            cached_weights,
+        }
     }
 
-    fn roll_rarity_level() -> u8 {
+    fn rarity_level_weight(rarity_level: RarityLevel, rarity_exponent: f64) -> u64 {
+        ((255 - rarity_level) as f64).powf(rarity_exponent) as u64 + 1
+    }
+
+    fn roll_rarity_level(&self, available_rarities: &[RarityLevel]) -> Option<RarityLevel> {
+        if available_rarities.is_empty() {
+            return None;
+        }
+
+        let cumulative_weights: Vec<u64> = available_rarities
+            .iter()
+            .scan(0u64, |sum, &rarity| {
+                *sum += self.cached_weights[&rarity];
+                Some(*sum)
+            })
+            .collect();
+
+        let total = cumulative_weights.last()?;
+
         let mut rng = rand::thread_rng();
-        let rarity_exponent = &get_config().settings.rarity_exponent;
+        let roll = rng.gen_range(0..*total);
 
-        let max_weight = 255_f64.powf(*rarity_exponent) as u64;
-        let roll = rng.gen_range(0..max_weight);
-
-        255 - (roll as f64).powf(1.0 / *rarity_exponent) as u8
+        let index = cumulative_weights.partition_point(|&weight| weight <= roll);
+        Some(available_rarities[index])
     }
 
     fn get_possible_rarity_encounters(
@@ -75,5 +101,23 @@ impl EncounterSystem {
             .get(&(time.hour() as u8))?
             .get(&weather)?
             .get(&location_id)
+    }
+
+    pub fn roll_encounter(
+        &self,
+        time: DateTime<Tz>,
+        weather: EncounterWeather,
+        location_id: LocationId,
+    ) -> Option<SpeciesId> {
+        let possible_rarity_encounters =
+            self.get_possible_rarity_encounters(time, weather, location_id)?;
+
+        let valid_rarity_levels: Vec<RarityLevel> =
+            possible_rarity_encounters.keys().copied().collect();
+        let rarity = self.roll_rarity_level(&valid_rarity_levels)?;
+
+        let mut rng = rand::thread_rng();
+        let possible_species = possible_rarity_encounters.get(&rarity)?;
+        possible_species.choose(&mut rng).copied()
     }
 }
