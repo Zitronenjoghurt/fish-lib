@@ -1,4 +1,5 @@
 use chrono::{DateTime, Duration};
+use chrono_tz::Tz;
 use dotenv::dotenv;
 use fish_lib::config::Config;
 use fish_lib::game::services::weather_service::WeatherService;
@@ -103,7 +104,9 @@ fn weather_plot(
     let root = BitMapBackend::new("weather_plot.png", (1200, 800)).into_drawing_area();
     root.fill(&WHITE)?;
 
-    let mut time = DateTime::from_timestamp(0, 0).unwrap();
+    let mut time = DateTime::from_timestamp(0, 0)
+        .unwrap()
+        .with_timezone(&Tz::UTC);
     time += Duration::hours(start_hour_offset);
     let weather_service = WeatherService::get_instance();
 

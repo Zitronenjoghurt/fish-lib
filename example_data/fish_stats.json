@@ -10,6 +10,14 @@
     "min_weight_adult_g": 220,
     "max_weight_adult_g": 350,
     "min_lifespan_days": 480,
-    "max_lifespan_days": 720
+    "max_lifespan_days": 720,
+    "encounters": [
+      {
+        "location_id": 1,
+        "min_time_hour": 9,
+        "max_time_hour": 21,
+        "rarity_level": 5
+      }
+    ]
   }
 }

@@ -26,6 +26,12 @@ pub struct EncounterSystem {
     cached_weights: HashMap<RarityLevel, u64>,
 }
 
+impl Default for EncounterSystem {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl EncounterSystem {
     pub fn new() -> Self {
         let mut encounters: HourlyEncounters = HashMap::new();
