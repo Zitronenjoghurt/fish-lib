@@ -2,7 +2,8 @@ use crate::game::systems::weather_system::attributes::WeatherAttributes;
 use crate::game::systems::weather_system::config::WeatherSystemConfig;
 use crate::game::systems::weather_system::weather::Weather;
 use crate::utils::math::float_interpolate;
-use chrono::{DateTime, Timelike, Utc};
+use chrono::{DateTime, Timelike};
+use chrono_tz::Tz;
 use noise::{NoiseFn, Perlin};
 
 pub mod attributes;
@@ -35,7 +36,7 @@ impl WeatherSystem {
         }
     }
 
-    fn time_to_noise_input(time: DateTime<Utc>) -> f64 {
+    fn time_to_noise_input(time: DateTime<Tz>) -> f64 {
         time.timestamp() as f64 / 1_000_000.0
     }
 
@@ -44,13 +45,13 @@ impl WeatherSystem {
     }
 
     /// Ensures its hottest at the middle of the day
-    pub fn light_level(time: DateTime<Utc>) -> f32 {
+    pub fn light_level(time: DateTime<Tz>) -> f32 {
         let hour = time.hour() as f32 + (time.minute() as f32 / 60.0);
         let multiplier = (((hour - 6.0) * std::f32::consts::PI / 12.0).sin() * 0.45) + 0.55;
         multiplier.clamp(0.1, 1.0)
     }
 
-    pub fn get_weather_attributes(&self, time: DateTime<Utc>) -> WeatherAttributes {
+    pub fn get_weather_attributes(&self, time: DateTime<Tz>) -> WeatherAttributes {
         let t = Self::time_to_noise_input(time);
 
         let cloudiness_noise = self.cloudiness.get([t * 5.5, 0.0]);
@@ -93,7 +94,7 @@ impl WeatherSystem {
         }
     }
 
-    pub fn get_weather(&self, time: DateTime<Utc>, time_multiplier: f32) -> Weather {
+    pub fn get_weather(&self, time: DateTime<Tz>, time_multiplier: f32) -> Weather {
         let attributes = self.get_weather_attributes(time);
         let (season_data, season, season_progress) = self
             .config

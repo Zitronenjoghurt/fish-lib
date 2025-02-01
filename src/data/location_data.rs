@@ -1,6 +1,7 @@
 use crate::data::season_data::SeasonData;
 use crate::enums::season::Season;
-use chrono::{DateTime, Utc};
+use chrono::DateTime;
+use chrono_tz::Tz;
 use serde::{Deserialize, Serialize};
 
 const SECONDS_PER_YEAR: f64 = 31_556_925.190_8;
@@ -8,6 +9,7 @@ const SECONDS_PER_YEAR: f64 = 31_556_925.190_8;
 #[derive(Debug, Default, Serialize, Deserialize, PartialEq)]
 pub struct LocationData {
     pub name: String,
+    pub timezone: Tz,
     pub weather_seed: u32,
     pub spring: SeasonData,
     pub summer: SeasonData,
@@ -16,7 +18,7 @@ pub struct LocationData {
 }
 
 impl LocationData {
-    fn season_index_and_progress(&self, time: DateTime<Utc>, time_multiplier: f32) -> (usize, f64) {
+    fn season_index_and_progress(&self, time: DateTime<Tz>, time_multiplier: f32) -> (usize, f64) {
         let year_progress = (time.timestamp() as f64 * time_multiplier as f64) % SECONDS_PER_YEAR
             / SECONDS_PER_YEAR;
 
@@ -27,7 +29,7 @@ impl LocationData {
         (season_index, season_progress)
     }
 
-    pub fn current_season_data(&self, time: DateTime<Utc>, time_multiplier: f32) -> SeasonData {
+    pub fn current_season_data(&self, time: DateTime<Tz>, time_multiplier: f32) -> SeasonData {
         let (index, progress) = self.season_index_and_progress(time, time_multiplier);
 
         let (prev_data, current_data, next_data) = match index {
@@ -49,7 +51,7 @@ impl LocationData {
         }
     }
 
-    pub fn current_season(&self, time: DateTime<Utc>, time_multiplier: f32) -> (Season, f64) {
+    pub fn current_season(&self, time: DateTime<Tz>, time_multiplier: f32) -> (Season, f64) {
         let (index, progress) = self.season_index_and_progress(time, time_multiplier);
         let season = Season::from_index(index);
         (season, progress)
@@ -57,7 +59,7 @@ impl LocationData {
 
     pub fn full_season_information(
         &self,
-        time: DateTime<Utc>,
+        time: DateTime<Tz>,
         time_multiplier: f32,
     ) -> (SeasonData, Season, f64) {
         let data = self.current_season_data(time, time_multiplier);

@@ -1,2 +1,2 @@
-mod encounter_system;
+pub mod encounter_system;
 pub mod weather_system;

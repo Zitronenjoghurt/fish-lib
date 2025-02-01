@@ -1,6 +1,7 @@
 {
   "1": {
     "name": "Central Europe",
+    "timezone": "Europe/Berlin",
     "weather_seed": 8462874,
     "spring": {
       "min_temp_c": 5.0,

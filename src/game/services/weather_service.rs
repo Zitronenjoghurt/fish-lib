@@ -3,6 +3,7 @@ use crate::game::systems::weather_system::weather::Weather;
 use crate::game::systems::weather_system::WeatherSystem;
 use crate::get_config;
 use chrono::{DateTime, Utc};
+use chrono_tz::Tz;
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -39,15 +40,15 @@ impl WeatherService {
         WEATHER_SERVICE.clone()
     }
 
-    pub fn get_weather(&self, location_id: i32, time: DateTime<Utc>) -> Option<Weather> {
+    pub fn get_weather(&self, location_id: i32, time: DateTime<Tz>) -> Option<Weather> {
         let time_multiplier = get_config().settings.time_speed_multiplier;
         self.weather_systems
             .get(&location_id)
             .map(|system| system.get_weather(time, time_multiplier))
     }
 
-    pub fn get_current_weather(&self, location_id: i32) -> Option<Weather> {
-        let time_now = Utc::now();
+    pub fn get_current_weather_utc(&self, location_id: i32) -> Option<Weather> {
+        let time_now = Utc::now().with_timezone(&Tz::UTC);
         self.get_weather(location_id, time_now)
     }
 }
