@@ -13,6 +13,6 @@ fn test_building() {
         .unwrap()
         .build();
 
-    assert_eq!(config.fish.get(&1).unwrap().name, "salmon");
+    assert_eq!(config.fish.get(&1).unwrap().name, "Salmon");
     assert_eq!(config.settings.time_speed_multiplier as u64, 1);
 }

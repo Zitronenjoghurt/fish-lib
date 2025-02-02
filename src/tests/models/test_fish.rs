@@ -20,6 +20,7 @@ fn mock_config() {
         min_lifespan_days: 1,
         max_lifespan_days: 4,
         lifespan_adult_ratio: 0.35,
+        encounters: Default::default(),
     };
     let mut fish_data_map = HashMap::new();
     fish_data_map.insert(0, fish_data);

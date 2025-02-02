@@ -1,8 +1,11 @@
 use crate::enums::season::Season;
+use chrono::DateTime;
+use chrono_tz::Tz;
 
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub struct Weather {
     pub location_name: String,
+    pub time: DateTime<Tz>,
     pub season: Season,
     pub season_progress: f64,
     pub temperature_c: f32,

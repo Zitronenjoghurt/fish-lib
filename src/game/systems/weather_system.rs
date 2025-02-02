@@ -117,6 +117,7 @@ impl WeatherSystem {
 
         Weather {
             location_name: self.config.location_data.name.clone(),
+            time,
             season,
             season_progress,
             temperature_c: float_interpolate(

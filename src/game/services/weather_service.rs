@@ -1,8 +1,9 @@
+use crate::game::services::location_service::LocationService;
 use crate::game::systems::weather_system::config::WeatherSystemConfig;
 use crate::game::systems::weather_system::weather::Weather;
 use crate::game::systems::weather_system::WeatherSystem;
 use crate::get_config;
-use chrono::{DateTime, Utc};
+use chrono::DateTime;
 use chrono_tz::Tz;
 use lazy_static::lazy_static;
 use std::collections::HashMap;
@@ -47,8 +48,9 @@ impl WeatherService {
             .map(|system| system.get_weather(time, time_multiplier))
     }
 
-    pub fn get_current_weather_utc(&self, location_id: i32) -> Option<Weather> {
-        let time_now = Utc::now().with_timezone(&Tz::UTC);
+    pub fn get_current_weather(&self, location_id: i32) -> Option<Weather> {
+        let location_data = LocationService::get_location_data(location_id)?;
+        let time_now = location_data.get_local_time();
         self.get_weather(location_id, time_now)
     }
 }

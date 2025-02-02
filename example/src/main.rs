@@ -1,4 +1,4 @@
-use chrono::{DateTime, Duration};
+use chrono::{Duration, Utc};
 use chrono_tz::Tz;
 use dotenv::dotenv;
 use fish_lib::config::Config;
@@ -90,10 +90,15 @@ fn main() {
     //    time += Duration::hours(1);
     //}
 
-    weather_plot(12, true, 730, true, -20.0, 40.0).unwrap();
+    weather_plot(Tz::Europe__Berlin, 0, false, 24000, true, -20.0, 40.0).unwrap();
+
+    //let mut time = Utc::now().with_timezone(&Tz::Europe__Berlin);
+    //time -= Duration::hours(1);
+    //println!("{:?}", WeatherService::get_instance().get_weather(1, time));
 }
 
 fn weather_plot(
+    timezone: Tz,
     start_hour_offset: i64,
     by_days: bool,
     count: u32,
@@ -104,9 +109,7 @@ fn weather_plot(
     let root = BitMapBackend::new("weather_plot.png", (1200, 800)).into_drawing_area();
     root.fill(&WHITE)?;
 
-    let mut time = DateTime::from_timestamp(0, 0)
-        .unwrap()
-        .with_timezone(&Tz::UTC);
+    let mut time = Utc::now().with_timezone(&timezone);
     time += Duration::hours(start_hour_offset);
     let weather_service = WeatherService::get_instance();
 

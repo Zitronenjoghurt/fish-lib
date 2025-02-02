@@ -1,6 +1,6 @@
 use crate::data::season_data::SeasonData;
 use crate::enums::season::Season;
-use chrono::DateTime;
+use chrono::{DateTime, Utc};
 use chrono_tz::Tz;
 use serde::{Deserialize, Serialize};
 
@@ -65,5 +65,9 @@ impl LocationData {
         let data = self.current_season_data(time, time_multiplier);
         let (season, progress) = self.current_season(time, time_multiplier);
         (data, season, progress)
+    }
+
+    pub fn get_local_time(&self) -> DateTime<Tz> {
+        Utc::now().with_timezone(&self.timezone)
     }
 }

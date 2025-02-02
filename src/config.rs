@@ -13,6 +13,8 @@ pub struct Config {
     pub fish: HashMap<i32, Arc<FishData>>,
     pub locations: HashMap<i32, Arc<LocationData>>,
     pub settings: Arc<Settings>,
+    pub fish_names: Arc<HashMap<i32, String>>,
+    pub location_names: Arc<HashMap<i32, String>>,
 }
 
 impl Config {
@@ -44,41 +46,41 @@ impl ConfigBuilder {
         self
     }
 
-    pub fn fish_json(mut self, json_string: &str) -> Result<Self, serde_json::Error> {
+    pub fn fish_json(self, json_string: &str) -> Result<Self, serde_json::Error> {
         let fish: HashMap<i32, FishData> = serde_json::from_str(json_string)?;
-        self.config.fish = fish.into_arc_map();
-        Ok(self)
+        Ok(self.fish(fish))
     }
 
-    pub fn fish_json_file(
-        mut self,
-        json_file_path: &Path,
-    ) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn fish_json_file(self, json_file_path: &Path) -> Result<Self, Box<dyn std::error::Error>> {
         let file = File::open(json_file_path)?;
         let fish: HashMap<i32, FishData> = serde_json::from_reader(file)?;
-        self.config.fish = fish.into_arc_map();
-        Ok(self)
+        Ok(self.fish(fish))
     }
 
     pub fn locations(mut self, locations: HashMap<i32, LocationData>) -> Self {
         self.config.locations = locations.into_arc_map();
+        let location_names: HashMap<i32, String> = self
+            .config
+            .locations
+            .iter()
+            .map(|(id, data)| (*id, data.name.clone()))
+            .collect();
+        self.config.location_names = Arc::new(location_names);
         self
     }
 
-    pub fn locations_json(mut self, json_string: &str) -> Result<Self, serde_json::Error> {
+    pub fn locations_json(self, json_string: &str) -> Result<Self, serde_json::Error> {
         let locations: HashMap<i32, LocationData> = serde_json::from_str(json_string)?;
-        self.config.locations = locations.into_arc_map();
-        Ok(self)
+        Ok(self.locations(locations))
     }
 
     pub fn locations_json_file(
-        mut self,
+        self,
         json_file_path: &Path,
     ) -> Result<Self, Box<dyn std::error::Error>> {
         let file = File::open(json_file_path)?;
         let locations: HashMap<i32, LocationData> = serde_json::from_reader(file)?;
-        self.config.locations = locations.into_arc_map();
-        Ok(self)
+        Ok(self.locations(locations))
     }
 
     pub fn settings(mut self, settings: Settings) -> Self {
@@ -86,19 +88,17 @@ impl ConfigBuilder {
         self
     }
 
-    pub fn settings_json(mut self, json_string: &str) -> Result<Self, serde_json::Error> {
+    pub fn settings_json(self, json_string: &str) -> Result<Self, serde_json::Error> {
         let settings: Settings = serde_json::from_str(json_string)?;
-        self.config.settings = Arc::new(settings);
-        Ok(self)
+        Ok(self.settings(settings))
     }
 
     pub fn settings_json_file(
-        mut self,
+        self,
         json_file_path: &Path,
     ) -> Result<Self, Box<dyn std::error::Error>> {
         let file = File::open(json_file_path)?;
         let settings: Settings = serde_json::from_reader(file)?;
-        self.config.settings = Arc::new(settings);
-        Ok(self)
+        Ok(self.settings(settings))
     }
 }
