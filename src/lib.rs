@@ -61,7 +61,7 @@ pub fn setup_test() {
     clear_db().unwrap();
 
     let config = Config::builder()
-        .fish_json_file(Path::new("./example_data/fish_stats.json"))
+        .species_json_file(Path::new("./example_data/species_data.json"))
         .unwrap()
         .build();
     set_config(config);

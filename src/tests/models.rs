@@ -1,2 +1,2 @@
-mod test_fish;
+mod test_specimen;
 mod test_user;

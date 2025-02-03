@@ -1,7 +1,7 @@
 use crate::game::repositories::fishing_history_entry_repository::FishingHistoryEntryRepository;
 use crate::get_config;
-use crate::models::fish::Fish;
 use crate::models::fishing_history_entry::{FishingHistoryEntry, NewFishingHistoryEntry};
+use crate::models::specimen::Specimen;
 use crate::traits::repository::Repository;
 use chrono::{DateTime, Utc};
 use std::error::Error;
@@ -9,7 +9,7 @@ use std::error::Error;
 pub struct FishingHistoryService;
 
 impl FishingHistoryService {
-    pub fn register_catch(fish: &Fish) -> Result<FishingHistoryEntry, Box<dyn Error>> {
+    pub fn register_catch(fish: &Specimen) -> Result<FishingHistoryEntry, Box<dyn Error>> {
         let existing_entry = FishingHistoryEntryRepository::find_by_user_and_species_id(
             fish.user_id,
             fish.species_id,
@@ -38,7 +38,7 @@ impl FishingHistoryService {
     }
 
     pub fn register_sell(
-        fish: &Fish,
+        fish: &Specimen,
         sell_time: DateTime<Utc>,
     ) -> Result<FishingHistoryEntry, Box<dyn Error>> {
         let mut existing_entry = FishingHistoryEntryRepository::find_by_user_and_species_id(

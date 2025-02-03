@@ -47,7 +47,7 @@ impl FishingHistoryEntry {
 
     pub fn get_smallest_size_mm(&self) -> f32 {
         let data = get_config()
-            .get_fish_data(self.species_id)
+            .get_species_data(self.species_id)
             .unwrap_or_else(|| panic!("Missing fish data for species id '{}'", self.species_id));
         float_interpolate(
             data.min_size_baby_mm as f32,
@@ -58,7 +58,7 @@ impl FishingHistoryEntry {
 
     pub fn get_largest_size_mm(&self) -> f32 {
         let data = get_config()
-            .get_fish_data(self.species_id)
+            .get_species_data(self.species_id)
             .unwrap_or_else(|| panic!("Missing fish data for species id '{}'", self.species_id));
         float_interpolate(
             data.min_size_baby_mm as f32,
@@ -69,7 +69,7 @@ impl FishingHistoryEntry {
 
     pub fn get_smallest_weight_g(&self) -> f32 {
         let data = get_config()
-            .get_fish_data(self.species_id)
+            .get_species_data(self.species_id)
             .unwrap_or_else(|| panic!("Missing fish data for species id '{}'", self.species_id));
         float_interpolate(
             data.min_weight_baby_g as f32,
@@ -80,7 +80,7 @@ impl FishingHistoryEntry {
 
     pub fn get_largest_weight_g(&self) -> f32 {
         let data = get_config()
-            .get_fish_data(self.species_id)
+            .get_species_data(self.species_id)
             .unwrap_or_else(|| panic!("Missing fish data for species id '{}'", self.species_id));
         float_interpolate(
             data.min_weight_baby_g as f32,

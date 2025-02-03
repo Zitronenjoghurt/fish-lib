@@ -1,17 +1,17 @@
 use crate::config::Config;
-use crate::data::fish_data::FishData;
-use crate::game::repositories::fish_repository::FishRepository;
+use crate::data::species_data::SpeciesData;
 use crate::game::repositories::fishing_history_entry_repository::FishingHistoryEntryRepository;
+use crate::game::repositories::specimen_repository::SpecimenRepository;
 use crate::game::services::fishing_history_service::FishingHistoryService;
 use crate::game::services::user_service::UserService;
-use crate::models::fish::NewFish;
+use crate::models::specimen::NewSpecimen;
 use crate::traits::repository::Repository;
 use crate::{set_config, setup_test};
 use chrono::Utc;
 use std::collections::HashMap;
 
 fn mock_config() {
-    let fish_data = FishData {
+    let species_data = SpeciesData {
         name: "salmon".to_string(),
         min_size_baby_mm: 40,
         max_size_baby_mm: 50,
@@ -26,10 +26,10 @@ fn mock_config() {
         lifespan_adult_ratio: 0.35,
         encounters: Default::default(),
     };
-    let mut fish_data_map = HashMap::new();
-    fish_data_map.insert(1, fish_data);
+    let mut species_data_map = HashMap::new();
+    species_data_map.insert(1, species_data);
 
-    let config = Config::builder().fish(fish_data_map).build();
+    let config = Config::builder().species(species_data_map).build();
     set_config(config);
 }
 
@@ -39,7 +39,7 @@ fn test_register_catch() {
     mock_config();
 
     let user = UserService::create_and_save_user(1337).unwrap();
-    let new_fish = NewFish {
+    let new_fish = NewSpecimen {
         user_id: user.id,
         species_id: 1,
         size_baby_ratio: 0.5,
@@ -47,7 +47,7 @@ fn test_register_catch() {
         lifespan_days_ratio: 0.5,
         catch_age: 1.0,
     };
-    let fish = FishRepository::create(new_fish).unwrap();
+    let fish = SpecimenRepository::create(new_fish).unwrap();
 
     let no_entry_yet =
         FishingHistoryEntryRepository::find_by_user_and_species_id(user.id, fish.species_id)
@@ -69,7 +69,7 @@ fn test_register_catch() {
             .unwrap();
     assert_eq!(found_entry, entry);
 
-    let new_fish2 = NewFish {
+    let new_fish2 = NewSpecimen {
         user_id: user.id,
         species_id: 1,
         size_baby_ratio: 0.75,
@@ -77,7 +77,7 @@ fn test_register_catch() {
         lifespan_days_ratio: 0.5,
         catch_age: 1.0,
     };
-    let fish2 = FishRepository::create(new_fish2).unwrap();
+    let fish2 = SpecimenRepository::create(new_fish2).unwrap();
     let entry2 = FishingHistoryService::register_catch(&fish2).unwrap();
     assert_eq!(entry2.user_id, user.id);
     assert_eq!(entry2.species_id, fish.species_id);
@@ -93,7 +93,7 @@ fn test_register_catch() {
             .unwrap();
     assert_eq!(found_entry2, entry2);
 
-    let new_fish3 = NewFish {
+    let new_fish3 = NewSpecimen {
         user_id: user.id,
         species_id: 1,
         size_baby_ratio: 0.25,
@@ -101,7 +101,7 @@ fn test_register_catch() {
         lifespan_days_ratio: 0.5,
         catch_age: 1.0,
     };
-    let fish3 = FishRepository::create(new_fish3).unwrap();
+    let fish3 = SpecimenRepository::create(new_fish3).unwrap();
     let entry3 = FishingHistoryService::register_catch(&fish3).unwrap();
     assert_eq!(entry3.user_id, user.id);
     assert_eq!(entry3.species_id, fish.species_id);
@@ -124,7 +124,7 @@ fn test_register_sell() {
     mock_config();
 
     let user = UserService::create_and_save_user(1337).unwrap();
-    let new_fish = NewFish {
+    let new_fish = NewSpecimen {
         user_id: user.id,
         species_id: 1,
         size_baby_ratio: 0.5,
@@ -132,7 +132,7 @@ fn test_register_sell() {
         lifespan_days_ratio: 0.5,
         catch_age: 1.0,
     };
-    let fish = FishRepository::create(new_fish).unwrap();
+    let fish = SpecimenRepository::create(new_fish).unwrap();
 
     let sell_time = Utc::now();
     let result = FishingHistoryService::register_sell(&fish, sell_time);

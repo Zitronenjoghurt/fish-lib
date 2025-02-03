@@ -37,7 +37,7 @@ impl EncounterSystem {
         let mut encounters: HourlyEncounters = HashMap::new();
 
         let config = get_config();
-        for (species_id, species_data) in &config.fish {
+        for (species_id, species_data) in &config.species {
             for encounter in &species_data.encounters {
                 let weather = if encounter.needs_rain {
                     EncounterWeather::Rain

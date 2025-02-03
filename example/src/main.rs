@@ -13,11 +13,11 @@ use std::path::Path;
 mod tests;
 
 fn init_config() {
-    let fish_json_file = Path::new("./../example_data/fish_stats.json");
+    let species_json_file = Path::new("./../example_data/species_data.json");
     let locations_json_file = Path::new("./../example_data/locations.json");
 
     let config = Config::builder()
-        .fish_json_file(fish_json_file)
+        .species_json_file(species_json_file)
         .unwrap()
         .locations_json_file(locations_json_file)
         .unwrap()

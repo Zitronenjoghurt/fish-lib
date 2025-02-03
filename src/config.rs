@@ -1,6 +1,6 @@
-use crate::data::fish_data::FishData;
 use crate::data::location_data::LocationData;
 use crate::data::settings::Settings;
+use crate::data::species_data::SpeciesData;
 use crate::traits::into_arc_map::IntoArcMap;
 use std::collections::HashMap;
 use std::fs::File;
@@ -9,11 +9,11 @@ use std::sync::Arc;
 
 #[derive(Debug, Default, PartialEq)]
 pub struct Config {
-    /// Mapping fish to their species ID
-    pub fish: HashMap<i32, Arc<FishData>>,
+    /// Mapping specimen to their species ID
+    pub species: HashMap<i32, Arc<SpeciesData>>,
     pub locations: HashMap<i32, Arc<LocationData>>,
     pub settings: Arc<Settings>,
-    pub fish_names: Arc<HashMap<i32, String>>,
+    pub specimen_names: Arc<HashMap<i32, String>>,
     pub location_names: Arc<HashMap<i32, String>>,
 }
 
@@ -22,8 +22,8 @@ impl Config {
         ConfigBuilder::default()
     }
 
-    pub fn get_fish_data(&self, species_id: i32) -> Option<Arc<FishData>> {
-        self.fish.get(&species_id).cloned()
+    pub fn get_species_data(&self, species_id: i32) -> Option<Arc<SpeciesData>> {
+        self.species.get(&species_id).cloned()
     }
 }
 
@@ -41,20 +41,23 @@ impl ConfigBuilder {
         self.config
     }
 
-    pub fn fish(mut self, fish: HashMap<i32, FishData>) -> Self {
-        self.config.fish = fish.into_arc_map();
+    pub fn species(mut self, specimens: HashMap<i32, SpeciesData>) -> Self {
+        self.config.species = specimens.into_arc_map();
         self
     }
 
-    pub fn fish_json(self, json_string: &str) -> Result<Self, serde_json::Error> {
-        let fish: HashMap<i32, FishData> = serde_json::from_str(json_string)?;
-        Ok(self.fish(fish))
+    pub fn species_json(self, json_string: &str) -> Result<Self, serde_json::Error> {
+        let specimens: HashMap<i32, SpeciesData> = serde_json::from_str(json_string)?;
+        Ok(self.species(specimens))
     }
 
-    pub fn fish_json_file(self, json_file_path: &Path) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn species_json_file(
+        self,
+        json_file_path: &Path,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
         let file = File::open(json_file_path)?;
-        let fish: HashMap<i32, FishData> = serde_json::from_reader(file)?;
-        Ok(self.fish(fish))
+        let specimens: HashMap<i32, SpeciesData> = serde_json::from_reader(file)?;
+        Ok(self.species(specimens))
     }
 
     pub fn locations(mut self, locations: HashMap<i32, LocationData>) -> Self {

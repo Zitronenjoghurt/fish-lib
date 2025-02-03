@@ -3,7 +3,7 @@ use crate::utils::math::float_interpolate;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Serialize, Deserialize, PartialEq)]
-pub struct FishData {
+pub struct SpeciesData {
     pub name: String,
     pub min_size_baby_mm: u32,
     pub max_size_baby_mm: u32,
@@ -26,7 +26,7 @@ fn default_lifespan_adult_ratio() -> f32 {
     0.35
 }
 
-impl FishData {
+impl SpeciesData {
     pub fn get_baby_size_by_ratio(&self, ratio: f32) -> f32 {
         float_interpolate(
             self.min_size_baby_mm as f32,

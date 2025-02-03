@@ -9,7 +9,7 @@ diesel::table! {
 }
 
 diesel::table! {
-    fish_fishes (id) {
+    fish_specimens (id) {
         id -> BigInt,
         user_id -> BigInt,
         species_id -> Integer,
@@ -49,8 +49,8 @@ diesel::table! {
     }
 }
 
-diesel::joinable!(fish_fishes -> fish_users (user_id));
-diesel::allow_tables_to_appear_in_same_query!(fish_fishes, fish_users);
+diesel::joinable!(fish_specimens -> fish_users (user_id));
+diesel::allow_tables_to_appear_in_same_query!(fish_specimens, fish_users);
 
 diesel::joinable!(fish_ponds -> fish_users (user_id));
 diesel::allow_tables_to_appear_in_same_query!(fish_ponds, fish_users);
