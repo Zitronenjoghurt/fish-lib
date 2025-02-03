@@ -4,7 +4,7 @@ use chrono_tz::Tz;
 use diesel::prelude::*;
 use std::str::FromStr;
 
-#[derive(Debug, Clone, PartialEq, Queryable, Selectable, AsChangeset)]
+#[derive(Debug, Default, Clone, PartialEq, Queryable, Selectable, AsChangeset)]
 #[diesel(table_name = crate::schema::fish_users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct User {

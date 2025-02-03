@@ -1,3 +1,5 @@
+use crate::game::errors::repository::GameRepositoryError;
+use crate::game::errors::resource::GameResourceError;
 use crate::game::repositories::specimen_repository::SpecimenRepository;
 use crate::game::services::fishing_history_service::FishingHistoryService;
 use crate::models::fishing_history_entry::FishingHistoryEntry;
@@ -14,7 +16,17 @@ impl SpecimenService {
         species_id: i32,
     ) -> Result<Specimen, Box<dyn Error>> {
         let new_fish = NewSpecimen::generate(owner_user.id, species_id)?;
-        SpecimenRepository::create(new_fish)
+        match SpecimenRepository::create(new_fish) {
+            Ok(specimen) => Ok(specimen),
+            Err(e) => match e.downcast_ref::<GameRepositoryError>() {
+                Some(repository_error)
+                    if repository_error.is_foreign_key_violation_user_not_found() =>
+                {
+                    Err(GameResourceError::user_not_found(owner_user.external_id).into())
+                }
+                _ => Err(e),
+            },
+        }
     }
 
     pub fn process_catch(

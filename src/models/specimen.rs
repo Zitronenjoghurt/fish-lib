@@ -1,3 +1,4 @@
+use crate::game::errors::resource::GameResourceError;
 use crate::get_config;
 use crate::traits::model::Model;
 use crate::utils::random::random_normal_01;
@@ -110,7 +111,7 @@ impl NewSpecimen {
     pub fn generate(user_id: i64, species_id: i32) -> Result<NewSpecimen, Box<dyn Error>> {
         let _ = get_config()
             .get_species_data(species_id)
-            .ok_or_else(|| format!("Fish data with species id '{}' does not exist.", species_id))?;
+            .ok_or_else(|| GameResourceError::species_not_found(species_id))?;
 
         let specimen = NewSpecimen {
             user_id,

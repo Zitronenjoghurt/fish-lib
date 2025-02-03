@@ -28,6 +28,7 @@
 
 use crate::config::Config;
 use crate::database::Database;
+use crate::game::errors::database::GameDatabaseError;
 use diesel::r2d2::{ConnectionManager, PooledConnection};
 use diesel::PgConnection;
 use lazy_static::lazy_static;
@@ -54,7 +55,7 @@ lazy_static! {
     static ref CONFIG: RwLock<Arc<Config>> = RwLock::new(Arc::new(Config::default()));
 }
 
-pub fn connect_db(postgres_url: &str) -> Result<(), Box<dyn std::error::Error>> {
+pub fn connect_db(postgres_url: &str) -> Result<(), GameDatabaseError> {
     DB.write()
         .expect("Failed to get write lock on DB")
         .connect(postgres_url)?;
@@ -62,13 +63,13 @@ pub fn connect_db(postgres_url: &str) -> Result<(), Box<dyn std::error::Error>> 
 }
 
 pub fn get_db_connection(
-) -> Result<PooledConnection<ConnectionManager<PgConnection>>, Box<dyn std::error::Error>> {
+) -> Result<PooledConnection<ConnectionManager<PgConnection>>, GameDatabaseError> {
     DB.read()
         .expect("Failed to get read lock on DB")
         .get_connection()
 }
 
-pub fn clear_db() -> Result<(), Box<dyn std::error::Error>> {
+pub fn clear_db() -> Result<(), GameDatabaseError> {
     DB.write().expect("Failed to get write lock on DB").clear()
 }
 
