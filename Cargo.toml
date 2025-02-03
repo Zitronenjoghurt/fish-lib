@@ -3,7 +3,13 @@ name = "fish-lib"
 description = "A work-in-progress fishing game library containing the game/storage logic for a discord fishing game I'm working on."
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
 repository = "https://github.com/Zitronenjoghurt/fish-lib"
+exclude = [
+    ".github/*",
+    "example/*",
+    "test/*",
+]
 
 [dependencies]
 chrono = "0.4.39"

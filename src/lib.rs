@@ -1,3 +1,31 @@
+//! # Fish Lib
+//!
+//! A library for fish-based games.
+//!
+//! ## Getting Started
+//!
+//! The main entry point is [`crate::game::Game`]. That's where you will find the public API to the game and storage logic.
+//!
+//! ```rust
+//! use fish_lib::game::prelude::*;
+//! use fish_lib::setup_test;
+//! setup_test();
+//!
+//! // Example of basic usage, registering a user
+//! let user = Game::register_user(1337).unwrap();
+//!
+//! // Re-find registered user
+//! let found_user = Game::get_user(1337).unwrap();
+//!
+//! assert_eq!(user, found_user);
+//! ```
+//!
+//! ## Core Modules
+//!
+//! - [`game`] - The primary module containing all game functionality
+//! - [`config`] - Configuration types
+//! - [`data`] - Supporting data structures
+
 use crate::config::Config;
 use crate::database::Database;
 use diesel::r2d2::{ConnectionManager, PooledConnection};
