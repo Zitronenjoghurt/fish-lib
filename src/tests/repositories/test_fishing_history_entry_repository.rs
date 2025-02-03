@@ -2,7 +2,7 @@ use crate::game::repositories::fishing_history_entry_repository::FishingHistoryE
 use crate::game::services::user_service::UserService;
 use crate::models::fishing_history_entry::{FishingHistoryEntry, NewFishingHistoryEntry};
 use crate::models::user::User;
-use crate::tests::setup_test;
+use crate::setup_test;
 use crate::traits::repository::Repository;
 
 fn new_user_and_entry() -> (User, FishingHistoryEntry) {

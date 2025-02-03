@@ -3,6 +3,7 @@ use crate::database::Database;
 use diesel::r2d2::{ConnectionManager, PooledConnection};
 use diesel::PgConnection;
 use lazy_static::lazy_static;
+use std::path::Path;
 use std::sync::{Arc, RwLock};
 
 pub mod config;
@@ -13,7 +14,7 @@ pub mod game;
 pub mod models;
 pub mod schema;
 #[cfg(test)]
-mod tests;
+pub mod tests;
 pub mod traits;
 pub mod utils;
 
@@ -53,4 +54,15 @@ pub fn set_config(new_config: Config) {
 
 pub fn reset_config() {
     set_config(Config::default());
+}
+
+pub fn setup_test() {
+    connect_db("postgresql://admin:root@db:5432/test_db").unwrap();
+    clear_db().unwrap();
+
+    let config = Config::builder()
+        .fish_json_file(Path::new("./example_data/fish_stats.json"))
+        .unwrap()
+        .build();
+    set_config(config);
 }

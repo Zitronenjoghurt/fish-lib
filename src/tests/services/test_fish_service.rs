@@ -1,7 +1,7 @@
 use crate::game::repositories::fish_repository::FishRepository;
 use crate::game::services::fish_service::FishService;
 use crate::game::services::user_service::UserService;
-use crate::tests::setup_test;
+use crate::setup_test;
 use crate::traits::repository::Repository;
 
 #[test]

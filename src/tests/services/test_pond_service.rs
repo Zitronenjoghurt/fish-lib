@@ -1,7 +1,7 @@
 use crate::game::repositories::pond_repository::PondRepository;
 use crate::game::services::pond_service::PondService;
 use crate::game::services::user_service::UserService;
-use crate::tests::setup_test;
+use crate::setup_test;
 use crate::traits::repository::Repository;
 
 #[test]

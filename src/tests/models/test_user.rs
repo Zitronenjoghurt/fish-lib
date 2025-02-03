@@ -1,6 +1,6 @@
 use crate::game::repositories::user_repository::UserRepository;
 use crate::game::services::user_service::UserService;
-use crate::tests::setup_test;
+use crate::setup_test;
 use crate::traits::repository::Repository;
 use chrono::Utc;
 use chrono_tz::Tz;

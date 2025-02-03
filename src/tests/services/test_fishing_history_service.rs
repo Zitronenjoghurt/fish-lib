@@ -5,9 +5,8 @@ use crate::game::repositories::fishing_history_entry_repository::FishingHistoryE
 use crate::game::services::fishing_history_service::FishingHistoryService;
 use crate::game::services::user_service::UserService;
 use crate::models::fish::NewFish;
-use crate::set_config;
-use crate::tests::setup_test;
 use crate::traits::repository::Repository;
+use crate::{set_config, setup_test};
 use chrono::Utc;
 use std::collections::HashMap;
 

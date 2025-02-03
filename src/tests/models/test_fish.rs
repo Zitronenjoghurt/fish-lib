@@ -1,8 +1,7 @@
 use crate::config::Config;
 use crate::data::fish_data::FishData;
 use crate::models::fish::Fish;
-use crate::set_config;
-use crate::tests::setup_test;
+use crate::{set_config, setup_test};
 use chrono::{Duration, Utc};
 use std::collections::HashMap;
 

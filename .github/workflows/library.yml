@@ -30,7 +30,7 @@ jobs:
       - name: Generate coverage
         run: |
           cd test
-          docker compose exec -T app cargo tarpaulin --verbose --all-features --timeout 120 --out Xml -- --test-threads 1
+          docker compose exec -T app cargo tarpaulin --doc --tests --verbose --all-features --timeout 120 --out Xml -- --test-threads 1
 
       - name: Copy coverage from container
         run: |
