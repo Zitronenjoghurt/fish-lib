@@ -1,7 +1,7 @@
 use crate::data::species_data::SpeciesData;
 use chrono::{DateTime, Timelike};
 use chrono_tz::Tz;
-use rand::seq::SliceRandom;
+use rand::seq::IndexedRandom;
 use rand::Rng;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -83,8 +83,8 @@ impl EncounterSystem {
 
         let total = cumulative_weights.last()?;
 
-        let mut rng = rand::thread_rng();
-        let roll = rng.gen_range(0..*total);
+        let mut rng = rand::rng();
+        let roll = rng.random_range(0..*total);
 
         let index = cumulative_weights.partition_point(|&weight| weight <= roll);
         Some(available_rarities[index])
@@ -115,7 +115,7 @@ impl EncounterSystem {
             possible_rarity_encounters.keys().copied().collect();
         let rarity = self.roll_rarity_level(&valid_rarity_levels)?;
 
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let possible_species = possible_rarity_encounters.get(&rarity)?;
         possible_species.choose(&mut rng).copied()
     }

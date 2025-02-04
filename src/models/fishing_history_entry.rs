@@ -5,23 +5,38 @@ use crate::traits::model::Model;
 use crate::utils::math::float_interpolate;
 use chrono::{DateTime, Utc};
 use diesel::{AsChangeset, Insertable, Queryable, Selectable};
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
-#[derive(Debug, Clone, PartialEq, Queryable, Selectable, AsChangeset)]
+#[derive(
+    Debug, Default, Serialize, Deserialize, Clone, PartialEq, Queryable, Selectable, AsChangeset,
+)]
 #[diesel(table_name = crate::schema::fish_fishing_history_entries)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct FishingHistoryEntry {
+    /// Primary key of this fishing history entry in the database
     pub id: i64,
+    /// The primary key of the user this fishing history entry belongs to
     pub user_id: i64,
+    /// The species ID this fishing history entry is associated with (species are defined in the config)
     pub species_id: i32,
+    /// When the dataset was created
     pub created_at: DateTime<Utc>,
+    /// When the dataset was last updated
     pub updated_at: DateTime<Utc>,
+    /// How often the specimen of this species was caught by the user
     pub caught_count: i32,
+    /// How often the specimen of this species was sold by the user
     pub sold_count: i32,
+    /// Smallest catch size ratio (0-1) relative to species' min/max size range
     pub smallest_catch_size_ratio: f32,
+    /// Largest catch size ratio (0-1) relative to species' min/max size range
     pub largest_catch_size_ratio: f32,
+    /// When a specimen of this species was last caught
     pub last_catch: DateTime<Utc>,
+    /// When a specimen of this species was first sold
     pub first_sell: Option<DateTime<Utc>>,
+    /// When a specimen of this species was last sold
     pub last_sell: Option<DateTime<Utc>>,
 }
 

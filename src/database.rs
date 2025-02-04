@@ -20,12 +20,14 @@ pub struct Database {
 }
 
 impl Database {
-    pub fn new() -> Arc<RwLock<dyn DatabaseInterface>> {
-        let db = Self {
+    pub fn new() -> Self {
+        Self {
             connection_pool: None,
-        };
+        }
+    }
 
-        Arc::new(RwLock::new(db))
+    pub fn create() -> Arc<RwLock<dyn DatabaseInterface>> {
+        Arc::new(RwLock::new(Self::new()))
     }
 }
 

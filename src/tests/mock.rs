@@ -5,7 +5,7 @@ use std::path::Path;
 use std::sync::{Arc, RwLock};
 
 pub fn mock_default_db() -> Arc<RwLock<dyn DatabaseInterface>> {
-    let db = Database::new();
+    let db = Database::create();
     db.write()
         .unwrap()
         .connect("postgresql://admin:root@db:5432/test_db")
@@ -25,7 +25,7 @@ pub fn mock_service_provider(
     config: Arc<dyn ConfigInterface>,
 ) -> Arc<dyn ServiceProviderInterface> {
     let db = mock_default_db();
-    ServiceProvider::new(config, db)
+    ServiceProvider::create(config, db)
 }
 
 pub fn mock_default_service_provider() -> Arc<dyn ServiceProviderInterface> {

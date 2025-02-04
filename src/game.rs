@@ -10,6 +10,7 @@ use crate::game::repositories::pond_repository::PondRepositoryInterface;
 use crate::game::repositories::specimen_repository::SpecimenRepositoryInterface;
 use crate::game::repositories::user_repository::UserRepositoryInterface;
 use crate::game::service_provider::{ServiceProvider, ServiceProviderInterface};
+use crate::game::services::encounter_service::EncounterServiceInterface;
 use crate::game::services::fishing_history_service::FishingHistoryServiceInterface;
 use crate::game::services::pond_service::PondServiceInterface;
 use crate::game::services::specimen_service::SpecimenServiceInterface;
@@ -41,12 +42,12 @@ pub struct Game {
 impl Game {
     pub fn new(db_url: &str, config: Option<Arc<dyn ConfigInterface>>) -> GameResult<Self> {
         let config = config.unwrap_or(Config::builder().build());
-        let db = Database::new();
+        let db = Database::create();
         db.write()
             .expect("Failed to get database write lock")
             .connect(db_url)?;
 
-        let service_provider = ServiceProvider::new(config, db);
+        let service_provider = ServiceProvider::create(config, db);
         let game = Game { service_provider };
         Ok(game)
     }
@@ -446,6 +447,10 @@ impl ServiceProviderInterface for Game {
 
     fn user_repository(&self) -> Arc<dyn UserRepositoryInterface> {
         self.service_provider.user_repository()
+    }
+
+    fn encounter_service(&self) -> Arc<dyn EncounterServiceInterface> {
+        self.service_provider.encounter_service()
     }
 
     fn fishing_history_service(&self) -> Arc<dyn FishingHistoryServiceInterface> {

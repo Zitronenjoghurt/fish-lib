@@ -26,6 +26,7 @@ pub trait ServiceProviderInterface: Send + Sync {
     fn pond_repository(&self) -> Arc<dyn PondRepositoryInterface>;
     fn specimen_repository(&self) -> Arc<dyn SpecimenRepositoryInterface>;
     fn user_repository(&self) -> Arc<dyn UserRepositoryInterface>;
+    fn encounter_service(&self) -> Arc<dyn EncounterServiceInterface>;
     fn fishing_history_service(&self) -> Arc<dyn FishingHistoryServiceInterface>;
     fn pond_service(&self) -> Arc<dyn PondServiceInterface>;
     fn specimen_service(&self) -> Arc<dyn SpecimenServiceInterface>;
@@ -53,7 +54,7 @@ impl ServiceProvider {
     pub fn new(
         config: Arc<dyn ConfigInterface>,
         database: Arc<RwLock<dyn DatabaseInterface>>,
-    ) -> Arc<dyn ServiceProviderInterface> {
+    ) -> Self {
         let fishing_history_entry_repository =
             Arc::new(FishingHistoryEntryRepository::new(database.clone()));
         let pond_repository = Arc::new(PondRepository::new(database.clone()));
@@ -83,7 +84,7 @@ impl ServiceProvider {
         ));
         let user_service = Arc::new(UserService::new(user_repository.clone()));
 
-        let service_provider = Self {
+        Self {
             config,
             database,
             fishing_history_entry_repository,
@@ -97,9 +98,14 @@ impl ServiceProvider {
             specimen_service,
             user_service,
             weather_service,
-        };
+        }
+    }
 
-        Arc::new(service_provider)
+    pub fn create(
+        config: Arc<dyn ConfigInterface>,
+        database: Arc<RwLock<dyn DatabaseInterface>>,
+    ) -> Arc<dyn ServiceProviderInterface> {
+        Arc::new(ServiceProvider::new(config, database))
     }
 }
 
@@ -126,6 +132,10 @@ impl ServiceProviderInterface for ServiceProvider {
 
     fn user_repository(&self) -> Arc<dyn UserRepositoryInterface> {
         self.user_repository.clone()
+    }
+
+    fn encounter_service(&self) -> Arc<dyn EncounterServiceInterface> {
+        self.encounter_service.clone()
     }
 
     fn fishing_history_service(&self) -> Arc<dyn FishingHistoryServiceInterface> {

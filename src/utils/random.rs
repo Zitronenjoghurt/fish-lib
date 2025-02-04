@@ -1,9 +1,9 @@
-use rand::distributions::Distribution;
-use rand::thread_rng;
+use rand::distr::Distribution;
+use rand::rng;
 use rand_distr::Normal;
 
 pub fn random_normal(min: f32, max: f32) -> f32 {
-    let mut rng = thread_rng();
+    let mut rng = rng();
     let mean = (min + max) / 2.0;
     let std_dev = (min - max) / 6.0;
 
@@ -14,7 +14,7 @@ pub fn random_normal(min: f32, max: f32) -> f32 {
 }
 
 pub fn random_normal_01() -> f32 {
-    let mut rng = thread_rng();
+    let mut rng = rng();
     let mean = 0.5;
     let std_dev = 1.0 / 6.0;
 

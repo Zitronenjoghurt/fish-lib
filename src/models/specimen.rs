@@ -6,19 +6,30 @@ use crate::utils::random::random_normal_01;
 use chrono::{DateTime, Utc};
 use diesel::{AsChangeset, Insertable, Queryable, Selectable};
 use rand::random;
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
-#[derive(Debug, Clone, PartialEq, Queryable, Selectable, AsChangeset)]
+#[derive(
+    Debug, Default, Serialize, Deserialize, Clone, PartialEq, Queryable, Selectable, AsChangeset,
+)]
 #[diesel(table_name = crate::schema::fish_specimens)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Specimen {
+    /// Primary key of this specimen in the database
     pub id: i64,
+    /// The primary key of the user this specimen belongs to
     pub user_id: i64,
+    /// The species ID this specimen is associated with (species are defined in the config)
     pub species_id: i32,
+    /// When the dataset was created
     pub created_at: DateTime<Utc>,
+    /// When the dataset was last updated
     pub updated_at: DateTime<Utc>,
+    /// Baby size ratio (0-1) relative to species' min/max baby size range
     pub size_baby_ratio: f32,
+    /// Adult size ratio (0-1) relative to species' min/max adult size range
     pub size_adult_ratio: f32,
+    /// Lifespan ratio (0-1) relative to species' min/max lifespan range
     pub lifespan_days_ratio: f32,
     /// The age this fish was caught at (from 0 to 1)
     pub catch_age: f32,

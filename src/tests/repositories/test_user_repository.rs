@@ -43,6 +43,7 @@ fn test_save() {
         .unwrap()
         .unwrap();
     assert_eq!(user.created_at, found_user.created_at);
+    assert_eq!(found_user.credits, 0);
 }
 
 #[test]

@@ -2,6 +2,7 @@ diesel::table! {
     fish_users (id) {
         id -> BigInt,
         external_id -> BigInt,
+        credits -> BigInt,
         created_at -> Timestamptz,
         updated_at -> Timestamptz,
         timezone -> VarChar
