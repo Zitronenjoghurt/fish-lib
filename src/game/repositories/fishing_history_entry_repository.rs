@@ -1,19 +1,39 @@
-use crate::get_db_connection;
+use crate::database::DatabaseInterface;
+use crate::game::errors::repository::GameRepositoryError;
 use crate::models::fishing_history_entry::{FishingHistoryEntry, NewFishingHistoryEntry};
 use crate::schema::fish_fishing_history_entries;
 use crate::traits::repository::Repository;
 use chrono::Utc;
 use diesel::prelude::*;
-use std::error::Error;
+use std::sync::{Arc, RwLock};
 
-pub struct FishingHistoryEntryRepository;
-
-impl FishingHistoryEntryRepository {
-    pub fn find_by_user_and_species_id(
+pub trait FishingHistoryEntryRepositoryInterface:
+    Repository<FishingHistoryEntry> + Send + Sync
+{
+    fn find_by_user_and_species_id(
+        &self,
         user_id: i64,
         species_id: i32,
-    ) -> Result<Option<FishingHistoryEntry>, Box<dyn Error>> {
-        let mut connection = get_db_connection()?;
+    ) -> Result<Option<FishingHistoryEntry>, GameRepositoryError>;
+}
+
+pub struct FishingHistoryEntryRepository {
+    db: Arc<RwLock<dyn DatabaseInterface>>,
+}
+
+impl FishingHistoryEntryRepository {
+    pub fn new(db: Arc<RwLock<dyn DatabaseInterface>>) -> Self {
+        Self { db }
+    }
+}
+
+impl FishingHistoryEntryRepositoryInterface for FishingHistoryEntryRepository {
+    fn find_by_user_and_species_id(
+        &self,
+        user_id: i64,
+        species_id: i32,
+    ) -> Result<Option<FishingHistoryEntry>, GameRepositoryError> {
+        let mut connection = self.get_connection()?;
         let entry = fish_fishing_history_entries::table
             .filter(
                 fish_fishing_history_entries::user_id
@@ -27,8 +47,15 @@ impl FishingHistoryEntryRepository {
 }
 
 impl Repository<FishingHistoryEntry> for FishingHistoryEntryRepository {
-    fn create(new_entity: NewFishingHistoryEntry) -> Result<FishingHistoryEntry, Box<dyn Error>> {
-        let mut connection = get_db_connection()?;
+    fn get_db(&self) -> Arc<RwLock<dyn DatabaseInterface>> {
+        self.db.clone()
+    }
+
+    fn create(
+        &self,
+        new_entity: NewFishingHistoryEntry,
+    ) -> Result<FishingHistoryEntry, GameRepositoryError> {
+        let mut connection = self.get_connection()?;
 
         let new_result = diesel::insert_into(fish_fishing_history_entries::table)
             .values(new_entity)
@@ -37,8 +64,8 @@ impl Repository<FishingHistoryEntry> for FishingHistoryEntryRepository {
         Ok(new_result)
     }
 
-    fn find(id: i64) -> Result<Option<FishingHistoryEntry>, Box<dyn Error>> {
-        let mut connection = get_db_connection()?;
+    fn find(&self, id: i64) -> Result<Option<FishingHistoryEntry>, GameRepositoryError> {
+        let mut connection = self.get_connection()?;
         let result = fish_fishing_history_entries::table
             .find(id)
             .first::<FishingHistoryEntry>(&mut connection)
@@ -46,8 +73,11 @@ impl Repository<FishingHistoryEntry> for FishingHistoryEntryRepository {
         Ok(result)
     }
 
-    fn save(mut entity: FishingHistoryEntry) -> Result<FishingHistoryEntry, Box<dyn Error>> {
-        let mut connection = get_db_connection()?;
+    fn save(
+        &self,
+        mut entity: FishingHistoryEntry,
+    ) -> Result<FishingHistoryEntry, GameRepositoryError> {
+        let mut connection = self.get_connection()?;
         entity.updated_at = Utc::now();
 
         let update_result = diesel::update(fish_fishing_history_entries::table)
@@ -58,8 +88,8 @@ impl Repository<FishingHistoryEntry> for FishingHistoryEntryRepository {
         Ok(update_result)
     }
 
-    fn delete(entity: &FishingHistoryEntry) -> Result<bool, Box<dyn Error>> {
-        let mut connection = get_db_connection()?;
+    fn delete(&self, entity: &FishingHistoryEntry) -> Result<bool, GameRepositoryError> {
+        let mut connection = self.get_connection()?;
 
         let deleted_count = diesel::delete(fish_fishing_history_entries::table)
             .filter(fish_fishing_history_entries::id.eq(entity.id))

@@ -2,6 +2,8 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum GameResourceError {
+    #[error("User with id '{user_id}' has no fishing history with species with id '{species_id}'")]
+    FishingHistoryNotFound { user_id: i64, species_id: i32 },
     #[error("Location with id '{location_id}' does not exist")]
     LocationNotFound { location_id: i32 },
     #[error("User with external id '{external_id}' has no fishing history with species with id '{species_id}'")]
@@ -15,6 +17,13 @@ pub enum GameResourceError {
 }
 
 impl GameResourceError {
+    pub fn fishing_history_not_found(user_id: i64, species_id: i32) -> Self {
+        Self::FishingHistoryNotFound {
+            user_id,
+            species_id,
+        }
+    }
+
     pub fn location_not_found(location_id: i32) -> Self {
         Self::LocationNotFound { location_id }
     }
@@ -36,6 +45,10 @@ impl GameResourceError {
 
     pub fn user_not_found(external_id: i64) -> Self {
         Self::UserNotFound { external_id }
+    }
+
+    pub fn is_fishing_history_not_found(&self) -> bool {
+        matches!(self, Self::FishingHistoryNotFound { .. })
     }
 
     pub fn is_location_not_found(&self) -> bool {
@@ -76,8 +89,16 @@ impl GameResourceError {
 
     pub fn get_species_id(&self) -> Option<i32> {
         match self {
+            Self::FishingHistoryNotFound { species_id, .. } => Some(*species_id),
             Self::NoFishingHistory { species_id, .. } => Some(*species_id),
             Self::SpeciesNotFound { species_id } => Some(*species_id),
+            _ => None,
+        }
+    }
+
+    pub fn get_user_id(&self) -> Option<i64> {
+        match self {
+            Self::FishingHistoryNotFound { user_id, .. } => Some(*user_id),
             _ => None,
         }
     }

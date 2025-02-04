@@ -1,40 +1,38 @@
 use chrono::{Duration, Utc};
 use chrono_tz::Tz;
 use dotenv::dotenv;
-use fish_lib::config::Config;
-use fish_lib::game::services::weather_service::WeatherService;
-use fish_lib::{connect_db, set_config};
+use fish_lib::config::{Config, ConfigBuilderInterface, ConfigInterface};
+use fish_lib::game::service_provider::ServiceProviderInterface;
+use fish_lib::game::Game;
 use plotters::prelude::full_palette::GREY;
 use plotters::prelude::*;
 use std::env;
 use std::path::Path;
+use std::sync::Arc;
 
 #[cfg(test)]
 mod tests;
 
-fn init_config() {
+fn init_config() -> Arc<dyn ConfigInterface> {
     let species_json_file = Path::new("./../example_data/species_data.json");
     let locations_json_file = Path::new("./../example_data/locations.json");
 
-    let config = Config::builder()
+    Config::builder()
         .species_json_file(species_json_file)
         .unwrap()
         .locations_json_file(locations_json_file)
         .unwrap()
-        .build();
-
-    set_config(config);
+        .build()
 }
 
-fn init_db() {
+fn init_game() -> Game {
     dotenv().ok();
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    connect_db(&database_url).unwrap();
+    Game::new(&database_url, Some(init_config())).unwrap()
 }
 
 fn main() {
-    init_config();
-    init_db();
+    let game = init_game();
 
     //let user = UserService::create_and_save_user(1337).unwrap();
     //let fish = FishService::generate_and_save_fish(&user, 1).unwrap();
@@ -90,7 +88,17 @@ fn main() {
     //    time += Duration::hours(1);
     //}
 
-    weather_plot(Tz::Europe__Berlin, 0, false, 24000, true, -20.0, 40.0).unwrap();
+    weather_plot(
+        &game,
+        Tz::Europe__Berlin,
+        0,
+        false,
+        24000,
+        true,
+        -20.0,
+        40.0,
+    )
+    .unwrap();
 
     //let mut time = Utc::now().with_timezone(&Tz::Europe__Berlin);
     //time -= Duration::hours(1);
@@ -98,6 +106,7 @@ fn main() {
 }
 
 fn weather_plot(
+    game: &Game,
     timezone: Tz,
     start_hour_offset: i64,
     by_days: bool,
@@ -111,7 +120,6 @@ fn weather_plot(
 
     let mut time = Utc::now().with_timezone(&timezone);
     time += Duration::hours(start_hour_offset);
-    let weather_service = WeatherService::get_instance();
 
     let mut temperatures = Vec::new();
     let mut humidity = Vec::new();
@@ -120,7 +128,7 @@ fn weather_plot(
     let mut days = Vec::new();
 
     for day in 0..=count {
-        let weather = weather_service.get_weather(1, time).unwrap();
+        let weather = game.weather_service().get_weather(1, time).unwrap();
 
         temperatures.push((day as f32, weather.temperature_c));
         humidity.push((day as f32, (weather.humidity * 100.0)));

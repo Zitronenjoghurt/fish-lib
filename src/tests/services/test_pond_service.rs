@@ -1,16 +1,12 @@
-use crate::game::repositories::pond_repository::PondRepository;
-use crate::game::services::pond_service::PondService;
-use crate::game::services::user_service::UserService;
-use crate::setup_test;
-use crate::traits::repository::Repository;
+use crate::tests::mock::mock_default_service_provider;
 
 #[test]
 fn test_create_and_save_pond() {
-    setup_test();
+    let sp = mock_default_service_provider();
 
-    let user = UserService::create_and_save_user(1337).unwrap();
-    let pond = PondService::create_and_save_pond(&user, 50).unwrap();
+    let user = sp.user_service().create_and_save_user(1337).unwrap();
+    let pond = sp.pond_service().create_and_save_pond(&user, 50).unwrap();
 
-    let found_pond = PondRepository::find(pond.id).unwrap().unwrap();
+    let found_pond = sp.pond_repository().find(pond.id).unwrap().unwrap();
     assert_eq!(pond, found_pond);
 }

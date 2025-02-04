@@ -1,12 +1,11 @@
-use crate::game::repositories::fishing_history_entry_repository::FishingHistoryEntryRepository;
-use crate::game::services::user_service::UserService;
+use crate::game::service_provider::ServiceProviderInterface;
 use crate::models::fishing_history_entry::{FishingHistoryEntry, NewFishingHistoryEntry};
 use crate::models::user::User;
-use crate::setup_test;
-use crate::traits::repository::Repository;
+use crate::tests::mock::mock_default_service_provider;
+use std::sync::Arc;
 
-fn new_user_and_entry() -> (User, FishingHistoryEntry) {
-    let user = UserService::create_and_save_user(1337).unwrap();
+fn new_user_and_entry(sp: &Arc<dyn ServiceProviderInterface>) -> (User, FishingHistoryEntry) {
+    let user = sp.user_service().create_and_save_user(1337).unwrap();
     let new_entry = NewFishingHistoryEntry {
         user_id: user.id,
         species_id: 1,
@@ -15,26 +14,34 @@ fn new_user_and_entry() -> (User, FishingHistoryEntry) {
         smallest_catch_size_ratio: 0.5,
         largest_catch_size_ratio: 0.75,
     };
-    let entry = FishingHistoryEntryRepository::create(new_entry).unwrap();
+    let entry = sp
+        .fishing_history_entry_repository()
+        .create(new_entry)
+        .unwrap();
     (user, entry)
 }
 
 #[test]
 fn test_find_by_user_and_species_id() {
-    setup_test();
-    let (user, entry) = new_user_and_entry();
-    let found_entry =
-        FishingHistoryEntryRepository::find_by_user_and_species_id(user.id, entry.species_id)
-            .unwrap()
-            .unwrap();
+    let sp = mock_default_service_provider();
+
+    let (user, entry) = new_user_and_entry(&sp);
+    let found_entry = sp
+        .fishing_history_entry_repository()
+        .find_by_user_and_species_id(user.id, entry.species_id)
+        .unwrap()
+        .unwrap();
     assert_eq!(found_entry, entry);
 }
 
 #[test]
 fn test_find() {
-    setup_test();
-    let (_, entry) = new_user_and_entry();
-    let found_entry = FishingHistoryEntryRepository::find(entry.id)
+    let sp = mock_default_service_provider();
+
+    let (_, entry) = new_user_and_entry(&sp);
+    let found_entry = sp
+        .fishing_history_entry_repository()
+        .find(entry.id)
         .unwrap()
         .unwrap();
     assert_eq!(entry, found_entry);
@@ -42,12 +49,17 @@ fn test_find() {
 
 #[test]
 fn test_save() {
-    setup_test();
-    let (_, mut entry) = new_user_and_entry();
+    let sp = mock_default_service_provider();
+
+    let (_, mut entry) = new_user_and_entry(&sp);
     entry.sold_count = 69;
 
-    FishingHistoryEntryRepository::save(entry.clone()).unwrap();
-    let found_entry = FishingHistoryEntryRepository::find(entry.id)
+    sp.fishing_history_entry_repository()
+        .save(entry.clone())
+        .unwrap();
+    let found_entry = sp
+        .fishing_history_entry_repository()
+        .find(entry.id)
         .unwrap()
         .unwrap();
     assert_eq!(found_entry.sold_count, 69);
@@ -56,17 +68,24 @@ fn test_save() {
 
 #[test]
 fn test_delete() {
-    setup_test();
-    let (_, entry) = new_user_and_entry();
+    let sp = mock_default_service_provider();
 
-    let found_entry = FishingHistoryEntryRepository::find(entry.id)
+    let (_, entry) = new_user_and_entry(&sp);
+
+    let found_entry = sp
+        .fishing_history_entry_repository()
+        .find(entry.id)
         .unwrap()
         .unwrap();
     assert_eq!(entry, found_entry);
 
-    FishingHistoryEntryRepository::delete(&found_entry).unwrap();
+    sp.fishing_history_entry_repository()
+        .delete(&found_entry)
+        .unwrap();
     assert_eq!(
-        FishingHistoryEntryRepository::find(found_entry.id).unwrap(),
+        sp.fishing_history_entry_repository()
+            .find(found_entry.id)
+            .unwrap(),
         None
     );
 }

@@ -1,4 +1,5 @@
 use crate::game::errors::database::GameDatabaseError;
+use crate::game::errors::repository::GameRepositoryError;
 use crate::game::errors::resource::GameResourceError;
 use thiserror::Error;
 
@@ -12,6 +13,8 @@ pub type GameResult<T> = Result<T, GameError>;
 pub enum GameError {
     #[error(transparent)]
     Database(#[from] GameDatabaseError),
+    #[error(transparent)]
+    Repository(#[from] GameRepositoryError),
     #[error(transparent)]
     Resource(#[from] GameResourceError),
     #[error("Unexpected error: {msg}")]

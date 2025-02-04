@@ -1,3 +1,4 @@
+mod mock;
 mod models;
 mod repositories;
 mod services;

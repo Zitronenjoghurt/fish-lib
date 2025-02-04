@@ -1,8 +1,11 @@
-use crate::get_config;
+use crate::config::ConfigInterface;
+use crate::game::errors::resource::GameResourceError;
+use crate::game::errors::GameResult;
 use crate::traits::model::Model;
 use crate::utils::math::float_interpolate;
 use chrono::{DateTime, Utc};
 use diesel::{AsChangeset, Insertable, Queryable, Selectable};
+use std::sync::Arc;
 
 #[derive(Debug, Clone, PartialEq, Queryable, Selectable, AsChangeset)]
 #[diesel(table_name = crate::schema::fish_fishing_history_entries)]
@@ -45,48 +48,48 @@ impl FishingHistoryEntry {
         self.sold_count = self.sold_count.saturating_add(1);
     }
 
-    pub fn get_smallest_size_mm(&self) -> f32 {
-        let data = get_config()
+    pub fn get_smallest_size_mm(&self, config: Arc<dyn ConfigInterface>) -> GameResult<f32> {
+        let data = config
             .get_species_data(self.species_id)
-            .unwrap_or_else(|| panic!("Missing fish data for species id '{}'", self.species_id));
-        float_interpolate(
+            .ok_or_else(|| GameResourceError::species_not_found(self.species_id))?;
+        Ok(float_interpolate(
             data.min_size_baby_mm as f32,
             data.max_size_adult_mm as f32,
             self.smallest_catch_size_ratio,
-        )
+        ))
     }
 
-    pub fn get_largest_size_mm(&self) -> f32 {
-        let data = get_config()
+    pub fn get_largest_size_mm(&self, config: Arc<dyn ConfigInterface>) -> GameResult<f32> {
+        let data = config
             .get_species_data(self.species_id)
-            .unwrap_or_else(|| panic!("Missing fish data for species id '{}'", self.species_id));
-        float_interpolate(
+            .ok_or_else(|| GameResourceError::species_not_found(self.species_id))?;
+        Ok(float_interpolate(
             data.min_size_baby_mm as f32,
             data.max_size_adult_mm as f32,
             self.largest_catch_size_ratio,
-        )
+        ))
     }
 
-    pub fn get_smallest_weight_g(&self) -> f32 {
-        let data = get_config()
+    pub fn get_smallest_weight_g(&self, config: Arc<dyn ConfigInterface>) -> GameResult<f32> {
+        let data = config
             .get_species_data(self.species_id)
-            .unwrap_or_else(|| panic!("Missing fish data for species id '{}'", self.species_id));
-        float_interpolate(
+            .ok_or_else(|| GameResourceError::species_not_found(self.species_id))?;
+        Ok(float_interpolate(
             data.min_weight_baby_g as f32,
             data.max_weight_adult_g as f32,
             self.smallest_catch_size_ratio,
-        )
+        ))
     }
 
-    pub fn get_largest_weight_g(&self) -> f32 {
-        let data = get_config()
+    pub fn get_largest_weight_g(&self, config: Arc<dyn ConfigInterface>) -> GameResult<f32> {
+        let data = config
             .get_species_data(self.species_id)
-            .unwrap_or_else(|| panic!("Missing fish data for species id '{}'", self.species_id));
-        float_interpolate(
+            .ok_or_else(|| GameResourceError::species_not_found(self.species_id))?;
+        Ok(float_interpolate(
             data.min_weight_baby_g as f32,
             data.max_weight_adult_g as f32,
             self.largest_catch_size_ratio,
-        )
+        ))
     }
 }
 

@@ -1,17 +1,29 @@
-use crate::game::repositories::pond_repository::PondRepository;
+use crate::game::errors::GameResult;
+use crate::game::repositories::pond_repository::PondRepositoryInterface;
 use crate::models::pond::{NewPond, Pond};
 use crate::models::user::User;
-use crate::traits::repository::Repository;
-use std::error::Error;
+use std::sync::Arc;
 
-pub struct PondService;
+pub trait PondServiceInterface: Send + Sync {
+    fn create_and_save_pond(&self, owner_user: &User, capacity: i32) -> GameResult<Pond>;
+}
+
+pub struct PondService {
+    pond_repository: Arc<dyn PondRepositoryInterface>,
+}
 
 impl PondService {
-    pub fn create_and_save_pond(owner_user: &User, capacity: i32) -> Result<Pond, Box<dyn Error>> {
+    pub fn new(pond_repository: Arc<dyn PondRepositoryInterface>) -> PondService {
+        PondService { pond_repository }
+    }
+}
+
+impl PondServiceInterface for PondService {
+    fn create_and_save_pond(&self, owner_user: &User, capacity: i32) -> GameResult<Pond> {
         let pond = NewPond {
             user_id: owner_user.id,
             capacity,
         };
-        PondRepository::create(pond)
+        Ok(self.pond_repository.create(pond)?)
     }
 }

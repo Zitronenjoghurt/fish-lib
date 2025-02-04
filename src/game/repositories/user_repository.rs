@@ -1,16 +1,29 @@
-use crate::get_db_connection;
+use crate::database::DatabaseInterface;
+use crate::game::errors::repository::GameRepositoryError;
 use crate::models::user::{NewUser, User};
 use crate::schema::fish_users;
 use crate::traits::repository::Repository;
 use chrono::Utc;
 use diesel::prelude::*;
-use std::error::Error;
+use std::sync::{Arc, RwLock};
 
-pub struct UserRepository;
+pub trait UserRepositoryInterface: Repository<User> + Send + Sync {
+    fn find_by_external_id(&self, external_id: i64) -> Result<Option<User>, GameRepositoryError>;
+}
+
+pub struct UserRepository {
+    db: Arc<RwLock<dyn DatabaseInterface>>,
+}
 
 impl UserRepository {
-    pub fn find_by_external_id(external_id: i64) -> Result<Option<User>, Box<dyn Error>> {
-        let mut connection = get_db_connection()?;
+    pub fn new(db: Arc<RwLock<dyn DatabaseInterface>>) -> Self {
+        Self { db }
+    }
+}
+
+impl UserRepositoryInterface for UserRepository {
+    fn find_by_external_id(&self, external_id: i64) -> Result<Option<User>, GameRepositoryError> {
+        let mut connection = self.get_connection()?;
         let user = fish_users::table
             .filter(fish_users::external_id.eq(external_id))
             .first::<User>(&mut connection)
@@ -20,8 +33,12 @@ impl UserRepository {
 }
 
 impl Repository<User> for UserRepository {
-    fn create(new_entity: NewUser) -> Result<User, Box<dyn Error>> {
-        let mut connection = get_db_connection()?;
+    fn get_db(&self) -> Arc<RwLock<dyn DatabaseInterface>> {
+        self.db.clone()
+    }
+
+    fn create(&self, new_entity: NewUser) -> Result<User, GameRepositoryError> {
+        let mut connection = self.get_connection()?;
 
         let new_result = diesel::insert_into(fish_users::table)
             .values(new_entity)
@@ -30,8 +47,8 @@ impl Repository<User> for UserRepository {
         Ok(new_result)
     }
 
-    fn find(id: i64) -> Result<Option<User>, Box<dyn Error>> {
-        let mut connection = get_db_connection()?;
+    fn find(&self, id: i64) -> Result<Option<User>, GameRepositoryError> {
+        let mut connection = self.get_connection()?;
         let user = fish_users::table
             .find(id)
             .first::<User>(&mut connection)
@@ -39,8 +56,8 @@ impl Repository<User> for UserRepository {
         Ok(user)
     }
 
-    fn save(mut entity: User) -> Result<User, Box<dyn Error>> {
-        let mut connection = get_db_connection()?;
+    fn save(&self, mut entity: User) -> Result<User, GameRepositoryError> {
+        let mut connection = self.get_connection()?;
         entity.updated_at = Utc::now();
 
         let updated_user = diesel::update(fish_users::table)
@@ -51,8 +68,8 @@ impl Repository<User> for UserRepository {
         Ok(updated_user)
     }
 
-    fn delete(entity: &User) -> Result<bool, Box<dyn Error>> {
-        let mut connection = get_db_connection()?;
+    fn delete(&self, entity: &User) -> Result<bool, GameRepositoryError> {
+        let mut connection = self.get_connection()?;
 
         let deleted_count = diesel::delete(fish_users::table)
             .filter(fish_users::id.eq(entity.id))

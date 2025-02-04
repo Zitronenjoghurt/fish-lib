@@ -1,11 +1,11 @@
-use crate::config::Config;
+use crate::config::{Config, ConfigBuilderInterface, ConfigInterface};
 use crate::data::species_data::SpeciesData;
 use crate::models::specimen::Specimen;
-use crate::{set_config, setup_test};
 use chrono::{Duration, Utc};
 use std::collections::HashMap;
+use std::sync::Arc;
 
-fn mock_config() {
+fn mock_config() -> Arc<dyn ConfigInterface> {
     let species_data = SpeciesData {
         name: "salmon".to_string(),
         min_size_baby_mm: 10,
@@ -24,14 +24,12 @@ fn mock_config() {
     let mut species_data_map = HashMap::new();
     species_data_map.insert(0, species_data);
 
-    let config = Config::builder().species(species_data_map).build();
-    set_config(config);
+    Config::builder().species(species_data_map).build()
 }
 
 #[test]
 fn test_age_calculation() {
-    setup_test();
-    mock_config();
+    let config = mock_config();
 
     let now = Utc::now();
     let yesterday = now - Duration::days(1);
@@ -72,28 +70,28 @@ fn test_age_calculation() {
         catch_age: 0.0,
     };
 
-    let age = specimen.get_age(1.0);
+    let age = specimen.get_age(config.clone(), 1.0).unwrap();
     assert!(
         (age - 0.5).abs() < 0.001,
         "Expected age to be approximately 0.5, got {}",
         age
     );
 
-    let age2 = specimen2.get_age(1.0);
+    let age2 = specimen2.get_age(config.clone(), 1.0).unwrap();
     assert!(
         (age2 - 1.0).abs() < 0.001,
         "Expected age2 to be approximately 1.0, got {}",
         age2
     );
 
-    let age3 = specimen3.get_age(1.0);
+    let age3 = specimen3.get_age(config.clone(), 1.0).unwrap();
     assert!(
         (age3 - 0.25).abs() < 0.001,
         "Expected age3 to be approximately 0.25, got {}",
         age3
     );
 
-    let age3_accelerated = specimen3.get_age(2.0);
+    let age3_accelerated = specimen3.get_age(config.clone(), 2.0).unwrap();
     assert!(
         (age3_accelerated - 0.5).abs() < 0.001,
         "Expected age3_accelerated to be approximately 0.5, got {}",
@@ -103,8 +101,7 @@ fn test_age_calculation() {
 
 #[test]
 fn test_size_calculation() {
-    setup_test();
-    mock_config();
+    let config = mock_config();
 
     let now = Utc::now();
     let yesterday = now - Duration::days(1);
@@ -145,28 +142,28 @@ fn test_size_calculation() {
         catch_age: 0.0,
     };
 
-    let size = specimen.get_size_mm(1.0);
+    let size = specimen.get_size_mm(config.clone(), 1.0).unwrap();
     assert!(
         (size - 30.0).abs() < 0.001,
         "Expected size to be approximately 30.0, got {}",
         size
     );
 
-    let size2 = specimen2.get_size_mm(1.0);
+    let size2 = specimen2.get_size_mm(config.clone(), 1.0).unwrap();
     assert!(
         (size2 - 40.0).abs() < 0.001,
         "Expected size2 to be approximately 40.0, got {}",
         size2
     );
 
-    let size3 = specimen3.get_size_mm(1.0);
+    let size3 = specimen3.get_size_mm(config.clone(), 1.0).unwrap();
     assert!(
         (size3 - 25.0).abs() < 0.001,
         "Expected size3 to be approximately 25.0, got {}",
         size3
     );
 
-    let size3_accelerated = specimen3.get_size_mm(3.0);
+    let size3_accelerated = specimen3.get_size_mm(config.clone(), 3.0).unwrap();
     assert!(
         (size3_accelerated - 35.0).abs() < 0.001,
         "Expected size3_accelerated to be approximately 35.0, got {}",
@@ -176,8 +173,7 @@ fn test_size_calculation() {
 
 #[test]
 fn test_weight_calculation() {
-    setup_test();
-    mock_config();
+    let config = mock_config();
 
     let now = Utc::now();
     let yesterday = now - Duration::days(1);
@@ -218,28 +214,28 @@ fn test_weight_calculation() {
         catch_age: 0.0,
     };
 
-    let weight = specimen.get_weight_g(1.0);
+    let weight = specimen.get_weight_g(config.clone(), 1.0).unwrap();
     assert!(
         (weight - 60.0).abs() < 0.001,
         "Expected weight to be approximately 60.0, got {}",
         weight
     );
 
-    let weight2 = specimen2.get_weight_g(1.0);
+    let weight2 = specimen2.get_weight_g(config.clone(), 1.0).unwrap();
     assert!(
         (weight2 - 80.0).abs() < 0.001,
         "Expected weight2 to be approximately 80.0, got {}",
         weight2
     );
 
-    let weight3 = specimen3.get_weight_g(1.0);
+    let weight3 = specimen3.get_weight_g(config.clone(), 1.0).unwrap();
     assert!(
         (weight3 - 50.0).abs() < 0.001,
         "Expected weight3 to be approximately 50.0, got {}",
         weight3
     );
 
-    let weight3_accelerated = specimen3.get_weight_g(3.0);
+    let weight3_accelerated = specimen3.get_weight_g(config.clone(), 3.0).unwrap();
     assert!(
         (weight3_accelerated - 70.0).abs() < 0.001,
         "Expected weight3_accelerated to be approximately 70.0, got {}",

@@ -7,15 +7,21 @@
 //! The main entry point is [`crate::game::Game`]. That's where you will find the public API to the game and storage logic.
 //!
 //! ```rust
+//! use fish_lib::config::{Config, ConfigBuilderInterface};
 //! use fish_lib::game::prelude::*;
-//! use fish_lib::setup_test;
-//! setup_test();
+//! use fish_lib::game::service_provider::ServiceProviderInterface;
+//!
+//! let config = Config::builder()/*. ...() */.build();
+//!
+//! // Create game and clear database for a blank test state
+//! let game = Game::new("postgresql://admin:root@db:5432/test_db", Some(config)).unwrap();
+//! game.database().write().unwrap().clear().unwrap();
 //!
 //! // Example of basic usage, registering a user
-//! let user = Game::register_user(1337).unwrap();
+//! let user = game.register_user(1337).unwrap();
 //!
 //! // Re-find registered user
-//! let found_user = Game::get_user(1337).unwrap();
+//! let found_user = game.get_user(1337).unwrap();
 //!
 //! assert_eq!(user, found_user);
 //! ```
@@ -25,15 +31,6 @@
 //! - [`game`] - The primary module containing all game functionality
 //! - [`config`] - Configuration types
 //! - [`data`] - Supporting data structures
-
-use crate::config::Config;
-use crate::database::Database;
-use crate::game::errors::database::GameDatabaseError;
-use diesel::r2d2::{ConnectionManager, PooledConnection};
-use diesel::PgConnection;
-use lazy_static::lazy_static;
-use std::path::Path;
-use std::sync::{Arc, RwLock};
 
 pub mod config;
 pub mod data;
@@ -46,52 +43,3 @@ pub mod schema;
 pub mod tests;
 pub mod traits;
 pub mod utils;
-
-lazy_static! {
-    static ref DB: RwLock<Database> = RwLock::new(Database::new());
-}
-
-lazy_static! {
-    static ref CONFIG: RwLock<Arc<Config>> = RwLock::new(Arc::new(Config::default()));
-}
-
-pub fn connect_db(postgres_url: &str) -> Result<(), GameDatabaseError> {
-    DB.write()
-        .expect("Failed to get write lock on DB")
-        .connect(postgres_url)?;
-    Ok(())
-}
-
-pub fn get_db_connection(
-) -> Result<PooledConnection<ConnectionManager<PgConnection>>, GameDatabaseError> {
-    DB.read()
-        .expect("Failed to get read lock on DB")
-        .get_connection()
-}
-
-pub fn clear_db() -> Result<(), GameDatabaseError> {
-    DB.write().expect("Failed to get write lock on DB").clear()
-}
-
-pub fn get_config() -> Arc<Config> {
-    CONFIG.read().unwrap().clone()
-}
-
-pub fn set_config(new_config: Config) {
-    *CONFIG.write().unwrap() = Arc::new(new_config);
-}
-
-pub fn reset_config() {
-    set_config(Config::default());
-}
-
-pub fn setup_test() {
-    connect_db("postgresql://admin:root@db:5432/test_db").unwrap();
-    clear_db().unwrap();
-
-    let config = Config::builder()
-        .species_json_file(Path::new("./example_data/species_data.json"))
-        .unwrap()
-        .build();
-    set_config(config);
-}

@@ -1,16 +1,29 @@
+use crate::config::ConfigInterface;
 use crate::data::location_data::LocationData;
-use crate::get_config;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-pub struct LocationService;
+pub trait LocationServiceInterface: Send + Sync {
+    fn get_location_names(&self) -> Arc<HashMap<i32, String>>;
+    fn get_location_data(&self, location_id: i32) -> Option<Arc<LocationData>>;
+}
+
+pub struct LocationService {
+    config: Arc<dyn ConfigInterface>,
+}
 
 impl LocationService {
-    pub fn get_location_names() -> Arc<HashMap<i32, String>> {
-        get_config().location_names.clone()
+    pub fn new(config: Arc<dyn ConfigInterface>) -> LocationService {
+        LocationService { config }
+    }
+}
+
+impl LocationServiceInterface for LocationService {
+    fn get_location_names(&self) -> Arc<HashMap<i32, String>> {
+        self.config.location_names().clone()
     }
 
-    pub fn get_location_data(location_id: i32) -> Option<Arc<LocationData>> {
-        get_config().locations.get(&location_id).cloned()
+    fn get_location_data(&self, location_id: i32) -> Option<Arc<LocationData>> {
+        self.config.locations().get(&location_id).cloned()
     }
 }

@@ -1,9 +1,10 @@
-use crate::get_config;
+use crate::data::species_data::SpeciesData;
 use chrono::{DateTime, Timelike};
 use chrono_tz::Tz;
 use rand::seq::SliceRandom;
 use rand::Rng;
 use std::collections::HashMap;
+use std::sync::Arc;
 
 pub type SpeciesId = i32;
 pub type LocationId = i32;
@@ -26,18 +27,11 @@ pub struct EncounterSystem {
     cached_weights: HashMap<RarityLevel, u64>,
 }
 
-impl Default for EncounterSystem {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl EncounterSystem {
-    pub fn new() -> Self {
+    pub fn new(species: Arc<HashMap<i32, Arc<SpeciesData>>>, rarity_exponent: f64) -> Self {
         let mut encounters: HourlyEncounters = HashMap::new();
 
-        let config = get_config();
-        for (species_id, species_data) in &config.species {
+        for (species_id, species_data) in species.iter() {
             for encounter in &species_data.encounters {
                 let weather = if encounter.needs_rain {
                     EncounterWeather::Rain
@@ -60,7 +54,6 @@ impl EncounterSystem {
             }
         }
 
-        let rarity_exponent = get_config().settings.rarity_exponent;
         let cached_weights = (0..=255)
             .map(|level| (level, Self::rarity_level_weight(level, rarity_exponent)))
             .collect();

@@ -1,4 +1,4 @@
-use crate::config::Config;
+use crate::config::{Config, ConfigBuilderInterface};
 use std::path::Path;
 
 #[test]
@@ -13,6 +13,6 @@ fn test_building() {
         .unwrap()
         .build();
 
-    assert_eq!(config.species.get(&1).unwrap().name, "Salmon");
-    assert_eq!(config.settings.time_speed_multiplier as u64, 1);
+    assert_eq!(config.species().get(&1).unwrap().name, "Salmon");
+    assert_eq!(config.settings().time_speed_multiplier as u64, 1);
 }

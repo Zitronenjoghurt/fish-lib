@@ -1,20 +1,28 @@
-use crate::game::repositories::specimen_repository::SpecimenRepository;
-use crate::game::services::specimen_service::SpecimenService;
-use crate::game::services::user_service::UserService;
-use crate::setup_test;
-use crate::traits::repository::Repository;
+use crate::tests::mock::mock_default_service_provider;
 
 #[test]
 fn test_find_by_user() {
-    setup_test();
-    let user = UserService::create_and_save_user(1337).unwrap();
+    let sp = mock_default_service_provider();
 
-    let _ = SpecimenService::generate_and_save_specimen(&user, 1).unwrap();
-    let _ = SpecimenService::generate_and_save_specimen(&user, 1).unwrap();
-    let _ = SpecimenService::generate_and_save_specimen(&user, 1).unwrap();
-    let _ = SpecimenService::generate_and_save_specimen(&user, 1).unwrap();
+    let user = sp.user_service().create_and_save_user(1337).unwrap();
+    let _ = sp
+        .specimen_service()
+        .generate_and_save_specimen(&user, 1)
+        .unwrap();
+    let _ = sp
+        .specimen_service()
+        .generate_and_save_specimen(&user, 1)
+        .unwrap();
+    let _ = sp
+        .specimen_service()
+        .generate_and_save_specimen(&user, 1)
+        .unwrap();
+    let _ = sp
+        .specimen_service()
+        .generate_and_save_specimen(&user, 1)
+        .unwrap();
 
-    let all_user_specimen = SpecimenRepository::find_by_user(&user).unwrap();
+    let all_user_specimen = sp.specimen_repository().find_by_user(&user).unwrap();
     assert_eq!(all_user_specimen.len(), 4);
 
     let first_specimen = all_user_specimen.first().unwrap();
@@ -24,36 +32,51 @@ fn test_find_by_user() {
 
 #[test]
 fn test_find() {
-    setup_test();
-    let user = UserService::create_and_save_user(1337).unwrap();
+    let sp = mock_default_service_provider();
 
-    let specimen = SpecimenService::generate_and_save_specimen(&user, 1).unwrap();
-    let found_specimen = SpecimenRepository::find(specimen.id).unwrap().unwrap();
+    let user = sp.user_service().create_and_save_user(1337).unwrap();
+
+    let specimen = sp
+        .specimen_service()
+        .generate_and_save_specimen(&user, 1)
+        .unwrap();
+    let found_specimen = sp.specimen_repository().find(specimen.id).unwrap().unwrap();
     assert_eq!(specimen, found_specimen);
 }
 
 #[test]
 fn test_save() {
-    setup_test();
-    let user = UserService::create_and_save_user(1337).unwrap();
-    let mut specimen = SpecimenService::generate_and_save_specimen(&user, 1).unwrap();
+    let sp = mock_default_service_provider();
+
+    let user = sp.user_service().create_and_save_user(1337).unwrap();
+    let mut specimen = sp
+        .specimen_service()
+        .generate_and_save_specimen(&user, 1)
+        .unwrap();
     specimen.species_id = 2;
 
-    SpecimenRepository::save(specimen.clone()).unwrap();
-    let found_specimen = SpecimenRepository::find(specimen.id).unwrap().unwrap();
+    sp.specimen_repository().save(specimen.clone()).unwrap();
+    let found_specimen = sp.specimen_repository().find(specimen.id).unwrap().unwrap();
     assert_eq!(found_specimen.species_id, 2);
     assert_eq!(specimen.created_at, found_specimen.created_at);
 }
 
 #[test]
 fn test_delete() {
-    setup_test();
-    let user = UserService::create_and_save_user(1337).unwrap();
-    let specimen = SpecimenService::generate_and_save_specimen(&user, 1).unwrap();
+    let sp = mock_default_service_provider();
 
-    let found_specimen = SpecimenRepository::find(specimen.id).unwrap().unwrap();
+    let user = sp.user_service().create_and_save_user(1337).unwrap();
+    let specimen = sp
+        .specimen_service()
+        .generate_and_save_specimen(&user, 1)
+        .unwrap();
+
+    let found_specimen = sp.specimen_repository().find(specimen.id).unwrap().unwrap();
     assert_eq!(specimen, found_specimen);
 
-    SpecimenRepository::delete(&found_specimen).unwrap();
-    assert_eq!(SpecimenRepository::find(found_specimen.id).unwrap(), None);
+    sp.specimen_repository().delete(&found_specimen).unwrap();
+    assert_eq!(
+        sp.specimen_repository().find(found_specimen.id).unwrap(),
+        None
+    );
 }

@@ -1,4 +1,4 @@
-mod encounter_service;
+pub mod encounter_service;
 pub mod fishing_history_service;
 pub mod location_service;
 pub mod pond_service;

@@ -12,14 +12,19 @@ use std::sync::Arc;
 /// by the [`crate::game::Game`] struct to provide the actual game functionality. It serves as a
 /// contract to ensure all required functionality is implemented and to prevent
 /// accidental breaking changes.
-pub trait GameInterface {
-    fn get_user(external_id: i64) -> GameResult<User>;
-    fn register_user(external_id: i64) -> GameResult<User>;
+pub trait GameInterface: Send + Sync {
+    fn get_user(&self, external_id: i64) -> GameResult<User>;
+    fn register_user(&self, external_id: i64) -> GameResult<User>;
     fn user_catch_specific_specimen(
+        &self,
         user: &User,
         species_id: i32,
     ) -> GameResult<(Specimen, FishingHistoryEntry)>;
-    fn user_get_fishing_history(user: &User, species_id: i32) -> GameResult<FishingHistoryEntry>;
-    fn get_location_data(location_id: i32) -> GameResult<Arc<LocationData>>;
-    fn get_species_data(species_id: i32) -> GameResult<Arc<SpeciesData>>;
+    fn user_get_fishing_history(
+        &self,
+        user: &User,
+        species_id: i32,
+    ) -> GameResult<FishingHistoryEntry>;
+    fn get_location_data(&self, location_id: i32) -> GameResult<Arc<LocationData>>;
+    fn get_species_data(&self, species_id: i32) -> GameResult<Arc<SpeciesData>>;
 }

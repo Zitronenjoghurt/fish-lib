@@ -7,24 +7,59 @@ use std::fs::File;
 use std::path::Path;
 use std::sync::Arc;
 
+pub trait ConfigInterface: Send + Sync {
+    fn species(&self) -> Arc<HashMap<i32, Arc<SpeciesData>>>;
+    fn locations(&self) -> Arc<HashMap<i32, Arc<LocationData>>>;
+    fn settings(&self) -> Arc<Settings>;
+    fn specimen_names(&self) -> Arc<HashMap<i32, String>>;
+    fn location_names(&self) -> Arc<HashMap<i32, String>>;
+    fn get_species_data(&self, species_id: i32) -> Option<Arc<SpeciesData>>;
+}
+
 #[derive(Debug, Default, PartialEq)]
 pub struct Config {
     /// Mapping specimen to their species ID
-    pub species: HashMap<i32, Arc<SpeciesData>>,
-    pub locations: HashMap<i32, Arc<LocationData>>,
+    pub species: Arc<HashMap<i32, Arc<SpeciesData>>>,
+    pub locations: Arc<HashMap<i32, Arc<LocationData>>>,
     pub settings: Arc<Settings>,
     pub specimen_names: Arc<HashMap<i32, String>>,
     pub location_names: Arc<HashMap<i32, String>>,
+}
+
+impl ConfigInterface for Config {
+    fn species(&self) -> Arc<HashMap<i32, Arc<SpeciesData>>> {
+        self.species.clone()
+    }
+
+    fn locations(&self) -> Arc<HashMap<i32, Arc<LocationData>>> {
+        self.locations.clone()
+    }
+
+    fn settings(&self) -> Arc<Settings> {
+        self.settings.clone()
+    }
+
+    fn specimen_names(&self) -> Arc<HashMap<i32, String>> {
+        self.specimen_names.clone()
+    }
+
+    fn location_names(&self) -> Arc<HashMap<i32, String>> {
+        self.location_names.clone()
+    }
+
+    fn get_species_data(&self, species_id: i32) -> Option<Arc<SpeciesData>> {
+        self.species.get(&species_id).cloned()
+    }
 }
 
 impl Config {
     pub fn builder() -> ConfigBuilder {
         ConfigBuilder::default()
     }
+}
 
-    pub fn get_species_data(&self, species_id: i32) -> Option<Arc<SpeciesData>> {
-        self.species.get(&species_id).cloned()
-    }
+pub trait ConfigBuilderInterface: Send + Sync {
+    fn build(self) -> Arc<dyn ConfigInterface>;
 }
 
 #[derive(Debug, Default)]
@@ -32,17 +67,20 @@ pub struct ConfigBuilder {
     config: Config,
 }
 
+impl ConfigBuilderInterface for ConfigBuilder {
+    fn build(self) -> Arc<dyn ConfigInterface> {
+        Arc::new(self.config)
+    }
+}
+
 impl ConfigBuilder {
     pub fn new() -> Self {
         Self::default()
     }
 
-    pub fn build(self) -> Config {
-        self.config
-    }
-
     pub fn species(mut self, specimens: HashMap<i32, SpeciesData>) -> Self {
-        self.config.species = specimens.into_arc_map();
+        let species = specimens.into_arc_map();
+        self.config.species = Arc::new(species);
         self
     }
 
@@ -61,7 +99,8 @@ impl ConfigBuilder {
     }
 
     pub fn locations(mut self, locations: HashMap<i32, LocationData>) -> Self {
-        self.config.locations = locations.into_arc_map();
+        let locations = locations.into_arc_map();
+        self.config.locations = Arc::new(locations);
         let location_names: HashMap<i32, String> = self
             .config
             .locations
