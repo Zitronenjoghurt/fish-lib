@@ -12,7 +12,7 @@ pub trait Repository<T: Model>: Send + Sync {
 
     fn find(&self, id: T::PrimaryKeyType) -> Result<Option<T>, GameRepositoryError>;
     fn save(&self, entity: T) -> Result<T, GameRepositoryError>;
-    fn delete(&self, entity: &T) -> Result<bool, GameRepositoryError>;
+    fn delete(&self, entity: T) -> Result<bool, GameRepositoryError>;
     fn get_connection(
         &self,
     ) -> Result<PooledConnection<ConnectionManager<PgConnection>>, GameDatabaseError> {

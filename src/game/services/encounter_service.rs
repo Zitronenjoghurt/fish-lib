@@ -1,5 +1,7 @@
 use crate::config::ConfigInterface;
 use crate::data::location_data::LocationData;
+use crate::game::errors::resource::GameResourceError;
+use crate::game::errors::GameResult;
 use crate::game::services::weather_service::WeatherServiceInterface;
 use crate::game::systems::encounter_system::{EncounterSystem, EncounterWeather};
 use crate::game::systems::weather_system::weather::Weather;
@@ -12,10 +14,14 @@ pub trait EncounterServiceInterface: Send + Sync {
         &self,
         location_id: i32,
         location_data: Arc<LocationData>,
-    ) -> Option<i32>;
+    ) -> GameResult<i32>;
 
-    fn roll_encounter(&self, time: DateTime<Tz>, weather: Weather, location_id: i32)
-        -> Option<i32>;
+    fn roll_encounter(
+        &self,
+        time: DateTime<Tz>,
+        weather: Weather,
+        location_id: i32,
+    ) -> GameResult<i32>;
 }
 
 pub struct EncounterService {
@@ -42,7 +48,7 @@ impl EncounterServiceInterface for EncounterService {
         &self,
         location_id: i32,
         location_data: Arc<LocationData>,
-    ) -> Option<i32> {
+    ) -> GameResult<i32> {
         let location_time = Utc::now().with_timezone(&location_data.timezone);
         let location_weather = self
             .weather_service
@@ -55,7 +61,7 @@ impl EncounterServiceInterface for EncounterService {
         time: DateTime<Tz>,
         weather: Weather,
         location_id: i32,
-    ) -> Option<i32> {
+    ) -> GameResult<i32> {
         let encounter_weather = if weather.is_raining {
             EncounterWeather::Rain
         } else {
@@ -64,5 +70,6 @@ impl EncounterServiceInterface for EncounterService {
 
         self.system
             .roll_encounter(time, encounter_weather, location_id)
+            .ok_or_else(|| GameResourceError::no_available_encounters().into())
     }
 }

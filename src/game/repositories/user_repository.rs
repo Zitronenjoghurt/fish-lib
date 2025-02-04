@@ -68,7 +68,7 @@ impl Repository<User> for UserRepository {
         Ok(updated_user)
     }
 
-    fn delete(&self, entity: &User) -> Result<bool, GameRepositoryError> {
+    fn delete(&self, entity: User) -> Result<bool, GameRepositoryError> {
         let mut connection = self.get_connection()?;
 
         let deleted_count = diesel::delete(fish_users::table)

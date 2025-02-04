@@ -18,10 +18,10 @@
 //! game.database().write().unwrap().clear().unwrap();
 //!
 //! // Example of basic usage, registering a user
-//! let user = game.register_user(1337).unwrap();
+//! let user = game.user_register(1337).unwrap();
 //!
 //! // Re-find registered user
-//! let found_user = game.get_user(1337).unwrap();
+//! let found_user = game.user_find(1337).unwrap();
 //!
 //! assert_eq!(user, found_user);
 //! ```

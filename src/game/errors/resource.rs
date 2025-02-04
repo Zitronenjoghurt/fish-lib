@@ -6,6 +6,8 @@ pub enum GameResourceError {
     FishingHistoryNotFound { user_id: i64, species_id: i32 },
     #[error("Location with id '{location_id}' does not exist")]
     LocationNotFound { location_id: i32 },
+    #[error("No available encounters for the specified conditions")]
+    NoAvailableEncounters,
     #[error("User with external id '{external_id}' has no fishing history with species with id '{species_id}'")]
     NoFishingHistory { external_id: i64, species_id: i32 },
     #[error("Species with id '{species_id}' does not exist")]
@@ -26,6 +28,10 @@ impl GameResourceError {
 
     pub fn location_not_found(location_id: i32) -> Self {
         Self::LocationNotFound { location_id }
+    }
+
+    pub fn no_available_encounters() -> Self {
+        Self::NoAvailableEncounters
     }
 
     pub fn no_fishing_history(external_id: i64, species_id: i32) -> Self {
@@ -53,6 +59,10 @@ impl GameResourceError {
 
     pub fn is_location_not_found(&self) -> bool {
         matches!(self, Self::LocationNotFound { .. })
+    }
+
+    pub fn is_no_available_encounters(&self) -> bool {
+        matches!(self, Self::NoAvailableEncounters)
     }
 
     pub fn is_no_fishing_history(&self) -> bool {

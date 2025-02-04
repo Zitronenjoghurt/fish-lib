@@ -70,7 +70,7 @@ impl Repository<Specimen> for SpecimenRepository {
         Ok(updated_specimen)
     }
 
-    fn delete(&self, entity: &Specimen) -> Result<bool, GameRepositoryError> {
+    fn delete(&self, entity: Specimen) -> Result<bool, GameRepositoryError> {
         let mut connection = self.get_connection()?;
 
         let deleted_count = diesel::delete(fish_specimens::table)

@@ -28,6 +28,7 @@ pub trait ServiceProviderInterface: Send + Sync {
     fn user_repository(&self) -> Arc<dyn UserRepositoryInterface>;
     fn encounter_service(&self) -> Arc<dyn EncounterServiceInterface>;
     fn fishing_history_service(&self) -> Arc<dyn FishingHistoryServiceInterface>;
+    fn location_service(&self) -> Arc<dyn LocationServiceInterface>;
     fn pond_service(&self) -> Arc<dyn PondServiceInterface>;
     fn specimen_service(&self) -> Arc<dyn SpecimenServiceInterface>;
     fn user_service(&self) -> Arc<dyn UserServiceInterface>;
@@ -140,6 +141,10 @@ impl ServiceProviderInterface for ServiceProvider {
 
     fn fishing_history_service(&self) -> Arc<dyn FishingHistoryServiceInterface> {
         self.fishing_history_service.clone()
+    }
+
+    fn location_service(&self) -> Arc<dyn LocationServiceInterface> {
+        self.location_service.clone()
     }
 
     fn pond_service(&self) -> Arc<dyn PondServiceInterface> {

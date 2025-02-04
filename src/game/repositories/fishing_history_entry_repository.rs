@@ -88,7 +88,7 @@ impl Repository<FishingHistoryEntry> for FishingHistoryEntryRepository {
         Ok(update_result)
     }
 
-    fn delete(&self, entity: &FishingHistoryEntry) -> Result<bool, GameRepositoryError> {
+    fn delete(&self, entity: FishingHistoryEntry) -> Result<bool, GameRepositoryError> {
         let mut connection = self.get_connection()?;
 
         let deleted_count = diesel::delete(fish_fishing_history_entries::table)

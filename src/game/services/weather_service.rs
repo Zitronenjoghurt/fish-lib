@@ -1,4 +1,6 @@
 use crate::config::ConfigInterface;
+use crate::game::errors::resource::GameResourceError;
+use crate::game::errors::GameResult;
 use crate::game::services::location_service::LocationServiceInterface;
 use crate::game::systems::weather_system::config::WeatherSystemConfig;
 use crate::game::systems::weather_system::weather::Weather;
@@ -9,8 +11,8 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 pub trait WeatherServiceInterface: Send + Sync {
-    fn get_weather(&self, location_id: i32, time: DateTime<Tz>) -> Option<Weather>;
-    fn get_current_weather(&self, location_id: i32) -> Option<Weather>;
+    fn get_weather(&self, location_id: i32, time: DateTime<Tz>) -> GameResult<Weather>;
+    fn get_current_weather(&self, location_id: i32) -> GameResult<Weather>;
 }
 
 pub struct WeatherService {
@@ -46,15 +48,19 @@ impl WeatherService {
 }
 
 impl WeatherServiceInterface for WeatherService {
-    fn get_weather(&self, location_id: i32, time: DateTime<Tz>) -> Option<Weather> {
+    fn get_weather(&self, location_id: i32, time: DateTime<Tz>) -> GameResult<Weather> {
         self.weather_systems
             .get(&location_id)
             .map(|system| system.get_weather(time, self.time_multiplier))
+            .ok_or_else(|| GameResourceError::location_not_found(location_id).into())
     }
 
-    fn get_current_weather(&self, location_id: i32) -> Option<Weather> {
-        let location_data = self.location_service.get_location_data(location_id)?;
-        let time_now = location_data.get_local_time();
-        self.get_weather(location_id, time_now)
+    fn get_current_weather(&self, location_id: i32) -> GameResult<Weather> {
+        if let Some(location_data) = self.location_service.get_location_data(location_id) {
+            let time_now = location_data.get_local_time();
+            self.get_weather(location_id, time_now)
+        } else {
+            Err(GameResourceError::location_not_found(location_id).into())
+        }
     }
 }

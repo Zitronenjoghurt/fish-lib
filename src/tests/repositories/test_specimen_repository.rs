@@ -74,9 +74,10 @@ fn test_delete() {
     let found_specimen = sp.specimen_repository().find(specimen.id).unwrap().unwrap();
     assert_eq!(specimen, found_specimen);
 
-    sp.specimen_repository().delete(&found_specimen).unwrap();
+    let found_specimen_id = found_specimen.id;
+    sp.specimen_repository().delete(found_specimen).unwrap();
     assert_eq!(
-        sp.specimen_repository().find(found_specimen.id).unwrap(),
+        sp.specimen_repository().find(found_specimen_id).unwrap(),
         None
     );
 }

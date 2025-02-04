@@ -53,6 +53,7 @@ fn test_delete() {
     let found_pond = sp.pond_repository().find(pond.id).unwrap().unwrap();
     assert_eq!(pond, found_pond);
 
-    sp.pond_repository().delete(&found_pond).unwrap();
-    assert_eq!(sp.pond_repository().find(found_pond.id).unwrap(), None);
+    let found_pond_id = found_pond.id;
+    sp.pond_repository().delete(found_pond).unwrap();
+    assert_eq!(sp.pond_repository().find(found_pond_id).unwrap(), None);
 }

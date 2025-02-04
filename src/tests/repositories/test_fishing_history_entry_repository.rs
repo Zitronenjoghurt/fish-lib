@@ -79,12 +79,13 @@ fn test_delete() {
         .unwrap();
     assert_eq!(entry, found_entry);
 
+    let found_entry_id = found_entry.id;
     sp.fishing_history_entry_repository()
-        .delete(&found_entry)
+        .delete(found_entry)
         .unwrap();
     assert_eq!(
         sp.fishing_history_entry_repository()
-            .find(found_entry.id)
+            .find(found_entry_id)
             .unwrap(),
         None
     );

@@ -1,5 +1,4 @@
 use crate::tests::mock::mock_default_service_provider;
-use crate::traits::repository::Repository;
 
 #[test]
 fn test_find_by_external_id() {
@@ -55,6 +54,7 @@ fn test_delete() {
     let found_user = sp.user_repository().find(user.id).unwrap().unwrap();
     assert_eq!(user, found_user);
 
-    sp.user_repository().delete(&found_user).unwrap();
-    assert_eq!(sp.user_repository().find(found_user.id).unwrap(), None);
+    let found_user_id = found_user.id;
+    sp.user_repository().delete(found_user).unwrap();
+    assert_eq!(sp.user_repository().find(found_user_id).unwrap(), None);
 }

@@ -6,7 +6,7 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 pub enum GameRepositoryError {
     #[error("Database error: {0}")]
-    Database(GameDatabaseError),
+    Database(#[from] GameDatabaseError),
     #[error("Unexpected error: {msg}")]
     Unexpected {
         msg: String,
@@ -39,12 +39,6 @@ impl GameRepositoryError {
     }
 }
 
-impl From<GameDatabaseError> for GameRepositoryError {
-    fn from(value: GameDatabaseError) -> Self {
-        Self::database(value)
-    }
-}
-
 impl From<Box<dyn Error>> for GameRepositoryError {
     fn from(value: Box<dyn Error>) -> Self {
         Self::unexpected(value)
@@ -63,6 +57,7 @@ impl From<diesel::result::Error> for GameRepositoryError {
                 ),
                 _ => Self::database(GameDatabaseError::other(info.message())),
             },
+            diesel::result::Error::NotFound => Self::database(GameDatabaseError::not_found()),
             _ => Self::unexpected(error.into()),
         }
     }

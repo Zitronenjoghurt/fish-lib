@@ -10,6 +10,8 @@ pub enum GameDatabaseError {
     MigrationsFailed { msg: String },
     #[error("No database connection specified")]
     MissingConnection,
+    #[error("Record not found")]
+    NotFound,
     #[error("Database error: {msg}")]
     Other { msg: String },
     #[error("Database unique constraint violation: {msg}")]
@@ -39,6 +41,10 @@ impl GameDatabaseError {
         Self::MissingConnection
     }
 
+    pub fn not_found() -> Self {
+        Self::NotFound
+    }
+
     pub fn other(msg: &str) -> Self {
         Self::Other {
             msg: msg.to_string(),
@@ -65,6 +71,10 @@ impl GameDatabaseError {
 
     pub fn is_missing_connection(&self) -> bool {
         matches!(self, Self::MissingConnection)
+    }
+
+    pub fn is_not_found(&self) -> bool {
+        matches!(self, Self::NotFound)
     }
 
     pub fn is_other(&self) -> bool {

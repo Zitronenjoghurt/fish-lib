@@ -1,7 +1,7 @@
 use crate::utils::math::float_interpolate;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
 pub struct SeasonData {
     pub min_temp_c: f32,
     pub max_temp_c: f32,
