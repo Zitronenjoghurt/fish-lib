@@ -64,7 +64,7 @@ fn main() {
 
     // Manipulate and save the user
     user.credits = 10;
-    let updated_user = game.user_save(external_id).unwrap();
+    let updated_user = game.user_save(user).unwrap();
     assert_eq!(updated_user.credits, 10);
 }
 ```
