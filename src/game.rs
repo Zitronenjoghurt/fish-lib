@@ -56,16 +56,16 @@ impl Game {
 }
 
 impl GameInterface for Game {
-    /// Get location data for the specified location ID.
+    /// Get [LocationData] for the specified location ID.
     ///
     /// # Arguments
     ///
-    /// * `location_id`: The ID of the location to get the data of.
+    /// * `location_id`: The ID of the location to get the data of. (See [Config])
     ///
     /// # Returns
     ///
-    /// Result<Arc<LocationData, Global>, GameError>
-    /// - The location data, if the location with the given ID exists
+    /// Result<Arc<[LocationData], Global>, [errors::GameError]>
+    /// - The [LocationData], if the location with the given ID exists
     /// - An error, if no location with the given ID exists
     ///
     /// # Examples
@@ -115,14 +115,15 @@ impl GameInterface for Game {
         }
     }
 
-    /// Get the current weather of a specified location
+    /// Get the current [Weather] of a specified location.
+    /// You will be able to get the weather for all locations specified by you in your [Config].
     ///
     /// # Arguments
     ///
-    /// * `location_id`: The ID of the location to get the current weather from
+    /// * `location_id`: The ID of the location to get the current [Weather] from. (See [Config])
     ///
     /// # Returns
-    /// Result<Weather, GameError>
+    /// Result<[Weather], [errors::GameError]>
     ///
     /// # Examples
     ///
@@ -176,16 +177,16 @@ impl GameInterface for Game {
         self.weather_service().get_current_weather(location_id)
     }
 
-    /// Get species data for the specified species ID.
+    /// Get [SpeciesData] for the specified species ID.
     ///
     /// # Arguments
     ///
-    /// * `species_id`: The ID of the species to get the data of.
+    /// * `species_id`: The ID of the species to get the data of. (See [Config])
     ///
     /// # Returns
     ///
-    /// Result<Arc<SpeciesData, Global>, GameError>
-    /// - The species data, if the species with the given ID exists
+    /// Result<Arc<[SpeciesData], Global>, [errors::GameError]>
+    /// - The [SpeciesData], if the species with the given ID exists
     /// - An error, if no species with the given ID exists
     ///
     /// # Examples
@@ -235,15 +236,15 @@ impl GameInterface for Game {
         }
     }
 
-    /// Generate a random specimen of the given species ID and assign it to the given user.
+    /// Generate a random [Specimen] of the given species ID and assign it to the given [User].
     ///
     /// # Arguments
     ///
-    /// * `user`: The user for which the catch is to be registered
-    /// * `species_id`: The species ID of the specimen to be caught
+    /// * `user`: The [User] for which the catch is to be registered
+    /// * `species_id`: The species ID of the [Specimen] to be caught (See [Config])
     ///
     /// # Returns
-    /// Result<(Specimen, FishingHistoryEntry), GameError>
+    /// Result<([Specimen], [FishingHistoryEntry]), [errors::GameError]>
     ///
     /// # Examples
     ///
@@ -316,18 +317,18 @@ impl GameInterface for Game {
         self.specimen_service().process_catch(user, species_id)
     }
 
-    /// Check the fishing history of a user with a specified species ID
+    /// Check the fishing history of a [User] with a specified species ID
     ///
     /// # Arguments
     ///
-    /// * `user`: The user to check the fishing history of
-    /// * `species_id`: Fishing history species ID to check for the giving user
+    /// * `user`: The [User] to check the fishing history of
+    /// * `species_id`: Fishing history species ID to check for the giving [User] (See [Config])
     ///
     /// # Returns
     ///
-    /// Result<FishingHistoryEntry, GameError>
-    /// - The fishing history of the given user with a specified species, if it exists
-    /// - An error, if it does not exist, aka if the user did not catch that species yet or the user does not exist
+    /// Result<[FishingHistoryEntry], [errors::GameError]>
+    /// - The fishing history of the given [User] with a specified species, if it exists
+    /// - An error, if it does not exist, aka if the [User] did not catch that species yet or the [User] does not exist
     ///
     /// # Examples
     ///
@@ -396,18 +397,18 @@ impl GameInterface for Game {
         }
     }
 
-    /// Find a user by their external ID.
+    /// Find a [User] by their external ID.
     ///
     /// # Arguments
     ///
-    /// * `external_id`: A freely selectable ID that your system will use to identify this user.
+    /// * `external_id`: A freely selectable ID that your system will use to identify this [User].
     ///
     /// # Returns
     ///
-    /// Result<User, GameError>
-    /// - A user with the given external ID
+    /// Result<[User], [errors::GameError]>
+    /// - A [User] with the given external ID
     /// - An error, if:
-    ///     - The user is not found
+    ///     - The [User] is not found
     ///     - Database operations fail
     ///
     /// # Examples
@@ -444,18 +445,18 @@ impl GameInterface for Game {
         }
     }
 
-    /// Register a new user by their external ID.
+    /// Register a new [User] by their external ID.
     ///
     /// # Arguments
     ///
-    /// * `external_id`: A freely selectable ID that your system will use to identify this user.
+    /// * `external_id`: A freely selectable ID that your system will use to identify this [User].
     ///
     /// # Returns
     ///
-    /// Result<User, GameError>
-    /// - A newly created user with the given external id
+    /// Result<[User], [errors::GameError]>
+    /// - A newly created [User] with the given external id
     /// - An error, if:
-    ///     - A user with the given external id already exists
+    ///     - A [User] with the given external id already exists
     ///     - Database operations fail
     ///
     /// # Examples
@@ -491,15 +492,15 @@ impl GameInterface for Game {
         }
     }
 
-    /// Save a user
+    /// Save a [User].
     ///
     /// # Arguments
     ///
-    /// * `user`: The user to save
+    /// * `user`: The [User] to save
     ///
     /// # Returns
-    /// Result<User, GameError>
-    /// - The updated user entity, if saving succeeded
+    /// Result<[User], [errors::GameError]>
+    /// - The updated [User] entity, if saving succeeded
     /// - An error, if saving failed (database errors, or the user doesn't exist)
     ///
     /// # Examples
