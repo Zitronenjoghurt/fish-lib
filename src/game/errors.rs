@@ -70,6 +70,7 @@ impl GameError {
         matches!(
             self,
             Self::Resource(GameResourceError::UserAlreadyExists { .. })
+                | Self::Resource(GameResourceError::LocationAlreadyUnlocked { .. })
         )
     }
 

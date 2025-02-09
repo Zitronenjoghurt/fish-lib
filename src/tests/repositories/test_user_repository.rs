@@ -15,6 +15,37 @@ fn test_find_by_external_id() {
 }
 
 #[test]
+fn test_unlock_location() {
+    let sp = mock_default_service_provider();
+
+    let user = sp.user_service().create_and_save_user(1337).unwrap();
+
+    let user_location = sp.user_repository().unlock_location(user.id, 68).unwrap();
+
+    let unlocked_locations = sp
+        .user_repository()
+        .find_unlocked_locations(user.id)
+        .unwrap();
+    assert_eq!(unlocked_locations.len(), 1);
+    assert_eq!(unlocked_locations[0], user_location);
+}
+
+#[test]
+fn test_unlocked_location_ids() {
+    let sp = mock_default_service_provider();
+
+    let user = sp.user_service().create_and_save_user(1337).unwrap();
+    let _ = sp.user_repository().unlock_location(user.id, 68).unwrap();
+
+    let unlocked_location_ids = sp
+        .user_repository()
+        .find_unlocked_location_ids(user.id)
+        .unwrap();
+    assert_eq!(unlocked_location_ids.len(), 1);
+    assert_eq!(unlocked_location_ids[0], 68);
+}
+
+#[test]
 fn test_find() {
     let sp = mock_default_service_provider();
 

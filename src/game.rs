@@ -2,6 +2,7 @@ use crate::config::{Config, ConfigBuilderInterface, ConfigInterface};
 use crate::data::location_data::LocationData;
 use crate::data::species_data::SpeciesData;
 use crate::database::{Database, DatabaseInterface};
+use crate::dto::user_location_unlock::UserLocationUnlock;
 use crate::game::errors::resource::GameResourceError;
 use crate::game::errors::GameResult;
 use crate::game::interface::GameInterface;
@@ -161,22 +162,12 @@ impl GameInterface for Game {
     /// game.database().write().unwrap().clear().unwrap();
     ///
     /// // Get the current weather
-    /// let weather = game.location_weather_current(LOCATION_ID).unwrap();
+    /// let location_data = game.location_find(LOCATION_ID).unwrap();
+    /// let weather = game.location_weather_current(location_data).unwrap();
     /// assert_eq!(weather.temperature_c, 10.0);
-    ///
-    /// // Get weather of a non-existent location
-    /// let error = game.location_weather_current(LOCATION_ID + 1).unwrap_err();
-    /// assert!(error.is_not_found());
-    /// if let Some(resource_error) = error.as_resource_error() {
-    ///     assert!(resource_error.is_location_not_found());
-    ///     assert_eq!(resource_error.get_location_id(), Some(LOCATION_ID + 1));
-    /// } else {
-    ///     panic!("{:?}", error);
-    /// }
     /// ```
-    fn location_weather_current(&self, location_id: i32) -> GameResult<Weather> {
-        let location_data = self.location_find(location_id)?;
-        self.weather_service().get_current_weather(location_data)
+    fn location_weather_current(&self, location: Arc<LocationData>) -> GameResult<Weather> {
+        self.weather_service().get_current_weather(location)
     }
 
     /// Get [SpeciesData] for the specified species ID.
@@ -277,24 +268,18 @@ impl GameInterface for Game {
     /// let game = Game::new("postgresql://admin:root@db:5432/test_db", Some(config)).unwrap();
     /// game.database().write().unwrap().clear().unwrap();
     ///
+    /// // Fetch the species data
+    /// let species = game.species_find(1).unwrap();
+    ///
     /// // Create a user
     /// let user = game.user_register(USER_EXTERNAL_ID).unwrap();
     ///
     /// // Let the user catch a specimen of the specified species ID
-    /// let (specimen, history_entry) = game.user_catch_specific_specimen(&user, SPECIES_ID).unwrap();
+    /// let (specimen, history_entry) = game.user_catch_specific_specimen(&user, species.clone()).unwrap();
     /// assert_eq!(specimen.species_id, SPECIES_ID);
     /// assert_eq!(specimen.user_id, user.id);
     /// assert_eq!(history_entry.species_id, SPECIES_ID);
     /// assert_eq!(history_entry.caught_count, 1);
-    ///
-    /// // Catch a specimen with a species ID that doesn't exist
-    /// let species_error = game.user_catch_specific_specimen(&user, SPECIES_ID + 1).unwrap_err();
-    /// if let Some(resource_error) = species_error.as_resource_error() {
-    ///     assert!(resource_error.is_species_not_found());
-    ///     assert_eq!(resource_error.get_species_id(), Some(SPECIES_ID + 1));
-    /// } else {
-    ///     panic!("{:?}", species_error);
-    /// }
     ///
     /// // Catch a specimen for a user that doesn't exist
     /// let dummy_user = User {
@@ -302,7 +287,7 @@ impl GameInterface for Game {
     ///     external_id: USER_EXTERNAL_ID + 1,
     ///     ..Default::default()
     /// };
-    /// let user_error = game.user_catch_specific_specimen(&dummy_user, SPECIES_ID).unwrap_err();
+    /// let user_error = game.user_catch_specific_specimen(&dummy_user, species).unwrap_err();
     /// if let Some(resource_error) = user_error.as_resource_error() {
     ///     assert!(resource_error.is_user_not_found());
     ///     assert_eq!(resource_error.get_external_id(), Some(USER_EXTERNAL_ID + 1));
@@ -314,9 +299,9 @@ impl GameInterface for Game {
     fn user_catch_specific_specimen(
         &self,
         user: &User,
-        species_id: i32,
+        species: Arc<SpeciesData>,
     ) -> GameResult<(Specimen, FishingHistoryEntry)> {
-        let specimen = self.specimen_service().process_catch(user, species_id)?;
+        let specimen = self.specimen_service().process_catch(user, species)?;
         let entry = self.fishing_history_service().register_catch(&specimen)?;
         Ok((specimen, entry))
     }
@@ -354,7 +339,10 @@ impl GameInterface for Game {
     ///     name: SPECIES_NAME.to_string(),
     ///     ..Default::default()
     /// };
-    /// let species_data_map = HashMap::from([(SPECIES_ID, species_data)]);
+    /// let species_data2 = SpeciesData {
+    ///     ..Default::default()
+    ///  };
+    /// let species_data_map = HashMap::from([(SPECIES_ID, species_data), (SPECIES_ID + 1, species_data2)]);
     ///
     /// // Add the species data to the config
     /// let config = Config::builder().species(species_data_map).build();
@@ -366,18 +354,22 @@ impl GameInterface for Game {
     /// // Create a user
     /// let user = game.user_register(USER_EXTERNAL_ID).unwrap();
     ///
+    /// // Get species data
+    /// let species = game.species_find(SPECIES_ID).unwrap();
+    /// let species2 = game.species_find(SPECIES_ID + 1).unwrap();
+    ///
     /// // Let the user catch a specimen
-    /// game.user_catch_specific_specimen(&user, SPECIES_ID).unwrap();
+    /// game.user_catch_specific_specimen(&user, species.clone()).unwrap();
     ///
     /// // Fetch the fishing history of the user with the given species ID
-    /// let history_entry = game.user_get_fishing_history(&user, SPECIES_ID).unwrap();
+    /// let history_entry = game.user_get_fishing_history(&user, species.clone()).unwrap();
     /// assert_eq!(history_entry.species_id, SPECIES_ID);
     /// assert_eq!(history_entry.user_id, user.id);
     /// assert_eq!(history_entry.caught_count, 1);
     /// assert_eq!(history_entry.sold_count, 0);
     ///
     /// // Trying to fetch the fishing history with a species the user didn't catch yet
-    /// let error = game.user_get_fishing_history(&user, SPECIES_ID + 1).unwrap_err();
+    /// let error = game.user_get_fishing_history(&user, species2).unwrap_err();
     /// assert!(error.is_not_found());
     /// if let Some(resource_error) = error.as_resource_error() {
     ///     assert!(resource_error.is_no_fishing_history());
@@ -390,14 +382,14 @@ impl GameInterface for Game {
     fn user_get_fishing_history(
         &self,
         user: &User,
-        species_id: i32,
+        species: Arc<SpeciesData>,
     ) -> GameResult<FishingHistoryEntry> {
         match self
             .fishing_history_entry_repository()
-            .find_by_user_and_species_id(user.id, species_id)?
+            .find_by_user_and_species_id(user.id, species.id)?
         {
             Some(entry) => Ok(entry),
-            None => Err(GameResourceError::no_fishing_history(user.external_id, species_id).into()),
+            None => Err(GameResourceError::no_fishing_history(user.external_id, species.id).into()),
         }
     }
 
@@ -447,6 +439,65 @@ impl GameInterface for Game {
             Some(user) => Ok(user),
             None => Err(GameResourceError::user_not_found(external_id).into()),
         }
+    }
+
+    /// Fetch the unlocked locations of a given user.
+    ///
+    /// # Arguments
+    ///
+    /// * `user`: The [User] to get the unlocked locations ([UserLocationUnlock]) from.
+    ///
+    /// # Returns
+    /// Result<Vec<[UserLocationUnlock], Global>, [errors::GameError]>
+    /// - A vector with information about all location unlocks
+    /// - An error, if database operations fail
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::collections::HashMap;
+    /// use fish_lib::config::{Config, ConfigBuilderInterface};
+    /// use fish_lib::data::location_data::LocationData;
+    /// use fish_lib::game::prelude::*;
+    /// use fish_lib::game::service_provider::ServiceProviderInterface;
+    ///
+    /// const EXTERNAL_ID: i64 = 1337;
+    /// const LOCATION_ID: i32 = 13;
+    /// const LOCATION_NAME: &str = "Island";
+    ///
+    /// // Define some location data
+    /// let location_data = LocationData {
+    ///     name: LOCATION_NAME.to_string(),
+    ///     ..Default::default()
+    /// };
+    /// let location_data_map = HashMap::from([(LOCATION_ID, location_data)]);
+    ///
+    /// // Add the location data to the config
+    /// let config = Config::builder().locations(location_data_map).build();
+    ///
+    /// // Create game and clear database for a blank test state
+    /// let game = Game::new("postgresql://admin:root@db:5432/test_db", Some(config)).unwrap();
+    /// game.database().write().unwrap().clear().unwrap();
+    ///
+    /// // Registering a new user
+    /// let user = game.user_register(EXTERNAL_ID).unwrap();
+    ///
+    /// // Let the user unlock a location
+    /// let island_location = game.location_find(LOCATION_ID).unwrap();
+    /// let unlocked_location = game.user_unlock_location(&user, island_location).unwrap();
+    ///
+    /// // Get unlocked locations
+    /// let unlocked_locations = game.user_get_unlocked_locations(&user).unwrap();
+    /// assert_eq!(unlocked_locations.len(), 1);
+    /// assert_eq!(unlocked_locations[0], unlocked_location);
+    /// ```
+    fn user_get_unlocked_locations(&self, user: &User) -> GameResult<Vec<UserLocationUnlock>> {
+        let user_locations = self.user_service().get_unlocked_locations(user)?;
+        let location_unlocks =
+            UserLocationUnlock::from_user_locations(user_locations, |location_id| {
+                self.location_find(location_id).ok()
+            });
+        Ok(location_unlocks)
     }
 
     /// Register a new [User] by their external ID.
@@ -546,6 +597,79 @@ impl GameInterface for Game {
     /// ```
     fn user_save(&self, user: User) -> GameResult<User> {
         Ok(self.user_repository().save(user)?)
+    }
+
+    /// Unlocks a given location for a given user
+    ///
+    /// # Arguments
+    ///
+    /// * `user`: The [User] to unlock a location for
+    /// * `location`: The location to unlock for the given [User]
+    ///
+    /// # Returns
+    /// Result<[UserLocationUnlock], [errors::GameError]>
+    /// - Information about the location unlock, if it succeeded
+    /// - An error, if:
+    ///     - the location does not exist
+    ///     - the location was already unlocked
+    ///     - database operations fail
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use fish_lib::game::prelude::*;
+    /// use std::collections::HashMap;
+    /// use fish_lib::config::{Config, ConfigBuilderInterface};
+    /// use fish_lib::data::location_data::LocationData;
+    /// use fish_lib::game::prelude::*;
+    /// use fish_lib::game::service_provider::ServiceProviderInterface;
+    ///
+    /// const EXTERNAL_ID: i64 = 1337;
+    /// const LOCATION_ID: i32 = 13;
+    /// const LOCATION_NAME: &str = "Island";
+    ///
+    /// // Define some location data
+    /// let location_data = LocationData {
+    ///     name: LOCATION_NAME.to_string(),
+    ///     ..Default::default()
+    /// };
+    /// let location_data_map = HashMap::from([(LOCATION_ID, location_data)]);
+    ///
+    /// // Add the location data to the config
+    /// let config = Config::builder().locations(location_data_map).build();
+    ///
+    /// // Create game and clear database for a blank test state
+    /// let game = Game::new("postgresql://admin:root@db:5432/test_db", Some(config)).unwrap();
+    /// game.database().write().unwrap().clear().unwrap();
+    ///
+    /// // Registering a new user
+    /// let user = game.user_register(EXTERNAL_ID).unwrap();
+    ///
+    /// // Unlock a location for the user
+    /// let island = game.location_find(LOCATION_ID).unwrap();
+    /// let location_unlock = game.user_unlock_location(&user, island).unwrap();
+    ///
+    /// // Find unlocked locations
+    /// let unlocked_locations = game.user_get_unlocked_locations(&user).unwrap();
+    /// assert_eq!(unlocked_locations.len(), 1);
+    /// assert_eq!(unlocked_locations[0], location_unlock);
+    /// ```
+    fn user_unlock_location(
+        &self,
+        user: &User,
+        location: Arc<LocationData>,
+    ) -> GameResult<UserLocationUnlock> {
+        let user_location = self
+            .user_service()
+            .unlock_location(user, location.clone())?;
+        let user_location_unlock =
+            UserLocationUnlock::from_user_location(user_location, &|location_id| {
+                self.location_find(location_id).ok()
+            });
+        match user_location_unlock {
+            Some(location_unlock) => Ok(location_unlock),
+            None => Err(GameResourceError::location_not_found(location.id).into()),
+        }
     }
 }
 

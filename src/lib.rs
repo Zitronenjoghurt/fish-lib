@@ -35,6 +35,7 @@
 pub mod config;
 pub mod data;
 pub mod database;
+mod dto;
 pub mod enums;
 pub mod game;
 pub mod models;

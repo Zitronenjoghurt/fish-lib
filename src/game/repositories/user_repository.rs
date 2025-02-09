@@ -1,7 +1,8 @@
 use crate::database::DatabaseInterface;
 use crate::game::errors::repository::GameRepositoryError;
 use crate::models::user::{NewUser, User};
-use crate::schema::fish_users;
+use crate::models::user_location::{NewUserLocation, UserLocation};
+use crate::schema::{fish_user_locations, fish_users};
 use crate::traits::repository::Repository;
 use chrono::Utc;
 use diesel::prelude::*;
@@ -9,6 +10,13 @@ use std::sync::{Arc, RwLock};
 
 pub trait UserRepositoryInterface: Repository<User> + Send + Sync {
     fn find_by_external_id(&self, external_id: i64) -> Result<Option<User>, GameRepositoryError>;
+    fn find_unlocked_locations(&self, id: i64) -> Result<Vec<UserLocation>, GameRepositoryError>;
+    fn find_unlocked_location_ids(&self, id: i64) -> Result<Vec<i32>, GameRepositoryError>;
+    fn unlock_location(
+        &self,
+        id: i64,
+        location_id: i32,
+    ) -> Result<UserLocation, GameRepositoryError>;
 }
 
 pub struct UserRepository {
@@ -29,6 +37,43 @@ impl UserRepositoryInterface for UserRepository {
             .first::<User>(&mut connection)
             .optional()?;
         Ok(user)
+    }
+
+    fn find_unlocked_locations(&self, id: i64) -> Result<Vec<UserLocation>, GameRepositoryError> {
+        let mut connection = self.get_connection()?;
+
+        let locations = fish_user_locations::table
+            .filter(fish_user_locations::user_id.eq(id))
+            .load::<UserLocation>(&mut connection)?;
+
+        Ok(locations)
+    }
+
+    fn find_unlocked_location_ids(&self, id: i64) -> Result<Vec<i32>, GameRepositoryError> {
+        let mut connection = self.get_connection()?;
+
+        let locations = fish_user_locations::table
+            .filter(fish_user_locations::user_id.eq(id))
+            .select(fish_user_locations::location_id)
+            .load::<i32>(&mut connection)?;
+
+        Ok(locations)
+    }
+
+    fn unlock_location(
+        &self,
+        id: i64,
+        location_id: i32,
+    ) -> Result<UserLocation, GameRepositoryError> {
+        let mut connection = self.get_connection()?;
+
+        let user_location = diesel::insert_into(fish_user_locations::table)
+            .values(NewUserLocation {
+                user_id: id,
+                location_id,
+            })
+            .get_result(&mut connection)?;
+        Ok(user_location)
     }
 }
 

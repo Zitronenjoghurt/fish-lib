@@ -17,7 +17,7 @@ pub enum GameRepositoryError {
 
 impl GameRepositoryError {
     pub fn database(error: GameDatabaseError) -> Self {
-        GameRepositoryError::Database(error)
+        Self::Database(error)
     }
 
     pub fn unexpected(error: Box<dyn std::error::Error>) -> Self {
@@ -28,7 +28,7 @@ impl GameRepositoryError {
     }
 
     pub fn is_database_error(&self) -> bool {
-        matches!(self, GameRepositoryError::Database(_))
+        matches!(self, Self::Database(_))
     }
 
     pub fn get_database_error(&self) -> Option<&GameDatabaseError> {

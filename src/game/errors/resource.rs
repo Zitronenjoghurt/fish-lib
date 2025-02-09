@@ -4,6 +4,8 @@ use thiserror::Error;
 pub enum GameResourceError {
     #[error("User with id '{user_id}' has no fishing history with species with id '{species_id}'")]
     FishingHistoryNotFound { user_id: i64, species_id: i32 },
+    #[error("User with external id '{external_id}' has already unlocked location with id '{location_id}'")]
+    LocationAlreadyUnlocked { external_id: i64, location_id: i32 },
     #[error("Location with id '{location_id}' does not exist")]
     LocationNotFound { location_id: i32 },
     #[error("No available encounters for the specified conditions")]
@@ -23,6 +25,13 @@ impl GameResourceError {
         Self::FishingHistoryNotFound {
             user_id,
             species_id,
+        }
+    }
+
+    pub fn location_already_unlocked(external_id: i64, location_id: i32) -> Self {
+        Self::LocationAlreadyUnlocked {
+            external_id,
+            location_id,
         }
     }
 
@@ -57,6 +66,10 @@ impl GameResourceError {
         matches!(self, Self::FishingHistoryNotFound { .. })
     }
 
+    pub fn is_location_already_unlocked(&self) -> bool {
+        matches!(self, Self::LocationAlreadyUnlocked { .. })
+    }
+
     pub fn is_location_not_found(&self) -> bool {
         matches!(self, Self::LocationNotFound { .. })
     }
@@ -83,6 +96,7 @@ impl GameResourceError {
 
     pub fn get_external_id(&self) -> Option<i64> {
         match self {
+            Self::LocationAlreadyUnlocked { external_id, .. } => Some(*external_id),
             Self::NoFishingHistory { external_id, .. } => Some(*external_id),
             Self::UserAlreadyExists { external_id } => Some(*external_id),
             Self::UserNotFound { external_id } => Some(*external_id),
@@ -92,6 +106,7 @@ impl GameResourceError {
 
     pub fn get_location_id(&self) -> Option<i32> {
         match self {
+            Self::LocationAlreadyUnlocked { location_id, .. } => Some(*location_id),
             Self::LocationNotFound { location_id } => Some(*location_id),
             _ => None,
         }

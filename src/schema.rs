@@ -10,6 +10,14 @@ diesel::table! {
 }
 
 diesel::table! {
+    fish_user_locations (user_id, location_id) {
+        user_id -> BigInt,
+        location_id -> Integer,
+        unlocked_at -> Timestamptz,
+    }
+}
+
+diesel::table! {
     fish_specimens (id) {
         id -> BigInt,
         user_id -> BigInt,
@@ -49,6 +57,9 @@ diesel::table! {
         last_sell -> Nullable<Timestamptz>,
     }
 }
+
+diesel::joinable!(fish_user_locations -> fish_users (user_id));
+diesel::allow_tables_to_appear_in_same_query!(fish_user_locations, fish_users);
 
 diesel::joinable!(fish_specimens -> fish_users (user_id));
 diesel::allow_tables_to_appear_in_same_query!(fish_specimens, fish_users);
