@@ -35,6 +35,19 @@ fn test_find_by_user_and_species_id() {
 }
 
 #[test]
+fn test_find_caught_species_ids_by_user() {
+    let sp = mock_default_service_provider();
+
+    let (user, entry) = new_user_and_entry(&sp);
+    let caught_species_ids = sp
+        .fishing_history_entry_repository()
+        .find_caught_species_ids_by_user(user.id)
+        .unwrap();
+    assert_eq!(caught_species_ids.len(), 1);
+    assert_eq!(caught_species_ids[0], entry.species_id);
+}
+
+#[test]
 fn test_find() {
     let sp = mock_default_service_provider();
 

@@ -28,7 +28,7 @@ impl Display for ConfigValidationReport {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Found {} config validation errors:", self.errors.len())?;
         for (i, error) in self.errors.iter().enumerate() {
-            writeln!(f, "[{}]: {}", i + 1, error)?;
+            writeln!(f, "[{}] {}", i + 1, error)?;
         }
         Ok(())
     }

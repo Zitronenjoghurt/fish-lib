@@ -85,6 +85,13 @@ impl GameError {
                 | Self::Repository(GameRepositoryError::Database(GameDatabaseError::NotFound))
         )
     }
+
+    pub fn is_unmet_requirements(&self) -> bool {
+        matches!(
+            self,
+            Self::Resource(GameResourceError::UnmetLocationUnlockRequirements { .. })
+        )
+    }
 }
 
 impl From<Box<dyn std::error::Error>> for GameError {

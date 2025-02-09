@@ -610,8 +610,9 @@ impl GameInterface for Game {
     /// Result<[UserLocationUnlock], [errors::GameError]>
     /// - Information about the location unlock, if it succeeded
     /// - An error, if:
-    ///     - the location does not exist
+    ///     - unlock conditions were not met
     ///     - the location was already unlocked
+    ///     - the location does not exist
     ///     - database operations fail
     ///
     /// # Examples
@@ -633,7 +634,17 @@ impl GameInterface for Game {
     ///     name: LOCATION_NAME.to_string(),
     ///     ..Default::default()
     /// };
-    /// let location_data_map = HashMap::from([(LOCATION_ID, location_data)]);
+    /// let location_data2 = LocationData {
+    ///     required_locations_unlocked: vec![LOCATION_ID + 2],
+    ///     ..Default::default()
+    /// };
+    /// let location_data3 = LocationData::default();
+    ///
+    /// let location_data_map = HashMap::from([
+    ///     (LOCATION_ID, location_data),
+    ///     (LOCATION_ID + 1, location_data2),
+    ///     (LOCATION_ID + 2, location_data3)
+    /// ]);
     ///
     /// // Add the location data to the config
     /// let config = Config::builder().locations(location_data_map).build().unwrap();
@@ -653,6 +664,18 @@ impl GameInterface for Game {
     /// let unlocked_locations = game.user_get_unlocked_locations(&user).unwrap();
     /// assert_eq!(unlocked_locations.len(), 1);
     /// assert_eq!(unlocked_locations[0], location_unlock);
+    ///
+    /// // Unmet requirements
+    /// let location2 = game.location_find(LOCATION_ID + 1).unwrap();
+    /// let unlock_error = game.user_unlock_location(&user, location2).unwrap_err();
+    ///
+    /// assert!(unlock_error.is_unmet_requirements());
+    /// if let Some(resource_error) = unlock_error.as_resource_error() {
+    ///     assert!(resource_error.is_unmet_location_unlock_requirements());
+    ///     assert_eq!(resource_error.get_location_id(), Some(LOCATION_ID + 1));
+    /// } else {
+    ///     panic!("{:?}", unlock_error);
+    /// }
     /// ```
     fn user_unlock_location(
         &self,

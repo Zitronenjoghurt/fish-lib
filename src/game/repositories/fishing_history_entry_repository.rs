@@ -15,6 +15,11 @@ pub trait FishingHistoryEntryRepositoryInterface:
         user_id: i64,
         species_id: i32,
     ) -> Result<Option<FishingHistoryEntry>, GameRepositoryError>;
+
+    fn find_caught_species_ids_by_user(
+        &self,
+        user_id: i64,
+    ) -> Result<Vec<i32>, GameRepositoryError>;
 }
 
 pub struct FishingHistoryEntryRepository {
@@ -43,6 +48,20 @@ impl FishingHistoryEntryRepositoryInterface for FishingHistoryEntryRepository {
             .first::<FishingHistoryEntry>(&mut connection)
             .optional()?;
         Ok(entry)
+    }
+
+    fn find_caught_species_ids_by_user(
+        &self,
+        user_id: i64,
+    ) -> Result<Vec<i32>, GameRepositoryError> {
+        let mut connection = self.get_connection()?;
+
+        let species_ids = fish_fishing_history_entries::table
+            .filter(fish_fishing_history_entries::user_id.eq(user_id))
+            .select(fish_fishing_history_entries::species_id)
+            .load::<i32>(&mut connection)?;
+
+        Ok(species_ids)
     }
 }
 

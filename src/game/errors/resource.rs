@@ -14,6 +14,10 @@ pub enum GameResourceError {
     NoFishingHistory { external_id: i64, species_id: i32 },
     #[error("Species with id '{species_id}' does not exist")]
     SpeciesNotFound { species_id: i32 },
+    #[error(
+        "Unable to unlock location with id '{location_id}' because of unmet unlock requirements"
+    )]
+    UnmetLocationUnlockRequirements { location_id: i32 },
     #[error("User with external id '{external_id}' already exists")]
     UserAlreadyExists { external_id: i64 },
     #[error("User with external id '{external_id}' does not exist")]
@@ -54,6 +58,10 @@ impl GameResourceError {
         Self::SpeciesNotFound { species_id }
     }
 
+    pub fn unmet_location_unlock_requirements(location_id: i32) -> Self {
+        Self::UnmetLocationUnlockRequirements { location_id }
+    }
+
     pub fn user_already_exists(external_id: i64) -> Self {
         Self::UserAlreadyExists { external_id }
     }
@@ -86,6 +94,10 @@ impl GameResourceError {
         matches!(self, Self::SpeciesNotFound { .. })
     }
 
+    pub fn is_unmet_location_unlock_requirements(&self) -> bool {
+        matches!(self, Self::UnmetLocationUnlockRequirements { .. })
+    }
+
     pub fn is_user_already_exists(&self) -> bool {
         matches!(self, Self::UserAlreadyExists { .. })
     }
@@ -108,6 +120,7 @@ impl GameResourceError {
         match self {
             Self::LocationAlreadyUnlocked { location_id, .. } => Some(*location_id),
             Self::LocationNotFound { location_id } => Some(*location_id),
+            Self::UnmetLocationUnlockRequirements { location_id, .. } => Some(*location_id),
             _ => None,
         }
     }

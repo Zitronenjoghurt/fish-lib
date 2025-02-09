@@ -73,6 +73,20 @@
             "min_temp_c",
             "max_temp_c"
           ]
+        },
+        "required_locations_unlocked": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "default": []
+        },
+        "required_species_caught": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "default": []
         }
       },
       "required": [

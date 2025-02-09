@@ -186,7 +186,60 @@ impl ConfigBuilder {
     pub fn validate(&self) -> ConfigValidationReport {
         let mut report = ConfigValidationReport::new();
         self.validate_species(&mut report);
+        self.validate_locations(&mut report);
         report
+    }
+
+    fn validate_locations(&self, report: &mut ConfigValidationReport) {
+        for location_data in self.config.locations.values() {
+            for required_location_id in &location_data.required_locations_unlocked {
+                self.validate_locations_required_locations(
+                    report,
+                    location_data,
+                    *required_location_id,
+                );
+            }
+
+            for required_species_id in &location_data.required_species_caught {
+                self.validate_locations_required_species(
+                    report,
+                    location_data,
+                    *required_species_id,
+                )
+            }
+        }
+    }
+
+    fn validate_locations_required_locations(
+        &self,
+        report: &mut ConfigValidationReport,
+        location_data: &Arc<LocationData>,
+        required_location_id: i32,
+    ) {
+        if self
+            .config
+            .get_location_data(required_location_id)
+            .is_none()
+        {
+            report.add_error(ConfigValidationError::location_required_location(
+                location_data.id,
+                required_location_id,
+            ));
+        }
+    }
+
+    fn validate_locations_required_species(
+        &self,
+        report: &mut ConfigValidationReport,
+        location_data: &Arc<LocationData>,
+        required_species_id: i32,
+    ) {
+        if self.config.get_species_data(required_species_id).is_none() {
+            report.add_error(ConfigValidationError::location_required_species(
+                location_data.id,
+                required_species_id,
+            ));
+        }
     }
 
     fn validate_species(&self, report: &mut ConfigValidationReport) {
@@ -205,7 +258,7 @@ impl ConfigBuilder {
     ) {
         let location_id = encounter_data.location_id;
         if self.config.get_location_data(location_id).is_none() {
-            report.add_error(ConfigValidationError::invalid_encounter_location(
+            report.add_error(ConfigValidationError::species_encounter_location(
                 species_data.id,
                 location_id,
             ));

@@ -17,6 +17,12 @@ pub struct LocationData {
     pub summer: SeasonData,
     pub autumn: SeasonData,
     pub winter: SeasonData,
+    #[serde(default)]
+    /// The IDs of the locations that need to be unlocked before this can
+    pub required_locations_unlocked: Vec<i32>,
+    #[serde(default)]
+    /// The IDs of the species that need to be caught before this location can be unlocked
+    pub required_species_caught: Vec<i32>,
 }
 
 impl LocationData {

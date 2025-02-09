@@ -1,5 +1,6 @@
 use crate::config::{Config, ConfigBuilderInterface};
 use crate::data::encounter_data::EncounterData;
+use crate::data::location_data::LocationData;
 use crate::data::species_data::SpeciesData;
 use std::collections::HashMap;
 use std::path::Path;
@@ -39,15 +40,54 @@ fn test_validation() {
     let mut species_data_map = HashMap::new();
     species_data_map.insert(4, species_data);
 
+    let location_data = LocationData {
+        required_locations_unlocked: vec![800],
+        required_species_caught: vec![700],
+        ..Default::default()
+    };
+
+    let mut locations_data_map = HashMap::new();
+    locations_data_map.insert(5, location_data);
+
     let validation_report = Config::builder()
+        .locations(locations_data_map)
         .species(species_data_map)
         .build()
         .unwrap_err();
 
     let errors = validation_report.errors();
+    assert_eq!(errors.len(), 3);
 
-    let invalid_encounter_location_error = &errors[0];
-    assert!(invalid_encounter_location_error.is_invalid_encounter_location());
-    assert_eq!(invalid_encounter_location_error.get_location_id(), Some(67));
-    assert_eq!(invalid_encounter_location_error.get_species_id(), Some(4));
+    let species_encounter_location_error = &errors[0];
+    assert!(species_encounter_location_error.is_species_encounter_location());
+    assert_eq!(
+        species_encounter_location_error.get_source_species_id(),
+        Some(4)
+    );
+    assert_eq!(
+        species_encounter_location_error.get_target_location_id(),
+        Some(67)
+    );
+
+    let location_required_location_error = &errors[1];
+    assert!(location_required_location_error.is_location_required_location());
+    assert_eq!(
+        location_required_location_error.get_source_location_id(),
+        Some(5)
+    );
+    assert_eq!(
+        location_required_location_error.get_target_location_id(),
+        Some(800)
+    );
+
+    let location_required_species_error = &errors[2];
+    assert!(location_required_species_error.is_location_required_species());
+    assert_eq!(
+        location_required_species_error.get_source_location_id(),
+        Some(5)
+    );
+    assert_eq!(
+        location_required_species_error.get_target_species_id(),
+        Some(700)
+    );
 }
