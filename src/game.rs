@@ -45,7 +45,7 @@ pub struct Game {
 
 impl Game {
     pub fn new(db_url: &str, config: Option<Arc<dyn ConfigInterface>>) -> GameResult<Self> {
-        let config = config.unwrap_or(Config::builder().build());
+        let config = config.unwrap_or(Config::builder().build().unwrap());
         let db = Database::create();
         db.write()
             .expect("Failed to get database write lock")
@@ -90,7 +90,7 @@ impl GameInterface for Game {
     /// let location_data_map = HashMap::from([(LOCATION_ID, location_data)]);
     ///
     /// // Add the location data to the config
-    /// let config = Config::builder().locations(location_data_map).build();
+    /// let config = Config::builder().locations(location_data_map).build().unwrap();
     ///
     /// // Create game and clear database for a blank test state
     /// let game = Game::new("postgresql://admin:root@db:5432/test_db", Some(config)).unwrap();
@@ -155,7 +155,7 @@ impl GameInterface for Game {
     /// };
     ///
     /// let location_data_map = HashMap::from([(LOCATION_ID, location_data)]);
-    /// let config = Config::builder().locations(location_data_map).build();
+    /// let config = Config::builder().locations(location_data_map).build().unwrap();
     ///
     /// // Create game and clear database for a blank test state
     /// let game = Game::new("postgresql://admin:root@db:5432/test_db", Some(config)).unwrap();
@@ -202,7 +202,7 @@ impl GameInterface for Game {
     /// let species_data_map = HashMap::from([(SPECIES_ID, species_data)]);
     ///
     /// // Add the species data to the config
-    /// let config = Config::builder().species(species_data_map).build();
+    /// let config = Config::builder().species(species_data_map).build().unwrap();
     ///
     /// // Create game and clear database for a blank test state
     /// let game = Game::new("postgresql://admin:root@db:5432/test_db", Some(config)).unwrap();
@@ -262,7 +262,7 @@ impl GameInterface for Game {
     /// let species_data_map = HashMap::from([(SPECIES_ID, species_data)]);
     ///
     /// // Add the species data to the config
-    /// let config = Config::builder().species(species_data_map).build();
+    /// let config = Config::builder().species(species_data_map).build().unwrap();
     ///
     /// // Create game and clear database for a blank test state
     /// let game = Game::new("postgresql://admin:root@db:5432/test_db", Some(config)).unwrap();
@@ -345,7 +345,7 @@ impl GameInterface for Game {
     /// let species_data_map = HashMap::from([(SPECIES_ID, species_data), (SPECIES_ID + 1, species_data2)]);
     ///
     /// // Add the species data to the config
-    /// let config = Config::builder().species(species_data_map).build();
+    /// let config = Config::builder().species(species_data_map).build().unwrap();
     ///
     /// // Create game and clear database for a blank test state
     /// let game = Game::new("postgresql://admin:root@db:5432/test_db", Some(config)).unwrap();
@@ -473,7 +473,7 @@ impl GameInterface for Game {
     /// let location_data_map = HashMap::from([(LOCATION_ID, location_data)]);
     ///
     /// // Add the location data to the config
-    /// let config = Config::builder().locations(location_data_map).build();
+    /// let config = Config::builder().locations(location_data_map).build().unwrap();
     ///
     /// // Create game and clear database for a blank test state
     /// let game = Game::new("postgresql://admin:root@db:5432/test_db", Some(config)).unwrap();
@@ -636,7 +636,7 @@ impl GameInterface for Game {
     /// let location_data_map = HashMap::from([(LOCATION_ID, location_data)]);
     ///
     /// // Add the location data to the config
-    /// let config = Config::builder().locations(location_data_map).build();
+    /// let config = Config::builder().locations(location_data_map).build().unwrap();
     ///
     /// // Create game and clear database for a blank test state
     /// let game = Game::new("postgresql://admin:root@db:5432/test_db", Some(config)).unwrap();

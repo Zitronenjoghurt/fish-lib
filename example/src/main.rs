@@ -24,6 +24,7 @@ fn init_config() -> Arc<dyn ConfigInterface> {
         .locations_json_file(locations_json_file)
         .unwrap()
         .build()
+        .unwrap()
 }
 
 fn init_game() -> Game {

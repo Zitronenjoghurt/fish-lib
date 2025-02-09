@@ -1,4 +1,3 @@
-use crate::config::ConfigInterface;
 use crate::data::species_data::SpeciesData;
 use crate::game::errors::resource::GameResourceError;
 use crate::game::errors::GameResult;
@@ -18,17 +17,12 @@ pub trait SpecimenServiceInterface: Send + Sync {
 }
 
 pub struct SpecimenService {
-    config: Arc<dyn ConfigInterface>,
     specimen_repository: Arc<dyn SpecimenRepositoryInterface>,
 }
 
 impl SpecimenService {
-    pub fn new(
-        config: Arc<dyn ConfigInterface>,
-        specimen_repository: Arc<dyn SpecimenRepositoryInterface>,
-    ) -> Self {
+    pub fn new(specimen_repository: Arc<dyn SpecimenRepositoryInterface>) -> Self {
         Self {
-            config,
             specimen_repository,
         }
     }

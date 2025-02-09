@@ -24,7 +24,7 @@ fn mock_config() -> Arc<dyn ConfigInterface> {
     let mut species_data_map = HashMap::new();
     species_data_map.insert(0, species_data);
 
-    Config::builder().species(species_data_map).build()
+    Config::builder().species(species_data_map).build().unwrap()
 }
 
 #[test]

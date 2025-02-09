@@ -11,7 +11,7 @@
 //! use fish_lib::game::prelude::*;
 //! use fish_lib::game::service_provider::ServiceProviderInterface;
 //!
-//! let config = Config::builder()/*. ...() */.build();
+//! let config = Config::builder()/*. ...() */.build().unwrap();
 //!
 //! // Create game and clear database for a blank test state
 //! let game = Game::new("postgresql://admin:root@db:5432/test_db", Some(config)).unwrap();

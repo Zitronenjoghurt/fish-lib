@@ -1,12 +1,19 @@
+mod validation_error;
+mod validation_report;
+
+use crate::config::validation_error::ConfigValidationError;
+use crate::config::validation_report::ConfigValidationReport;
+use crate::data::encounter_data::EncounterData;
 use crate::data::location_data::LocationData;
 use crate::data::settings::Settings;
 use crate::data::species_data::SpeciesData;
 use std::collections::HashMap;
+use std::fmt::Debug;
 use std::fs::File;
 use std::path::Path;
 use std::sync::Arc;
 
-pub trait ConfigInterface: Send + Sync {
+pub trait ConfigInterface: Debug + Send + Sync {
     fn species(&self) -> Arc<HashMap<i32, Arc<SpeciesData>>>;
     fn locations(&self) -> Arc<HashMap<i32, Arc<LocationData>>>;
     fn settings(&self) -> Arc<Settings>;
@@ -63,7 +70,7 @@ impl Config {
 }
 
 pub trait ConfigBuilderInterface: Send + Sync {
-    fn build(self) -> Arc<dyn ConfigInterface>;
+    fn build(self) -> Result<Arc<dyn ConfigInterface>, ConfigValidationReport>;
 }
 
 #[derive(Debug, Default)]
@@ -72,8 +79,13 @@ pub struct ConfigBuilder {
 }
 
 impl ConfigBuilderInterface for ConfigBuilder {
-    fn build(self) -> Arc<dyn ConfigInterface> {
-        Arc::new(self.config)
+    fn build(self) -> Result<Arc<dyn ConfigInterface>, ConfigValidationReport> {
+        let validation_report = self.validate();
+        if validation_report.has_errors() {
+            Err(validation_report)
+        } else {
+            Ok(Arc::new(self.config))
+        }
     }
 }
 
@@ -169,5 +181,34 @@ impl ConfigBuilder {
         let file = File::open(json_file_path)?;
         let settings: Settings = serde_json::from_reader(file)?;
         Ok(self.settings(settings))
+    }
+
+    pub fn validate(&self) -> ConfigValidationReport {
+        let mut report = ConfigValidationReport::new();
+        self.validate_species(&mut report);
+        report
+    }
+
+    fn validate_species(&self, report: &mut ConfigValidationReport) {
+        for species_data in self.config.species.values() {
+            for encounter in &species_data.encounters {
+                self.validate_species_encounters(report, species_data, encounter);
+            }
+        }
+    }
+
+    fn validate_species_encounters(
+        &self,
+        report: &mut ConfigValidationReport,
+        species_data: &Arc<SpeciesData>,
+        encounter_data: &EncounterData,
+    ) {
+        let location_id = encounter_data.location_id;
+        if self.config.get_location_data(location_id).is_none() {
+            report.add_error(ConfigValidationError::invalid_encounter_location(
+                species_data.id,
+                location_id,
+            ));
+        }
     }
 }

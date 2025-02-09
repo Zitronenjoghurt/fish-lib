@@ -73,10 +73,7 @@ impl ServiceProvider {
         let location_service = Arc::new(LocationService::new(config.clone()));
         let pond_service = Arc::new(PondService::new(pond_repository.clone()));
         let species_service = Arc::new(SpeciesService::new(config.clone()));
-        let specimen_service = Arc::new(SpecimenService::new(
-            config.clone(),
-            specimen_repository.clone(),
-        ));
+        let specimen_service = Arc::new(SpecimenService::new(specimen_repository.clone()));
         let user_service = Arc::new(UserService::new(user_repository.clone()));
         let weather_service = Arc::new(WeatherService::new(config.clone()));
 

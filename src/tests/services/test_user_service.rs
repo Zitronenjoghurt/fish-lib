@@ -8,7 +8,10 @@ fn mock_config() -> Arc<dyn ConfigInterface> {
     let test_data = LocationData::default();
     let mut location_data_map = HashMap::new();
     location_data_map.insert(1, test_data);
-    Config::builder().locations(location_data_map).build()
+    Config::builder()
+        .locations(location_data_map)
+        .build()
+        .unwrap()
 }
 
 #[test]

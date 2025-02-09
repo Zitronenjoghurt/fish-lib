@@ -18,7 +18,10 @@ pub fn mock_default_config() -> Arc<dyn ConfigInterface> {
     Config::builder()
         .species_json_file(Path::new("./example_data/species_data.json"))
         .unwrap()
+        .locations_json_file(Path::new("./example_data/locations.json"))
+        .unwrap()
         .build()
+        .unwrap()
 }
 
 pub fn mock_service_provider(

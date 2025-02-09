@@ -52,7 +52,7 @@ fn main() {
         .locations_file(locations_file_path).unwrap()
         .settings_file(settings_file_path).unwrap()
         .species_file(species_file_path).unwrap()
-        .build();
+        .build().unwrap();
 
     // Will create a new game interface
     // Fails if it's unable to connect to the database

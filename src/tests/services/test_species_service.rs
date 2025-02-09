@@ -30,7 +30,7 @@ fn mock_config() -> Arc<dyn ConfigInterface> {
     species_data_map.insert(1, salmon_data);
     species_data_map.insert(37, shark_data);
 
-    Config::builder().species(species_data_map).build()
+    Config::builder().species(species_data_map).build().unwrap()
 }
 
 #[test]

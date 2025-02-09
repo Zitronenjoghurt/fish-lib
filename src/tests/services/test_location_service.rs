@@ -22,7 +22,10 @@ fn mock_config() -> Arc<dyn ConfigInterface> {
     location_data_map.insert(2, island_data);
     location_data_map.insert(41, oslo_data);
 
-    Config::builder().locations(location_data_map).build()
+    Config::builder()
+        .locations(location_data_map)
+        .build()
+        .unwrap()
 }
 
 #[test]
