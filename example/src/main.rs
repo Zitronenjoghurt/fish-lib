@@ -2,6 +2,7 @@ use chrono::{Duration, Utc};
 use chrono_tz::Tz;
 use dotenv::dotenv;
 use fish_lib::config::{Config, ConfigBuilderInterface, ConfigInterface};
+use fish_lib::game::interface::GameInterface;
 use fish_lib::game::service_provider::ServiceProviderInterface;
 use fish_lib::game::Game;
 use plotters::prelude::full_palette::GREY;
@@ -127,8 +128,13 @@ fn weather_plot(
     let mut cloudiness = Vec::new();
     let mut days = Vec::new();
 
+    let location_data = game.location_find(1).unwrap();
+
     for day in 0..=count {
-        let weather = game.weather_service().get_weather(1, time).unwrap();
+        let weather = game
+            .weather_service()
+            .get_weather(location_data.clone(), time)
+            .unwrap();
 
         temperatures.push((day as f32, weather.temperature_c));
         humidity.push((day as f32, (weather.humidity * 100.0)));
