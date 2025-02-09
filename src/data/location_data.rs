@@ -8,6 +8,8 @@ const SECONDS_PER_YEAR: f64 = 31_556_925.190_8;
 
 #[derive(Debug, Default, Serialize, Deserialize, PartialEq)]
 pub struct LocationData {
+    #[serde(skip, default)]
+    pub id: i32,
     pub name: String,
     pub timezone: Tz,
     pub weather_seed: u32,

@@ -9,7 +9,6 @@ use std::sync::{Arc, RwLock};
 pub trait Repository<T: Model>: Send + Sync {
     fn get_db(&self) -> Arc<RwLock<dyn DatabaseInterface>>;
     fn create(&self, new_entity: T::InsertType) -> Result<T, GameRepositoryError>;
-
     fn find(&self, id: T::PrimaryKeyType) -> Result<Option<T>, GameRepositoryError>;
     fn save(&self, entity: T) -> Result<T, GameRepositoryError>;
     fn delete(&self, entity: T) -> Result<bool, GameRepositoryError>;

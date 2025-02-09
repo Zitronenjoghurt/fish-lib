@@ -2,8 +2,6 @@ use crate::config::ConfigInterface;
 use crate::game::errors::resource::GameResourceError;
 use crate::game::errors::GameResult;
 use crate::game::repositories::specimen_repository::SpecimenRepositoryInterface;
-use crate::game::services::fishing_history_service::FishingHistoryServiceInterface;
-use crate::models::fishing_history_entry::FishingHistoryEntry;
 use crate::models::specimen::{NewSpecimen, Specimen};
 use crate::models::user::User;
 use std::sync::Arc;
@@ -15,30 +13,23 @@ pub trait SpecimenServiceInterface: Send + Sync {
         species_id: i32,
     ) -> GameResult<Specimen>;
 
-    fn process_catch(
-        &self,
-        user: &User,
-        species_id: i32,
-    ) -> GameResult<(Specimen, FishingHistoryEntry)>;
+    fn process_catch(&self, user: &User, species_id: i32) -> GameResult<Specimen>;
 
     fn species_exists(&self, species_id: i32) -> bool;
 }
 
 pub struct SpecimenService {
     config: Arc<dyn ConfigInterface>,
-    fishing_history_service: Arc<dyn FishingHistoryServiceInterface>,
     specimen_repository: Arc<dyn SpecimenRepositoryInterface>,
 }
 
 impl SpecimenService {
     pub fn new(
         config: Arc<dyn ConfigInterface>,
-        fishing_history_service: Arc<dyn FishingHistoryServiceInterface>,
         specimen_repository: Arc<dyn SpecimenRepositoryInterface>,
     ) -> Self {
         Self {
             config,
-            fishing_history_service,
             specimen_repository,
         }
     }
@@ -71,14 +62,9 @@ impl SpecimenServiceInterface for SpecimenService {
         }
     }
 
-    fn process_catch(
-        &self,
-        user: &User,
-        species_id: i32,
-    ) -> GameResult<(Specimen, FishingHistoryEntry)> {
+    fn process_catch(&self, user: &User, species_id: i32) -> GameResult<Specimen> {
         let fish = self.generate_and_save_specimen(user, species_id)?;
-        let history_entry = self.fishing_history_service.register_catch(&fish)?;
-        Ok((fish, history_entry))
+        Ok(fish)
     }
 
     fn species_exists(&self, species_id: i32) -> bool {

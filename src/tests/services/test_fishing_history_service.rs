@@ -20,7 +20,7 @@ fn mock_config() -> Arc<dyn ConfigInterface> {
         min_lifespan_days: 480,
         max_lifespan_days: 720,
         lifespan_adult_ratio: 0.35,
-        encounters: Default::default(),
+        ..Default::default()
     };
     let mut species_data_map = HashMap::new();
     species_data_map.insert(1, species_data);

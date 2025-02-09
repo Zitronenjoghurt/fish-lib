@@ -14,6 +14,7 @@ use crate::game::services::fishing_history_service::{
 };
 use crate::game::services::location_service::{LocationService, LocationServiceInterface};
 use crate::game::services::pond_service::{PondService, PondServiceInterface};
+use crate::game::services::species_service::{SpeciesService, SpeciesServiceInterface};
 use crate::game::services::specimen_service::{SpecimenService, SpecimenServiceInterface};
 use crate::game::services::user_service::{UserService, UserServiceInterface};
 use crate::game::services::weather_service::{WeatherService, WeatherServiceInterface};
@@ -30,6 +31,7 @@ pub trait ServiceProviderInterface: Send + Sync {
     fn fishing_history_service(&self) -> Arc<dyn FishingHistoryServiceInterface>;
     fn location_service(&self) -> Arc<dyn LocationServiceInterface>;
     fn pond_service(&self) -> Arc<dyn PondServiceInterface>;
+    fn species_service(&self) -> Arc<dyn SpeciesServiceInterface>;
     fn specimen_service(&self) -> Arc<dyn SpecimenServiceInterface>;
     fn user_service(&self) -> Arc<dyn UserServiceInterface>;
     fn weather_service(&self) -> Arc<dyn WeatherServiceInterface>;
@@ -46,6 +48,7 @@ pub struct ServiceProvider {
     fishing_history_service: Arc<dyn FishingHistoryServiceInterface>,
     location_service: Arc<dyn LocationServiceInterface>,
     pond_service: Arc<dyn PondServiceInterface>,
+    species_service: Arc<dyn SpeciesServiceInterface>,
     specimen_service: Arc<dyn SpecimenServiceInterface>,
     user_service: Arc<dyn UserServiceInterface>,
     weather_service: Arc<dyn WeatherServiceInterface>,
@@ -62,28 +65,20 @@ impl ServiceProvider {
         let specimen_repository = Arc::new(SpecimenRepository::new(database.clone()));
         let user_repository = Arc::new(UserRepository::new(database.clone()));
 
-        let location_service = Arc::new(LocationService::new(config.clone()));
+        let encounter_service = Arc::new(EncounterService::new(config.clone()));
         let fishing_history_service = Arc::new(FishingHistoryService::new(
             config.clone(),
             fishing_history_entry_repository.clone(),
         ));
-
-        let weather_service = Arc::new(WeatherService::new(
-            config.clone(),
-            location_service.clone(),
-        ));
-
-        let encounter_service = Arc::new(EncounterService::new(
-            config.clone(),
-            weather_service.clone(),
-        ));
+        let location_service = Arc::new(LocationService::new(config.clone()));
         let pond_service = Arc::new(PondService::new(pond_repository.clone()));
+        let species_service = Arc::new(SpeciesService::new(config.clone()));
         let specimen_service = Arc::new(SpecimenService::new(
             config.clone(),
-            fishing_history_service.clone(),
             specimen_repository.clone(),
         ));
         let user_service = Arc::new(UserService::new(user_repository.clone()));
+        let weather_service = Arc::new(WeatherService::new(config.clone()));
 
         Self {
             config,
@@ -96,6 +91,7 @@ impl ServiceProvider {
             fishing_history_service,
             location_service,
             pond_service,
+            species_service,
             specimen_service,
             user_service,
             weather_service,
@@ -149,6 +145,10 @@ impl ServiceProviderInterface for ServiceProvider {
 
     fn pond_service(&self) -> Arc<dyn PondServiceInterface> {
         self.pond_service.clone()
+    }
+
+    fn species_service(&self) -> Arc<dyn SpeciesServiceInterface> {
+        self.species_service.clone()
     }
 
     fn specimen_service(&self) -> Arc<dyn SpecimenServiceInterface> {

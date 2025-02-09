@@ -4,16 +4,28 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Serialize, Deserialize, PartialEq)]
 pub struct SpeciesData {
+    #[serde(skip, default)]
+    pub id: i32,
     pub name: String,
+    /// Minimum possible size at age 0.0
     pub min_size_baby_mm: u32,
+    /// Maximum possible size at age 0.0
     pub max_size_baby_mm: u32,
+    /// Minimum possible size at age 1.0
     pub min_size_adult_mm: u32,
+    /// Maximum possible size at age 1.0
     pub max_size_adult_mm: u32,
+    /// Minimum possible weight at age 0.0
     pub min_weight_baby_g: u32,
+    /// Maximum possible weight at age 0.0
     pub max_weight_baby_g: u32,
+    /// Minimum possible weight at age 1.0
     pub min_weight_adult_g: u32,
+    /// Maximum possible weight at age 1.0
     pub max_weight_adult_g: u32,
+    /// Minimum possible lifespan in days
     pub min_lifespan_days: u32,
+    /// Maximum possible lifespan in days
     pub max_lifespan_days: u32,
     /// Time when fish becomes adult (0 to 1)
     #[serde(default = "default_lifespan_adult_ratio")]

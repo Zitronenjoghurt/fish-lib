@@ -14,6 +14,7 @@ use crate::game::services::encounter_service::EncounterServiceInterface;
 use crate::game::services::fishing_history_service::FishingHistoryServiceInterface;
 use crate::game::services::location_service::LocationServiceInterface;
 use crate::game::services::pond_service::PondServiceInterface;
+use crate::game::services::species_service::SpeciesServiceInterface;
 use crate::game::services::specimen_service::SpecimenServiceInterface;
 use crate::game::services::user_service::UserServiceInterface;
 use crate::game::services::weather_service::WeatherServiceInterface;
@@ -174,7 +175,8 @@ impl GameInterface for Game {
     /// }
     /// ```
     fn location_weather_current(&self, location_id: i32) -> GameResult<Weather> {
-        self.weather_service().get_current_weather(location_id)
+        let location_data = self.location_find(location_id)?;
+        self.weather_service().get_current_weather(location_data)
     }
 
     /// Get [SpeciesData] for the specified species ID.
@@ -314,7 +316,9 @@ impl GameInterface for Game {
         user: &User,
         species_id: i32,
     ) -> GameResult<(Specimen, FishingHistoryEntry)> {
-        self.specimen_service().process_catch(user, species_id)
+        let specimen = self.specimen_service().process_catch(user, species_id)?;
+        let entry = self.fishing_history_service().register_catch(&specimen)?;
+        Ok((specimen, entry))
     }
 
     /// Check the fishing history of a [User] with a specified species ID
@@ -584,6 +588,10 @@ impl ServiceProviderInterface for Game {
 
     fn pond_service(&self) -> Arc<dyn PondServiceInterface> {
         self.service_provider.pond_service()
+    }
+
+    fn species_service(&self) -> Arc<dyn SpeciesServiceInterface> {
+        self.service_provider.species_service()
     }
 
     fn specimen_service(&self) -> Arc<dyn SpecimenServiceInterface> {

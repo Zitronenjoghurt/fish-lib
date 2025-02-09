@@ -24,6 +24,6 @@ impl LocationServiceInterface for LocationService {
     }
 
     fn get_location_data(&self, location_id: i32) -> Option<Arc<LocationData>> {
-        self.config.locations().get(&location_id).cloned()
+        self.config.get_location_data(location_id)
     }
 }

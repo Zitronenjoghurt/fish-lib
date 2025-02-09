@@ -1,7 +1,6 @@
 use crate::data::location_data::LocationData;
 use crate::data::settings::Settings;
 use crate::data::species_data::SpeciesData;
-use crate::traits::into_arc_map::IntoArcMap;
 use std::collections::HashMap;
 use std::fs::File;
 use std::path::Path;
@@ -11,9 +10,10 @@ pub trait ConfigInterface: Send + Sync {
     fn species(&self) -> Arc<HashMap<i32, Arc<SpeciesData>>>;
     fn locations(&self) -> Arc<HashMap<i32, Arc<LocationData>>>;
     fn settings(&self) -> Arc<Settings>;
-    fn specimen_names(&self) -> Arc<HashMap<i32, String>>;
+    fn species_names(&self) -> Arc<HashMap<i32, String>>;
     fn location_names(&self) -> Arc<HashMap<i32, String>>;
     fn get_species_data(&self, species_id: i32) -> Option<Arc<SpeciesData>>;
+    fn get_location_data(&self, location_id: i32) -> Option<Arc<LocationData>>;
 }
 
 #[derive(Debug, Default, PartialEq)]
@@ -22,7 +22,7 @@ pub struct Config {
     pub species: Arc<HashMap<i32, Arc<SpeciesData>>>,
     pub locations: Arc<HashMap<i32, Arc<LocationData>>>,
     pub settings: Arc<Settings>,
-    pub specimen_names: Arc<HashMap<i32, String>>,
+    pub species_names: Arc<HashMap<i32, String>>,
     pub location_names: Arc<HashMap<i32, String>>,
 }
 
@@ -39,8 +39,8 @@ impl ConfigInterface for Config {
         self.settings.clone()
     }
 
-    fn specimen_names(&self) -> Arc<HashMap<i32, String>> {
-        self.specimen_names.clone()
+    fn species_names(&self) -> Arc<HashMap<i32, String>> {
+        self.species_names.clone()
     }
 
     fn location_names(&self) -> Arc<HashMap<i32, String>> {
@@ -49,6 +49,10 @@ impl ConfigInterface for Config {
 
     fn get_species_data(&self, species_id: i32) -> Option<Arc<SpeciesData>> {
         self.species.get(&species_id).cloned()
+    }
+
+    fn get_location_data(&self, location_id: i32) -> Option<Arc<LocationData>> {
+        self.locations.get(&location_id).cloned()
     }
 }
 
@@ -79,8 +83,23 @@ impl ConfigBuilder {
     }
 
     pub fn species(mut self, specimens: HashMap<i32, SpeciesData>) -> Self {
-        let species = specimens.into_arc_map();
+        let species = specimens
+            .into_iter()
+            .map(|(id, mut data)| {
+                data.id = id;
+                (id, Arc::new(data))
+            })
+            .collect();
         self.config.species = Arc::new(species);
+
+        let species_names: HashMap<i32, String> = self
+            .config
+            .species
+            .iter()
+            .map(|(id, data)| (*id, data.name.clone()))
+            .collect();
+        self.config.species_names = Arc::new(species_names);
+
         self
     }
 
@@ -99,8 +118,15 @@ impl ConfigBuilder {
     }
 
     pub fn locations(mut self, locations: HashMap<i32, LocationData>) -> Self {
-        let locations = locations.into_arc_map();
+        let locations = locations
+            .into_iter()
+            .map(|(id, mut data)| {
+                data.id = id;
+                (id, Arc::new(data))
+            })
+            .collect();
         self.config.locations = Arc::new(locations);
+
         let location_names: HashMap<i32, String> = self
             .config
             .locations
@@ -108,6 +134,7 @@ impl ConfigBuilder {
             .map(|(id, data)| (*id, data.name.clone()))
             .collect();
         self.config.location_names = Arc::new(location_names);
+
         self
     }
 
