@@ -1,61 +1,97 @@
+use crate::enums::item_type::ItemType;
+use crate::models::item::components::usage_count::UsageComponent;
+use crate::models::item::components::{ItemComponent, ItemComponentType};
 use diesel::deserialize::FromSql;
 use diesel::pg::Pg;
 use diesel::serialize::{Output, ToSql};
 use diesel::sql_types::Jsonb;
 use diesel::{deserialize, serialize, AsExpression, FromSqlRow};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Debug, Default, Clone, PartialEq, Serialize, Deserialize, FromSqlRow, AsExpression)]
 #[diesel(sql_type = diesel::sql_types::Jsonb)]
-pub struct RodProperties {
-    pub times_used: i64,
+pub struct ItemProperties {
+    item_type: ItemType,
+    components: HashMap<ItemComponentType, ItemComponent>,
 }
 
-#[derive(Debug, Default, Clone, PartialEq, Serialize, Deserialize, FromSqlRow, AsExpression)]
-#[diesel(sql_type = diesel::sql_types::Jsonb)]
-#[serde(tag = "type")]
-pub enum ItemProperties {
-    #[default]
-    None,
-    Rod(RodProperties),
+impl ItemProperties {
+    pub fn new(item_type: ItemType) -> Self {
+        Self {
+            item_type,
+            components: HashMap::new(),
+        }
+    }
+
+    pub fn add_component(&mut self, component: ItemComponent) {
+        match component {
+            ItemComponent::Usage(_) => self.components.insert(ItemComponentType::Usage, component),
+        };
+    }
+
+    pub fn with_usage_count(mut self, count: u64) -> Self {
+        let component = ItemComponent::usage(count);
+        self.add_component(component);
+        self
+    }
 }
 
 impl ItemPropertiesInterface for ItemProperties {
-    fn is_none(&self) -> bool {
-        matches!(self, Self::None)
+    fn get_item_type(&self) -> ItemType {
+        self.item_type
     }
 
-    fn is_rod(&self) -> bool {
-        matches!(self, Self::Rod(_))
-    }
-
-    fn as_rod(&self) -> Option<&RodProperties> {
-        match self {
-            Self::Rod(rod) => Some(rod),
-            _ => None,
+    fn get_usage_component(&self) -> Option<&UsageComponent> {
+        match self.components.get(&ItemComponentType::Usage) {
+            Some(ItemComponent::Usage(count)) => Some(count),
+            None => None,
         }
     }
 
-    fn get_times_used(&self) -> Option<i64> {
-        match self {
-            Self::Rod(rod) => Some(rod.times_used),
-            _ => None,
-        }
-    }
-
-    fn increment_times_used(&mut self) {
-        if let Self::Rod(rod) = self {
-            rod.times_used += 1
+    fn get_usage_component_mut(&mut self) -> Option<&mut UsageComponent> {
+        match self.components.get_mut(&ItemComponentType::Usage) {
+            Some(ItemComponent::Usage(count)) => Some(count),
+            None => None,
         }
     }
 }
 
 pub trait ItemPropertiesInterface {
-    fn is_none(&self) -> bool;
-    fn is_rod(&self) -> bool;
-    fn as_rod(&self) -> Option<&RodProperties>;
-    fn get_times_used(&self) -> Option<i64>;
-    fn increment_times_used(&mut self);
+    fn get_item_type(&self) -> ItemType;
+    fn get_usage_component(&self) -> Option<&UsageComponent>;
+    fn get_usage_component_mut(&mut self) -> Option<&mut UsageComponent>;
+
+    fn is_none(&self) -> bool {
+        self.get_item_type() == ItemType::None
+    }
+
+    fn is_rod(&self) -> bool {
+        self.get_item_type() == ItemType::Rod
+    }
+
+    // Component-specific variable access
+    fn get_times_used(&self) -> Option<u64> {
+        self.get_usage_component()
+            .map(|count| count.get_times_used())
+    }
+
+    // Orchestration between different components
+    fn is_usable(&self) -> bool {
+        self.get_usage_component().is_some()
+    }
+
+    fn do_use(&mut self) -> bool {
+        if !self.is_usable() {
+            return false;
+        }
+
+        if let Some(usage) = self.get_usage_component_mut() {
+            usage.do_use()
+        };
+
+        true
+    }
 }
 
 impl ToSql<Jsonb, Pg> for ItemProperties {

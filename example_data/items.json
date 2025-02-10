@@ -1,15 +1,22 @@
 {
   "1": {
     "name": "Bob",
+    "stackable": true,
     "default_properties": {
-      "type": "None"
+      "item_type": "None",
+      "components": {}
     }
   },
   "2": {
     "name": "Bobber",
+    "stackable": false,
     "default_properties": {
-      "type": "Rod",
-      "times_used": 0
+      "item_type": "Rod",
+      "components": {
+        "Usage": {
+          "times_used": 0
+        }
+      }
     }
   }
 }

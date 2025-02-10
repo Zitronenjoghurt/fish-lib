@@ -1,9 +1,12 @@
-use crate::models::item::properties::{ItemProperties, ItemPropertiesInterface, RodProperties};
+use crate::enums::item_type::ItemType;
+use crate::models::item::components::usage_count::UsageComponent;
+use crate::models::item::properties::{ItemProperties, ItemPropertiesInterface};
 use crate::traits::model::Model;
 use chrono::{DateTime, Utc};
 use diesel::{AsChangeset, Insertable, Queryable, Selectable};
 use serde::{Deserialize, Serialize};
 
+pub mod components;
 pub mod properties;
 
 #[derive(
@@ -14,6 +17,7 @@ pub struct Item {
     pub id: i64,
     pub user_id: i64,
     pub type_id: i32,
+    pub count: i64,
     pub properties: ItemProperties,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
@@ -39,27 +43,20 @@ impl Model for Item {
 pub struct NewItem {
     pub user_id: i64,
     pub type_id: i32,
+    pub count: i64,
     pub properties: ItemProperties,
 }
 
 impl ItemPropertiesInterface for Item {
-    fn is_none(&self) -> bool {
-        self.properties.is_none()
+    fn get_item_type(&self) -> ItemType {
+        self.properties.get_item_type()
     }
 
-    fn is_rod(&self) -> bool {
-        self.properties.is_rod()
+    fn get_usage_component(&self) -> Option<&UsageComponent> {
+        self.properties.get_usage_component()
     }
 
-    fn as_rod(&self) -> Option<&RodProperties> {
-        self.properties.as_rod()
-    }
-
-    fn get_times_used(&self) -> Option<i64> {
-        self.properties.get_times_used()
-    }
-
-    fn increment_times_used(&mut self) {
-        self.properties.increment_times_used();
+    fn get_usage_component_mut(&mut self) -> Option<&mut UsageComponent> {
+        self.properties.get_usage_component_mut()
     }
 }

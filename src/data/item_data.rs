@@ -1,4 +1,6 @@
-use crate::models::item::properties::{ItemProperties, ItemPropertiesInterface, RodProperties};
+use crate::enums::item_type::ItemType;
+use crate::models::item::components::usage_count::UsageComponent;
+use crate::models::item::properties::{ItemProperties, ItemPropertiesInterface};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Serialize, Deserialize, PartialEq)]
@@ -6,26 +8,21 @@ pub struct ItemData {
     #[serde(skip, default)]
     pub id: i32,
     pub name: String,
+    pub stackable: bool,
     #[serde(default)]
     pub default_properties: ItemProperties,
 }
 
 impl ItemPropertiesInterface for ItemData {
-    fn is_none(&self) -> bool {
-        self.default_properties.is_none()
+    fn get_item_type(&self) -> ItemType {
+        self.default_properties.get_item_type()
     }
 
-    fn is_rod(&self) -> bool {
-        self.default_properties.is_rod()
+    fn get_usage_component(&self) -> Option<&UsageComponent> {
+        self.default_properties.get_usage_component()
     }
 
-    fn as_rod(&self) -> Option<&RodProperties> {
-        self.default_properties.as_rod()
+    fn get_usage_component_mut(&mut self) -> Option<&mut UsageComponent> {
+        self.default_properties.get_usage_component_mut()
     }
-
-    fn get_times_used(&self) -> Option<i64> {
-        self.default_properties.get_times_used()
-    }
-
-    fn increment_times_used(&mut self) {}
 }
