@@ -7,6 +7,7 @@ use crate::game::errors::resource::GameResourceError;
 use crate::game::errors::GameResult;
 use crate::game::interface::GameInterface;
 use crate::game::repositories::fishing_history_entry_repository::FishingHistoryEntryRepositoryInterface;
+use crate::game::repositories::item_repository::ItemRepositoryInterface;
 use crate::game::repositories::pond_repository::PondRepositoryInterface;
 use crate::game::repositories::specimen_repository::SpecimenRepositoryInterface;
 use crate::game::repositories::user_repository::UserRepositoryInterface;
@@ -707,6 +708,10 @@ impl ServiceProviderInterface for Game {
 
     fn fishing_history_entry_repository(&self) -> Arc<dyn FishingHistoryEntryRepositoryInterface> {
         self.service_provider.fishing_history_entry_repository()
+    }
+
+    fn item_repository(&self) -> Arc<dyn ItemRepositoryInterface> {
+        self.service_provider.item_repository()
     }
 
     fn pond_repository(&self) -> Arc<dyn PondRepositoryInterface> {

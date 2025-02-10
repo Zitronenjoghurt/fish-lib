@@ -1,4 +1,5 @@
 mod test_fishing_history_entry_repository;
+mod test_item_repository;
 mod test_pond_repository;
 mod test_specimen_repository;
 mod test_user_repository;

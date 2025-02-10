@@ -1,0 +1,15 @@
+{
+  "1": {
+    "name": "Bob",
+    "default_properties": {
+      "type": "None"
+    }
+  },
+  "2": {
+    "name": "Bobber",
+    "default_properties": {
+      "type": "Rod",
+      "times_used": 0
+    }
+  }
+}

@@ -14,7 +14,7 @@ exclude = [
 [dependencies]
 chrono = { version = "0.4.39", features = ["serde"] }
 chrono-tz = { version = "0.10.1", features = ["serde"] }
-diesel = { version = "2.2.6", features = ["postgres", "r2d2", "chrono"] }
+diesel = { version = "2.2.6", features = ["postgres", "r2d2", "chrono", "serde_json"] }
 diesel_migrations = { version = "2.2.0", features = ["postgres"] }
 noise = "0.9.0"
 rand = "0.9.0"

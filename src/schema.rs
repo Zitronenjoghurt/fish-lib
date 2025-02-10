@@ -58,6 +58,17 @@ diesel::table! {
     }
 }
 
+diesel::table! {
+    fish_items (id) {
+        id -> BigInt,
+        user_id -> BigInt,
+        type_id -> Integer,
+        properties -> Jsonb,
+        created_at -> Timestamptz,
+        updated_at -> Timestamptz,
+    }
+}
+
 diesel::joinable!(fish_user_locations -> fish_users (user_id));
 diesel::allow_tables_to_appear_in_same_query!(fish_user_locations, fish_users);
 
@@ -69,3 +80,6 @@ diesel::allow_tables_to_appear_in_same_query!(fish_ponds, fish_users);
 
 diesel::joinable!(fish_fishing_history_entries -> fish_users (user_id));
 diesel::allow_tables_to_appear_in_same_query!(fish_fishing_history_entries, fish_users);
+
+diesel::joinable!(fish_items -> fish_users (user_id));
+diesel::allow_tables_to_appear_in_same_query!(fish_items, fish_users);

@@ -2,6 +2,7 @@ use crate::config::{Config, ConfigBuilderInterface};
 use crate::data::encounter_data::EncounterData;
 use crate::data::location_data::LocationData;
 use crate::data::species_data::SpeciesData;
+use crate::models::item::properties::ItemPropertiesInterface;
 use std::collections::HashMap;
 use std::path::Path;
 
@@ -10,6 +11,7 @@ fn test_building() {
     let locations_json_file = Path::new("./example_data/locations.json");
     let species_json_file = Path::new("./example_data/species_data.json");
     let settings_json_file = Path::new("./example_data/settings.json");
+    let items_json_file = Path::new("./example_data/items.json");
 
     let config = Config::builder()
         .locations_json_file(locations_json_file)
@@ -18,11 +20,20 @@ fn test_building() {
         .unwrap()
         .settings_json_file(settings_json_file)
         .unwrap()
+        .items_json_file(items_json_file)
+        .unwrap()
         .build()
         .unwrap();
 
     assert_eq!(config.species().get(&1).unwrap().name, "Salmon");
     assert_eq!(config.settings().time_speed_multiplier as u64, 1);
+
+    let item1 = config.get_item_data(1).unwrap();
+    assert!(item1.is_none());
+
+    let item2 = config.get_item_data(2).unwrap();
+    assert!(item2.is_rod());
+    assert_eq!(item2.get_times_used(), Some(0));
 }
 
 #[test]

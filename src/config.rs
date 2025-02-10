@@ -1,9 +1,7 @@
-mod validation_error;
-mod validation_report;
-
 use crate::config::validation_error::ConfigValidationError;
 use crate::config::validation_report::ConfigValidationReport;
 use crate::data::encounter_data::EncounterData;
+use crate::data::item_data::ItemData;
 use crate::data::location_data::LocationData;
 use crate::data::settings::Settings;
 use crate::data::species_data::SpeciesData;
@@ -13,14 +11,20 @@ use std::fs::File;
 use std::path::Path;
 use std::sync::Arc;
 
+mod validation_error;
+mod validation_report;
+
 pub trait ConfigInterface: Debug + Send + Sync {
     fn species(&self) -> Arc<HashMap<i32, Arc<SpeciesData>>>;
     fn locations(&self) -> Arc<HashMap<i32, Arc<LocationData>>>;
+    fn items(&self) -> Arc<HashMap<i32, Arc<ItemData>>>;
     fn settings(&self) -> Arc<Settings>;
     fn species_names(&self) -> Arc<HashMap<i32, String>>;
     fn location_names(&self) -> Arc<HashMap<i32, String>>;
+    fn item_names(&self) -> Arc<HashMap<i32, String>>;
     fn get_species_data(&self, species_id: i32) -> Option<Arc<SpeciesData>>;
     fn get_location_data(&self, location_id: i32) -> Option<Arc<LocationData>>;
+    fn get_item_data(&self, item_id: i32) -> Option<Arc<ItemData>>;
 }
 
 #[derive(Debug, Default, PartialEq)]
@@ -28,9 +32,11 @@ pub struct Config {
     /// Mapping specimen to their species ID
     pub species: Arc<HashMap<i32, Arc<SpeciesData>>>,
     pub locations: Arc<HashMap<i32, Arc<LocationData>>>,
+    pub items: Arc<HashMap<i32, Arc<ItemData>>>,
     pub settings: Arc<Settings>,
     pub species_names: Arc<HashMap<i32, String>>,
     pub location_names: Arc<HashMap<i32, String>>,
+    pub item_names: Arc<HashMap<i32, String>>,
 }
 
 impl ConfigInterface for Config {
@@ -40,6 +46,10 @@ impl ConfigInterface for Config {
 
     fn locations(&self) -> Arc<HashMap<i32, Arc<LocationData>>> {
         self.locations.clone()
+    }
+
+    fn items(&self) -> Arc<HashMap<i32, Arc<ItemData>>> {
+        self.items.clone()
     }
 
     fn settings(&self) -> Arc<Settings> {
@@ -54,12 +64,20 @@ impl ConfigInterface for Config {
         self.location_names.clone()
     }
 
+    fn item_names(&self) -> Arc<HashMap<i32, String>> {
+        self.item_names.clone()
+    }
+
     fn get_species_data(&self, species_id: i32) -> Option<Arc<SpeciesData>> {
         self.species.get(&species_id).cloned()
     }
 
     fn get_location_data(&self, location_id: i32) -> Option<Arc<LocationData>> {
         self.locations.get(&location_id).cloned()
+    }
+
+    fn get_item_data(&self, item_id: i32) -> Option<Arc<ItemData>> {
+        self.items.get(&item_id).cloned()
     }
 }
 
@@ -162,6 +180,41 @@ impl ConfigBuilder {
         let file = File::open(json_file_path)?;
         let locations: HashMap<i32, LocationData> = serde_json::from_reader(file)?;
         Ok(self.locations(locations))
+    }
+
+    pub fn items(mut self, items: HashMap<i32, ItemData>) -> Self {
+        let items = items
+            .into_iter()
+            .map(|(id, mut data)| {
+                data.id = id;
+                (id, Arc::new(data))
+            })
+            .collect();
+        self.config.items = Arc::new(items);
+
+        let item_names: HashMap<i32, String> = self
+            .config
+            .items
+            .iter()
+            .map(|(id, data)| (*id, data.name.clone()))
+            .collect();
+        self.config.item_names = Arc::new(item_names);
+
+        self
+    }
+
+    pub fn items_json(self, json_string: &str) -> Result<Self, serde_json::Error> {
+        let items: HashMap<i32, ItemData> = serde_json::from_str(json_string)?;
+        Ok(self.items(items))
+    }
+
+    pub fn items_json_file(
+        self,
+        json_file_path: &Path,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
+        let file = File::open(json_file_path)?;
+        let items: HashMap<i32, ItemData> = serde_json::from_reader(file)?;
+        Ok(self.items(items))
     }
 
     pub fn settings(mut self, settings: Settings) -> Self {

@@ -3,6 +3,7 @@ use crate::database::DatabaseInterface;
 use crate::game::repositories::fishing_history_entry_repository::{
     FishingHistoryEntryRepository, FishingHistoryEntryRepositoryInterface,
 };
+use crate::game::repositories::item_repository::{ItemRepository, ItemRepositoryInterface};
 use crate::game::repositories::pond_repository::{PondRepository, PondRepositoryInterface};
 use crate::game::repositories::specimen_repository::{
     SpecimenRepository, SpecimenRepositoryInterface,
@@ -24,6 +25,7 @@ pub trait ServiceProviderInterface: Send + Sync {
     fn config(&self) -> Arc<dyn ConfigInterface>;
     fn database(&self) -> Arc<RwLock<dyn DatabaseInterface>>;
     fn fishing_history_entry_repository(&self) -> Arc<dyn FishingHistoryEntryRepositoryInterface>;
+    fn item_repository(&self) -> Arc<dyn ItemRepositoryInterface>;
     fn pond_repository(&self) -> Arc<dyn PondRepositoryInterface>;
     fn specimen_repository(&self) -> Arc<dyn SpecimenRepositoryInterface>;
     fn user_repository(&self) -> Arc<dyn UserRepositoryInterface>;
@@ -41,6 +43,7 @@ pub struct ServiceProvider {
     config: Arc<dyn ConfigInterface>,
     database: Arc<RwLock<dyn DatabaseInterface>>,
     fishing_history_entry_repository: Arc<dyn FishingHistoryEntryRepositoryInterface>,
+    item_repository: Arc<dyn ItemRepositoryInterface>,
     pond_repository: Arc<dyn PondRepositoryInterface>,
     specimen_repository: Arc<dyn SpecimenRepositoryInterface>,
     user_repository: Arc<dyn UserRepositoryInterface>,
@@ -61,6 +64,7 @@ impl ServiceProvider {
     ) -> Self {
         let fishing_history_entry_repository =
             Arc::new(FishingHistoryEntryRepository::new(database.clone()));
+        let item_repository = Arc::new(ItemRepository::new(database.clone()));
         let pond_repository = Arc::new(PondRepository::new(database.clone()));
         let specimen_repository = Arc::new(SpecimenRepository::new(database.clone()));
         let user_repository = Arc::new(UserRepository::new(database.clone()));
@@ -84,6 +88,7 @@ impl ServiceProvider {
             config,
             database,
             fishing_history_entry_repository,
+            item_repository,
             pond_repository,
             specimen_repository,
             user_repository,
@@ -117,6 +122,10 @@ impl ServiceProviderInterface for ServiceProvider {
 
     fn fishing_history_entry_repository(&self) -> Arc<dyn FishingHistoryEntryRepositoryInterface> {
         self.fishing_history_entry_repository.clone()
+    }
+
+    fn item_repository(&self) -> Arc<dyn ItemRepositoryInterface> {
+        self.item_repository.clone()
     }
 
     fn pond_repository(&self) -> Arc<dyn PondRepositoryInterface> {
