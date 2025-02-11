@@ -1,7 +1,10 @@
-use crate::enums::item_type::ItemType;
-use crate::models::item::components::usage_count::UsageComponent;
+use crate::models::item::attributes::{
+    ItemAttributes, ItemAttributesContainer, ItemAttributesContainerInterface, ItemAttributesType,
+};
+use crate::models::item::components::{ItemComponent, ItemComponentType};
 use crate::models::item::properties::{ItemProperties, ItemPropertiesInterface};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Debug, Default, Serialize, Deserialize, PartialEq)]
 pub struct ItemData {
@@ -10,19 +13,23 @@ pub struct ItemData {
     pub name: String,
     pub stackable: bool,
     #[serde(default)]
+    pub attributes: ItemAttributesContainer,
+    #[serde(default)]
     pub default_properties: ItemProperties,
 }
 
 impl ItemPropertiesInterface for ItemData {
-    fn get_item_type(&self) -> ItemType {
-        self.default_properties.get_item_type()
+    fn get_components(&self) -> &HashMap<ItemComponentType, ItemComponent> {
+        self.default_properties.get_components()
     }
 
-    fn get_usage_component(&self) -> Option<&UsageComponent> {
-        self.default_properties.get_usage_component()
+    fn get_components_mut(&mut self) -> &mut HashMap<ItemComponentType, ItemComponent> {
+        self.default_properties.get_components_mut()
     }
+}
 
-    fn get_usage_component_mut(&mut self) -> Option<&mut UsageComponent> {
-        self.default_properties.get_usage_component_mut()
+impl ItemAttributesContainerInterface for ItemData {
+    fn get_attributes(&self) -> &HashMap<ItemAttributesType, ItemAttributes> {
+        self.attributes.get_attributes()
     }
 }

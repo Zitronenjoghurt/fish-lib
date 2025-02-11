@@ -1,4 +1,3 @@
-use crate::enums::item_type::ItemType;
 use crate::models::item::components::usage_count::UsageComponent;
 use crate::models::item::components::{ItemComponent, ItemComponentType};
 use diesel::deserialize::FromSql;
@@ -12,14 +11,12 @@ use std::collections::HashMap;
 #[derive(Debug, Default, Clone, PartialEq, Serialize, Deserialize, FromSqlRow, AsExpression)]
 #[diesel(sql_type = diesel::sql_types::Jsonb)]
 pub struct ItemProperties {
-    item_type: ItemType,
     components: HashMap<ItemComponentType, ItemComponent>,
 }
 
 impl ItemProperties {
-    pub fn new(item_type: ItemType) -> Self {
+    pub fn new() -> Self {
         Self {
-            item_type,
             components: HashMap::new(),
         }
     }
@@ -38,36 +35,30 @@ impl ItemProperties {
 }
 
 impl ItemPropertiesInterface for ItemProperties {
-    fn get_item_type(&self) -> ItemType {
-        self.item_type
+    fn get_components(&self) -> &HashMap<ItemComponentType, ItemComponent> {
+        &self.components
     }
 
-    fn get_usage_component(&self) -> Option<&UsageComponent> {
-        match self.components.get(&ItemComponentType::Usage) {
-            Some(ItemComponent::Usage(count)) => Some(count),
-            None => None,
-        }
-    }
-
-    fn get_usage_component_mut(&mut self) -> Option<&mut UsageComponent> {
-        match self.components.get_mut(&ItemComponentType::Usage) {
-            Some(ItemComponent::Usage(count)) => Some(count),
-            None => None,
-        }
+    fn get_components_mut(&mut self) -> &mut HashMap<ItemComponentType, ItemComponent> {
+        &mut self.components
     }
 }
 
 pub trait ItemPropertiesInterface {
-    fn get_item_type(&self) -> ItemType;
-    fn get_usage_component(&self) -> Option<&UsageComponent>;
-    fn get_usage_component_mut(&mut self) -> Option<&mut UsageComponent>;
+    fn get_components(&self) -> &HashMap<ItemComponentType, ItemComponent>;
+    fn get_components_mut(&mut self) -> &mut HashMap<ItemComponentType, ItemComponent>;
 
-    fn is_none(&self) -> bool {
-        self.get_item_type() == ItemType::None
+    fn get_usage_component(&self) -> Option<&UsageComponent> {
+        match self.get_components().get(&ItemComponentType::Usage) {
+            Some(ItemComponent::Usage(usage)) => Some(usage),
+            None => None,
+        }
     }
-
-    fn is_rod(&self) -> bool {
-        self.get_item_type() == ItemType::Rod
+    fn get_usage_component_mut(&mut self) -> Option<&mut UsageComponent> {
+        match self.get_components_mut().get_mut(&ItemComponentType::Usage) {
+            Some(ItemComponent::Usage(usage)) => Some(usage),
+            None => None,
+        }
     }
 
     // Component-specific variable access

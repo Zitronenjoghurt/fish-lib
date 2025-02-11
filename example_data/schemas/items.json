@@ -6,8 +6,7 @@
       "type": "object",
       "required": [
         "name",
-        "stackable",
-        "default_properties"
+        "stackable"
       ],
       "properties": {
         "name": {
@@ -18,20 +17,37 @@
           "type": "boolean",
           "description": "If this item can be stacked or not"
         },
-        "default_properties": {
+        "attributes": {
           "type": "object",
           "required": [
-            "item_type",
             "components"
           ],
           "properties": {
-            "item_type": {
-              "type": "string",
-              "enum": [
-                "None",
-                "Rod"
-              ]
-            },
+            "components": {
+              "type": "object",
+              "properties": {
+                "Rod": {
+                  "type": "object",
+                  "properties": {
+                    "level": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "default_properties": {
+          "type": "object",
+          "required": [
+            "components"
+          ],
+          "properties": {
             "components": {
               "type": "object",
               "properties": {
@@ -49,7 +65,8 @@
                 }
               }
             }
-          }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false

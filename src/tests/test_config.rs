@@ -2,6 +2,7 @@ use crate::config::{Config, ConfigBuilderInterface};
 use crate::data::encounter_data::EncounterData;
 use crate::data::location_data::LocationData;
 use crate::data::species_data::SpeciesData;
+use crate::models::item::attributes::ItemAttributesContainerInterface;
 use crate::models::item::properties::ItemPropertiesInterface;
 use std::collections::HashMap;
 use std::path::Path;
@@ -29,7 +30,7 @@ fn test_building() {
     assert_eq!(config.settings().time_speed_multiplier as u64, 1);
 
     let item1 = config.get_item_data(1).unwrap();
-    assert!(item1.is_none());
+    assert_eq!(item1.name, "Bob");
 
     let item2 = config.get_item_data(2).unwrap();
     assert!(item2.is_rod());

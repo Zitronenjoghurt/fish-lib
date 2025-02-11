@@ -1,11 +1,15 @@
-use crate::enums::item_type::ItemType;
-use crate::models::item::components::usage_count::UsageComponent;
+use crate::config::ConfigInterface;
+use crate::models::item::attributes::ItemAttributesContainerInterface;
+use crate::models::item::components::{ItemComponent, ItemComponentType};
 use crate::models::item::properties::{ItemProperties, ItemPropertiesInterface};
 use crate::traits::model::Model;
 use chrono::{DateTime, Utc};
 use diesel::{AsChangeset, Insertable, Queryable, Selectable};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::sync::Arc;
 
+pub mod attributes;
 pub mod components;
 pub mod properties;
 
@@ -47,16 +51,30 @@ pub struct NewItem {
     pub properties: ItemProperties,
 }
 
+pub trait ItemInterface: ItemPropertiesInterface {
+    fn attributes(
+        &self,
+        config: Arc<dyn ConfigInterface>,
+    ) -> Option<Arc<dyn ItemAttributesContainerInterface>>;
+}
+
+impl ItemInterface for Item {
+    fn attributes(
+        &self,
+        config: Arc<dyn ConfigInterface>,
+    ) -> Option<Arc<dyn ItemAttributesContainerInterface>> {
+        config
+            .get_item_data(self.type_id)
+            .map(|data| data as Arc<dyn ItemAttributesContainerInterface>)
+    }
+}
+
 impl ItemPropertiesInterface for Item {
-    fn get_item_type(&self) -> ItemType {
-        self.properties.get_item_type()
+    fn get_components(&self) -> &HashMap<ItemComponentType, ItemComponent> {
+        self.properties.get_components()
     }
 
-    fn get_usage_component(&self) -> Option<&UsageComponent> {
-        self.properties.get_usage_component()
-    }
-
-    fn get_usage_component_mut(&mut self) -> Option<&mut UsageComponent> {
-        self.properties.get_usage_component_mut()
+    fn get_components_mut(&mut self) -> &mut HashMap<ItemComponentType, ItemComponent> {
+        self.properties.get_components_mut()
     }
 }
