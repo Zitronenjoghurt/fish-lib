@@ -4,6 +4,7 @@ use crate::game::errors::resource::GameResourceError;
 use thiserror::Error;
 
 pub mod database;
+pub mod item_event;
 pub mod repository;
 pub mod resource;
 

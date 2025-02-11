@@ -18,4 +18,11 @@ impl ItemComponent {
     pub fn usage(count: u64) -> Self {
         Self::Usage(UsageComponent::new(count))
     }
+
+    // Events
+    pub fn on_use(&mut self) {
+        match self {
+            ItemComponent::Usage(usage) => usage.on_use(),
+        }
+    }
 }

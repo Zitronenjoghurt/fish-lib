@@ -1,4 +1,5 @@
 use crate::config::ConfigInterface;
+use crate::game::errors::item_event::GameItemEventError;
 use crate::models::item::attributes::ItemAttributesContainerInterface;
 use crate::models::item::components::{ItemComponent, ItemComponentType};
 use crate::models::item::properties::{ItemProperties, ItemPropertiesInterface};
@@ -49,6 +50,34 @@ pub struct NewItem {
     pub type_id: i32,
     pub count: i64,
     pub properties: ItemProperties,
+}
+
+pub type ItemEventResult = Result<ItemEventSuccess, GameItemEventError>;
+
+#[derive(Debug, Default, Clone, PartialEq)]
+pub struct ItemEventSuccess {
+    pub consume: bool,
+}
+
+impl ItemEventSuccess {
+    pub fn new(consume: bool) -> Self {
+        Self { consume }
+    }
+}
+
+impl Item {
+    pub fn use_as_rod(&mut self, config: Arc<dyn ConfigInterface>) -> ItemEventResult {
+        let attributes = self
+            .attributes(config)
+            .ok_or(GameItemEventError::invalid_item_type(self.type_id))?;
+
+        if !attributes.is_rod() {
+            Err(GameItemEventError::not_a_rod(self.type_id))
+        } else {
+            self.properties.on_use();
+            Ok(ItemEventSuccess::new(false))
+        }
+    }
 }
 
 pub trait ItemInterface: ItemPropertiesInterface {

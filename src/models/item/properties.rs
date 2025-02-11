@@ -27,7 +27,7 @@ impl ItemProperties {
         };
     }
 
-    pub fn with_usage_count(mut self, count: u64) -> Self {
+    pub fn with_usage(mut self, count: u64) -> Self {
         let component = ItemComponent::usage(count);
         self.add_component(component);
         self
@@ -67,21 +67,11 @@ pub trait ItemPropertiesInterface {
             .map(|count| count.get_times_used())
     }
 
-    // Orchestration between different components
-    fn is_usable(&self) -> bool {
-        self.get_usage_component().is_some()
-    }
-
-    fn do_use(&mut self) -> bool {
-        if !self.is_usable() {
-            return false;
-        }
-
-        if let Some(usage) = self.get_usage_component_mut() {
-            usage.do_use()
-        };
-
-        true
+    // Component events
+    fn on_use(&mut self) {
+        self.get_components_mut()
+            .values_mut()
+            .for_each(|component| component.on_use())
     }
 }
 

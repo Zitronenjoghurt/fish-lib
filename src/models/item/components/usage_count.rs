@@ -10,11 +10,12 @@ impl UsageComponent {
         Self { times_used }
     }
 
-    pub fn do_use(&mut self) {
-        self.times_used = self.times_used.saturating_add(1);
-    }
-
     pub fn get_times_used(&self) -> u64 {
         self.times_used
+    }
+
+    // Events
+    pub fn on_use(&mut self) {
+        self.times_used = self.times_used.saturating_add(1);
     }
 }
