@@ -26,6 +26,18 @@
             "components": {
               "type": "object",
               "properties": {
+                "Bait": {
+                  "type": "object",
+                  "properties": {
+                    "level": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ]
+                },
                 "Rod": {
                   "type": "object",
                   "properties": {
@@ -36,6 +48,18 @@
                   },
                   "required": [
                     "level"
+                  ]
+                },
+                "Purchasable": {
+                  "type": "object",
+                  "properties": {
+                    "cost": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "cost"
                   ]
                 }
               }

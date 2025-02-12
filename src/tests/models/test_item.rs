@@ -1,7 +1,9 @@
 use crate::config::{Config, ConfigBuilderInterface, ConfigInterface};
 use crate::data::item_data::ItemData;
-use crate::models::item::attributes::ItemAttributesContainer;
-use crate::models::item::properties::{ItemProperties, ItemPropertiesInterface};
+use crate::models::item::attributes_container::ItemAttributesContainer;
+use crate::models::item::properties_container::{
+    ItemPropertiesContainer, ItemPropertiesContainerInterface,
+};
 use crate::models::item::{Item, ItemInterface};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -14,21 +16,21 @@ fn mock_config() -> Arc<dyn ConfigInterface> {
     let nothing_item = ItemData {
         name: "Nothing really".to_string(),
         attributes: ItemAttributesContainer::new(),
-        default_properties: ItemProperties::new(),
+        default_properties: ItemPropertiesContainer::new(),
         ..Default::default()
     };
 
     let rod_item = ItemData {
         name: "Rod".to_string(),
         attributes: ItemAttributesContainer::new().with_rod(1),
-        default_properties: ItemProperties::new().with_usage(0),
+        default_properties: ItemPropertiesContainer::new().with_usage(0),
         ..Default::default()
     };
 
     let bait_item = ItemData {
         name: "Bait".to_string(),
         attributes: ItemAttributesContainer::new().with_bait(1),
-        default_properties: ItemProperties::new().with_stackable(0),
+        default_properties: ItemPropertiesContainer::new().with_stackable(0),
         ..Default::default()
     };
 
@@ -67,7 +69,7 @@ fn test_migrate_properties() {
     let new_rod_data = ItemData {
         name: "Rod".to_string(),
         attributes: ItemAttributesContainer::new().with_rod(1),
-        default_properties: ItemProperties::new().with_stackable(0),
+        default_properties: ItemPropertiesContainer::new().with_stackable(0),
         ..Default::default()
     };
     let new_item_data_map = HashMap::from([(ROD_ITEM, new_rod_data)]);

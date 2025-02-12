@@ -1,8 +1,11 @@
-use crate::models::item::attributes::{
-    ItemAttributes, ItemAttributesContainer, ItemAttributesContainerInterface, ItemAttributesType,
+use crate::models::item::attributes::{ItemAttributes, ItemAttributesType};
+use crate::models::item::attributes_container::{
+    ItemAttributesContainer, ItemAttributesContainerInterface,
 };
-use crate::models::item::components::{ItemComponent, ItemComponentType};
-use crate::models::item::properties::{ItemProperties, ItemPropertiesInterface};
+use crate::models::item::properties::{ItemProperties, ItemPropertiesType};
+use crate::models::item::properties_container::{
+    ItemPropertiesContainer, ItemPropertiesContainerInterface,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -21,20 +24,20 @@ pub struct ItemData {
     #[serde(default)]
     pub attributes: ItemAttributesContainer,
     #[serde(default)]
-    pub default_properties: ItemProperties,
+    pub default_properties: ItemPropertiesContainer,
 }
 
 fn default_one() -> u32 {
     1
 }
 
-impl ItemPropertiesInterface for ItemData {
-    fn get_components(&self) -> &HashMap<ItemComponentType, ItemComponent> {
-        self.default_properties.get_components()
+impl ItemPropertiesContainerInterface for ItemData {
+    fn get_properties(&self) -> &HashMap<ItemPropertiesType, ItemProperties> {
+        self.default_properties.get_properties()
     }
 
-    fn get_components_mut(&mut self) -> &mut HashMap<ItemComponentType, ItemComponent> {
-        self.default_properties.get_components_mut()
+    fn get_properties_mut(&mut self) -> &mut HashMap<ItemPropertiesType, ItemProperties> {
+        self.default_properties.get_properties_mut()
     }
 }
 

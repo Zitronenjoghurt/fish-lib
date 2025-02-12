@@ -1,6 +1,16 @@
 {
   "1": {
-    "name": "Bob"
+    "name": "Bob",
+    "attributes": {
+      "components": {
+        "Bait": {
+          "level": 1
+        },
+        "Purchasable": {
+          "cost": 50
+        }
+      }
+    }
   },
   "2": {
     "name": "Bobber",

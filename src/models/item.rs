@@ -1,8 +1,10 @@
 use crate::config::ConfigInterface;
 use crate::game::errors::item_event::GameItemEventError;
-use crate::models::item::attributes::ItemAttributesContainerInterface;
-use crate::models::item::components::{ItemComponent, ItemComponentType};
-use crate::models::item::properties::{ItemProperties, ItemPropertiesInterface};
+use crate::models::item::attributes_container::ItemAttributesContainerInterface;
+use crate::models::item::properties::{ItemProperties, ItemPropertiesType};
+use crate::models::item::properties_container::{
+    ItemPropertiesContainer, ItemPropertiesContainerInterface,
+};
 use crate::traits::model::Model;
 use chrono::{DateTime, Utc};
 use diesel::{AsChangeset, Insertable, Queryable, Selectable};
@@ -11,8 +13,9 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 pub mod attributes;
-pub mod components;
+pub mod attributes_container;
 pub mod properties;
+pub mod properties_container;
 
 #[derive(
     Debug, Default, Serialize, Deserialize, Clone, PartialEq, Queryable, Selectable, AsChangeset,
@@ -22,7 +25,7 @@ pub struct Item {
     pub id: i64,
     pub user_id: i64,
     pub type_id: i32,
-    pub properties: ItemProperties,
+    pub properties: ItemPropertiesContainer,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -47,7 +50,7 @@ impl Model for Item {
 pub struct NewItem {
     pub user_id: i64,
     pub type_id: i32,
-    pub properties: ItemProperties,
+    pub properties: ItemPropertiesContainer,
 }
 
 pub type ItemEventResult = Result<ItemEventSuccess, GameItemEventError>;
@@ -69,30 +72,30 @@ impl Item {
             .get_item_data(self.type_id)
             .ok_or(GameItemEventError::invalid_item_type(self.type_id))?;
 
-        let required_property_types: HashSet<ItemComponentType> =
-            item_data.default_properties.get_component_types();
+        let required_property_types: HashSet<ItemPropertiesType> =
+            item_data.default_properties.get_properties_types();
 
-        let existing_property_types: HashSet<ItemComponentType> =
-            self.properties.get_component_types();
+        let existing_property_types: HashSet<ItemPropertiesType> =
+            self.properties.get_properties_types();
 
-        let properties_to_add: HashSet<ItemComponentType> = required_property_types
+        let properties_to_add: HashSet<ItemPropertiesType> = required_property_types
             .difference(&existing_property_types)
             .copied()
             .collect();
 
-        let properties_to_remove: HashSet<ItemComponentType> = existing_property_types
+        let properties_to_remove: HashSet<ItemPropertiesType> = existing_property_types
             .difference(&required_property_types)
             .copied()
             .collect();
 
         properties_to_add.iter().for_each(|component_type| {
-            let component = component_type.get_default_component();
-            self.properties.add_component(component);
+            let component = component_type.get_default_properties();
+            self.properties.add_properties(component);
         });
 
         properties_to_remove
             .iter()
-            .for_each(|component_type| self.properties.remove_component(*component_type));
+            .for_each(|component_type| self.properties.remove_properties(*component_type));
 
         Ok(ItemEventSuccess::new(self.should_consume()))
     }
@@ -121,7 +124,7 @@ impl Item {
     }
 }
 
-pub trait ItemInterface: ItemPropertiesInterface {
+pub trait ItemInterface: ItemPropertiesContainerInterface {
     fn attributes(
         &self,
         config: Arc<dyn ConfigInterface>,
@@ -139,12 +142,12 @@ impl ItemInterface for Item {
     }
 }
 
-impl ItemPropertiesInterface for Item {
-    fn get_components(&self) -> &HashMap<ItemComponentType, ItemComponent> {
-        self.properties.get_components()
+impl ItemPropertiesContainerInterface for Item {
+    fn get_properties(&self) -> &HashMap<ItemPropertiesType, ItemProperties> {
+        self.properties.get_properties()
     }
 
-    fn get_components_mut(&mut self) -> &mut HashMap<ItemComponentType, ItemComponent> {
-        self.properties.get_components_mut()
+    fn get_properties_mut(&mut self) -> &mut HashMap<ItemPropertiesType, ItemProperties> {
+        self.properties.get_properties_mut()
     }
 }

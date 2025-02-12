@@ -5,6 +5,8 @@ use crate::data::item_data::ItemData;
 use crate::data::location_data::LocationData;
 use crate::data::settings::Settings;
 use crate::data::species_data::SpeciesData;
+use crate::models::item::attributes::ItemAttributesType;
+use crate::models::item::properties::ItemPropertiesType;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::fs::File;
@@ -22,21 +24,48 @@ pub trait ConfigInterface: Debug + Send + Sync {
     fn species_names(&self) -> Arc<HashMap<i32, String>>;
     fn location_names(&self) -> Arc<HashMap<i32, String>>;
     fn item_names(&self) -> Arc<HashMap<i32, String>>;
-    fn get_species_data(&self, species_id: i32) -> Option<Arc<SpeciesData>>;
-    fn get_location_data(&self, location_id: i32) -> Option<Arc<LocationData>>;
-    fn get_item_data(&self, item_id: i32) -> Option<Arc<ItemData>>;
+    fn items_by_attributes(&self) -> Arc<HashMap<ItemAttributesType, Arc<Vec<Arc<ItemData>>>>>;
+    fn items_by_properties(&self) -> Arc<HashMap<ItemPropertiesType, Arc<Vec<Arc<ItemData>>>>>;
+
+    fn get_species_data(&self, species_id: i32) -> Option<Arc<SpeciesData>> {
+        self.species().get(&species_id).cloned()
+    }
+
+    fn get_location_data(&self, location_id: i32) -> Option<Arc<LocationData>> {
+        self.locations().get(&location_id).cloned()
+    }
+
+    fn get_item_data(&self, item_id: i32) -> Option<Arc<ItemData>> {
+        self.items().get(&item_id).cloned()
+    }
+
+    fn get_items_by_attributes_type(
+        &self,
+        attributes_type: ItemAttributesType,
+    ) -> Option<Arc<Vec<Arc<ItemData>>>> {
+        self.items_by_attributes().get(&attributes_type).cloned()
+    }
+
+    fn get_items_by_properties_type(
+        &self,
+        properties_type: ItemPropertiesType,
+    ) -> Option<Arc<Vec<Arc<ItemData>>>> {
+        self.items_by_properties().get(&properties_type).cloned()
+    }
 }
 
 #[derive(Debug, Default, PartialEq)]
 pub struct Config {
     /// Mapping specimen to their species ID
-    pub species: Arc<HashMap<i32, Arc<SpeciesData>>>,
-    pub locations: Arc<HashMap<i32, Arc<LocationData>>>,
-    pub items: Arc<HashMap<i32, Arc<ItemData>>>,
-    pub settings: Arc<Settings>,
-    pub species_names: Arc<HashMap<i32, String>>,
-    pub location_names: Arc<HashMap<i32, String>>,
-    pub item_names: Arc<HashMap<i32, String>>,
+    species: Arc<HashMap<i32, Arc<SpeciesData>>>,
+    locations: Arc<HashMap<i32, Arc<LocationData>>>,
+    items: Arc<HashMap<i32, Arc<ItemData>>>,
+    settings: Arc<Settings>,
+    species_names: Arc<HashMap<i32, String>>,
+    location_names: Arc<HashMap<i32, String>>,
+    item_names: Arc<HashMap<i32, String>>,
+    items_by_attributes: Arc<HashMap<ItemAttributesType, Arc<Vec<Arc<ItemData>>>>>,
+    items_by_properties: Arc<HashMap<ItemPropertiesType, Arc<Vec<Arc<ItemData>>>>>,
 }
 
 impl ConfigInterface for Config {
@@ -68,16 +97,12 @@ impl ConfigInterface for Config {
         self.item_names.clone()
     }
 
-    fn get_species_data(&self, species_id: i32) -> Option<Arc<SpeciesData>> {
-        self.species.get(&species_id).cloned()
+    fn items_by_attributes(&self) -> Arc<HashMap<ItemAttributesType, Arc<Vec<Arc<ItemData>>>>> {
+        self.items_by_attributes.clone()
     }
 
-    fn get_location_data(&self, location_id: i32) -> Option<Arc<LocationData>> {
-        self.locations.get(&location_id).cloned()
-    }
-
-    fn get_item_data(&self, item_id: i32) -> Option<Arc<ItemData>> {
-        self.items.get(&item_id).cloned()
+    fn items_by_properties(&self) -> Arc<HashMap<ItemPropertiesType, Arc<Vec<Arc<ItemData>>>>> {
+        self.items_by_properties.clone()
     }
 }
 
@@ -122,13 +147,7 @@ impl ConfigBuilder {
             .collect();
         self.config.species = Arc::new(species);
 
-        let species_names: HashMap<i32, String> = self
-            .config
-            .species
-            .iter()
-            .map(|(id, data)| (*id, data.name.clone()))
-            .collect();
-        self.config.species_names = Arc::new(species_names);
+        self.map_species_names();
 
         self
     }
@@ -157,13 +176,7 @@ impl ConfigBuilder {
             .collect();
         self.config.locations = Arc::new(locations);
 
-        let location_names: HashMap<i32, String> = self
-            .config
-            .locations
-            .iter()
-            .map(|(id, data)| (*id, data.name.clone()))
-            .collect();
-        self.config.location_names = Arc::new(location_names);
+        self.map_location_names();
 
         self
     }
@@ -192,13 +205,8 @@ impl ConfigBuilder {
             .collect();
         self.config.items = Arc::new(items);
 
-        let item_names: HashMap<i32, String> = self
-            .config
-            .items
-            .iter()
-            .map(|(id, data)| (*id, data.name.clone()))
-            .collect();
-        self.config.item_names = Arc::new(item_names);
+        self.map_item_names();
+        self.map_items_by_attributes_and_properties_types();
 
         self
     }
@@ -236,6 +244,77 @@ impl ConfigBuilder {
         Ok(self.settings(settings))
     }
 
+    // Helper function for building config indices
+    fn map_species_names(&mut self) {
+        let species_names: HashMap<i32, String> = self
+            .config
+            .species
+            .iter()
+            .map(|(id, data)| (*id, data.name.clone()))
+            .collect();
+        self.config.species_names = Arc::new(species_names);
+    }
+
+    fn map_location_names(&mut self) {
+        let location_names: HashMap<i32, String> = self
+            .config
+            .locations
+            .iter()
+            .map(|(id, data)| (*id, data.name.clone()))
+            .collect();
+        self.config.location_names = Arc::new(location_names);
+    }
+
+    fn map_item_names(&mut self) {
+        let item_names: HashMap<i32, String> = self
+            .config
+            .items
+            .iter()
+            .map(|(id, data)| (*id, data.name.clone()))
+            .collect();
+        self.config.item_names = Arc::new(item_names);
+    }
+
+    fn map_items_by_attributes_and_properties_types(&mut self) {
+        let mut by_attributes: HashMap<ItemAttributesType, Vec<Arc<ItemData>>> = HashMap::new();
+        let mut by_properties: HashMap<ItemPropertiesType, Vec<Arc<ItemData>>> = HashMap::new();
+
+        self.config.items.values().for_each(|item| {
+            item.attributes
+                .get_attributes_types()
+                .iter()
+                .for_each(|attr_type| {
+                    by_attributes
+                        .entry(*attr_type)
+                        .or_default()
+                        .push(item.clone());
+                });
+
+            item.default_properties
+                .get_properties_types()
+                .iter()
+                .for_each(|prop_type| {
+                    by_properties
+                        .entry(*prop_type)
+                        .or_default()
+                        .push(item.clone());
+                });
+        });
+
+        let by_attributes = by_attributes
+            .into_iter()
+            .map(|(k, v)| (k, Arc::new(v)))
+            .collect();
+        let by_properties = by_properties
+            .into_iter()
+            .map(|(k, v)| (k, Arc::new(v)))
+            .collect();
+
+        self.config.items_by_attributes = Arc::new(by_attributes);
+        self.config.items_by_properties = Arc::new(by_properties);
+    }
+
+    // Validation
     pub fn validate(&self) -> ConfigValidationReport {
         let mut report = ConfigValidationReport::new();
         self.validate_species(&mut report);

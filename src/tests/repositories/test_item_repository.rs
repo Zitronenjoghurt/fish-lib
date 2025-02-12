@@ -1,8 +1,10 @@
 use crate::config::{Config, ConfigBuilderInterface, ConfigInterface};
 use crate::data::item_data::ItemData;
 use crate::game::service_provider::ServiceProviderInterface;
-use crate::models::item::attributes::ItemAttributesContainer;
-use crate::models::item::properties::{ItemProperties, ItemPropertiesInterface};
+use crate::models::item::attributes_container::ItemAttributesContainer;
+use crate::models::item::properties_container::{
+    ItemPropertiesContainer, ItemPropertiesContainerInterface,
+};
 use crate::models::item::{Item, ItemInterface, NewItem};
 use crate::tests::mock::mock_service_provider;
 use std::collections::HashMap;
@@ -10,7 +12,7 @@ use std::sync::Arc;
 
 fn mock_config() -> Arc<dyn ConfigInterface> {
     let item_attributes = ItemAttributesContainer::new().with_rod(22);
-    let item_props = ItemProperties::new().with_usage(0);
+    let item_props = ItemPropertiesContainer::new().with_usage(0);
 
     let item = ItemData {
         name: "Roddie the Rod".to_string(),
