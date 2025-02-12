@@ -63,7 +63,6 @@ diesel::table! {
         id -> BigInt,
         user_id -> BigInt,
         type_id -> Integer,
-        count -> BigInt,
         properties -> Jsonb,
         created_at -> Timestamptz,
         updated_at -> Timestamptz,

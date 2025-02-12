@@ -7,7 +7,7 @@ use crate::traits::model::Model;
 use chrono::{DateTime, Utc};
 use diesel::{AsChangeset, Insertable, Queryable, Selectable};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 pub mod attributes;
@@ -22,7 +22,6 @@ pub struct Item {
     pub id: i64,
     pub user_id: i64,
     pub type_id: i32,
-    pub count: i64,
     pub properties: ItemProperties,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
@@ -48,7 +47,6 @@ impl Model for Item {
 pub struct NewItem {
     pub user_id: i64,
     pub type_id: i32,
-    pub count: i64,
     pub properties: ItemProperties,
 }
 
@@ -66,6 +64,39 @@ impl ItemEventSuccess {
 }
 
 impl Item {
+    pub fn migrate_properties(&mut self, config: Arc<dyn ConfigInterface>) -> ItemEventResult {
+        let item_data = config
+            .get_item_data(self.type_id)
+            .ok_or(GameItemEventError::invalid_item_type(self.type_id))?;
+
+        let required_property_types: HashSet<ItemComponentType> =
+            item_data.default_properties.get_component_types();
+
+        let existing_property_types: HashSet<ItemComponentType> =
+            self.properties.get_component_types();
+
+        let properties_to_add: HashSet<ItemComponentType> = required_property_types
+            .difference(&existing_property_types)
+            .copied()
+            .collect();
+
+        let properties_to_remove: HashSet<ItemComponentType> = existing_property_types
+            .difference(&required_property_types)
+            .copied()
+            .collect();
+
+        properties_to_add.iter().for_each(|component_type| {
+            let component = component_type.get_default_component();
+            self.properties.add_component(component);
+        });
+
+        properties_to_remove
+            .iter()
+            .for_each(|component_type| self.properties.remove_component(*component_type));
+
+        Ok(ItemEventSuccess::new(self.should_consume()))
+    }
+
     pub fn use_as_rod(&mut self, config: Arc<dyn ConfigInterface>) -> ItemEventResult {
         let attributes = self
             .attributes(config)
@@ -74,9 +105,19 @@ impl Item {
         if !attributes.is_rod() {
             Err(GameItemEventError::not_a_rod(self.type_id))
         } else {
-            self.properties.on_use();
-            Ok(ItemEventSuccess::new(false))
+            self.properties.on_use(1);
+            Ok(ItemEventSuccess::new(self.should_consume()))
         }
+    }
+
+    pub fn add(&mut self, amount: u64) -> ItemEventResult {
+        self.on_add(amount);
+        Ok(ItemEventSuccess::new(self.should_consume()))
+    }
+
+    pub fn remove(&mut self, amount: u64) -> ItemEventResult {
+        self.on_remove(amount);
+        Ok(ItemEventSuccess::new(self.should_consume()))
     }
 }
 

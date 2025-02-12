@@ -5,17 +5,17 @@
     "^[0-9]+$": {
       "type": "object",
       "required": [
-        "name",
-        "stackable"
+        "name"
       ],
       "properties": {
         "name": {
           "type": "string",
           "description": "Name of the item"
         },
-        "stackable": {
-          "type": "boolean",
-          "description": "If this item can be stacked or not"
+        "max_count": {
+          "type": "integer",
+          "description": "How many instances of this item a user can own. E.g. you might have one instance of a certain type of bait, BUT the instance might be stackable and store a count, making it seem like you own multiple instances of this item. Defaults to one.",
+          "min": 1
         },
         "attributes": {
           "type": "object",
@@ -58,10 +58,7 @@
                       "type": "integer",
                       "minimum": 0
                     }
-                  },
-                  "required": [
-                    "times_used"
-                  ]
+                  }
                 }
               }
             }

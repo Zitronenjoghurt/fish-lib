@@ -11,11 +11,21 @@ pub struct ItemData {
     #[serde(skip, default)]
     pub id: i32,
     pub name: String,
-    pub stackable: bool,
+    /// How many instances of this item a user can own
+    /// E.g. you might have one instance of a certain type of bait,
+    /// BUT the instance might be stackable and store a count,
+    /// making it seem like you own multiple instances of this item.
+    /// Defaults to one.
+    #[serde(default = "default_one")]
+    pub max_count: u32,
     #[serde(default)]
     pub attributes: ItemAttributesContainer,
     #[serde(default)]
     pub default_properties: ItemProperties,
+}
+
+fn default_one() -> u32 {
+    1
 }
 
 impl ItemPropertiesInterface for ItemData {

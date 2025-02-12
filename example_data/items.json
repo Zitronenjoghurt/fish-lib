@@ -1,11 +1,9 @@
 {
   "1": {
-    "name": "Bob",
-    "stackable": true
+    "name": "Bob"
   },
   "2": {
     "name": "Bobber",
-    "stackable": false,
     "attributes": {
       "components": {
         "Rod": {

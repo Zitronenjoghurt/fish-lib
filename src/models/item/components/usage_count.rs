@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Clone, PartialEq, Serialize, Deserialize)]
 pub struct UsageComponent {
+    #[serde(default)]
     times_used: u64,
 }
 
@@ -15,7 +16,7 @@ impl UsageComponent {
     }
 
     // Events
-    pub fn on_use(&mut self) {
-        self.times_used = self.times_used.saturating_add(1);
+    pub fn on_use(&mut self, times: u64) {
+        self.times_used = self.times_used.saturating_add(times);
     }
 }

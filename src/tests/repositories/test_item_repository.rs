@@ -31,7 +31,6 @@ fn create_and_save_item(
     let item = sp.config().get_item_data(item_id).unwrap();
     let new_item = NewItem {
         user_id,
-        count: 1,
         type_id: item_id,
         properties: item.default_properties.clone(),
     };
