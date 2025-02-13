@@ -9,7 +9,7 @@ use crate::models::item::properties_container::{
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(Debug, Default, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct ItemData {
     #[serde(skip, default)]
     pub id: i32,
@@ -25,6 +25,18 @@ pub struct ItemData {
     pub attributes: ItemAttributesContainer,
     #[serde(default)]
     pub default_properties: ItemPropertiesContainer,
+}
+
+impl Default for ItemData {
+    fn default() -> Self {
+        Self {
+            id: 0,
+            name: "".to_string(),
+            max_count: 1,
+            attributes: ItemAttributesContainer::new(),
+            default_properties: ItemPropertiesContainer::new(),
+        }
+    }
 }
 
 fn default_one() -> u32 {

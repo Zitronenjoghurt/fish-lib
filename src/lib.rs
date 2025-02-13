@@ -7,6 +7,7 @@
 //! The main entry point is [`crate::game::Game`]. That's where you will find the public API to the game and storage logic.
 //!
 //! ```rust
+//! use std::env;
 //! use fish_lib::config::{Config, ConfigBuilderInterface};
 //! use fish_lib::game::prelude::*;
 //! use fish_lib::game::service_provider::ServiceProviderInterface;
@@ -14,7 +15,8 @@
 //! let config = Config::builder()/*. ...() */.build().unwrap();
 //!
 //! // Create game and clear database for a blank test state
-//! let game = Game::new("postgresql://admin:root@db:5432/test_db", Some(config)).unwrap();
+//! let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+//! let game = Game::new(&database_url, Some(config)).unwrap();
 //! game.database().write().unwrap().clear().unwrap();
 //!
 //! // Example of basic usage, registering a user

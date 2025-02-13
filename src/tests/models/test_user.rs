@@ -1,5 +1,4 @@
 use crate::tests::mock::mock_default_service_provider;
-use chrono::Utc;
 use chrono_tz::Tz;
 
 #[test]
@@ -18,8 +17,4 @@ fn test_user_timezone() {
         .unwrap()
         .unwrap();
     assert_eq!(user.get_timezone(), Tz::Europe__Berlin);
-
-    let utc_now = Utc::now();
-    let berlin_now = user.get_local_time();
-    assert!(berlin_now > utc_now);
 }

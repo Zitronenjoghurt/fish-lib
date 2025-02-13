@@ -1,0 +1,14 @@
+name: fish-lib-db
+
+services:
+  db:
+    image: postgres:17
+    volumes:
+      - postgres_data_dev_test:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+
+volumes:
+  postgres_data_dev_test:

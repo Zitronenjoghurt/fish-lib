@@ -7,7 +7,13 @@ use chrono::Utc;
 use diesel::prelude::*;
 use std::sync::{Arc, RwLock};
 
-pub trait ItemRepositoryInterface: Repository<Item> + Send + Sync {}
+pub trait ItemRepositoryInterface: Repository<Item> + Send + Sync {
+    fn find_by_type_and_user(
+        &self,
+        type_id: i32,
+        user_id: i64,
+    ) -> Result<Vec<Item>, GameRepositoryError>;
+}
 
 pub struct ItemRepository {
     db: Arc<RwLock<dyn DatabaseInterface>>,
@@ -19,7 +25,25 @@ impl ItemRepository {
     }
 }
 
-impl ItemRepositoryInterface for ItemRepository {}
+impl ItemRepositoryInterface for ItemRepository {
+    fn find_by_type_and_user(
+        &self,
+        type_id: i32,
+        user_id: i64,
+    ) -> Result<Vec<Item>, GameRepositoryError> {
+        let mut connection = self.get_connection()?;
+
+        let results = fish_items::table
+            .filter(
+                fish_items::type_id
+                    .eq(type_id)
+                    .and(fish_items::user_id.eq(user_id)),
+            )
+            .load::<Item>(&mut connection)?;
+
+        Ok(results)
+    }
+}
 
 impl Repository<Item> for ItemRepository {
     fn get_db(&self) -> Arc<RwLock<dyn DatabaseInterface>> {

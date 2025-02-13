@@ -13,6 +13,7 @@ use crate::game::services::encounter_service::{EncounterService, EncounterServic
 use crate::game::services::fishing_history_service::{
     FishingHistoryService, FishingHistoryServiceInterface,
 };
+use crate::game::services::item_service::{ItemService, ItemServiceInterface};
 use crate::game::services::location_service::{LocationService, LocationServiceInterface};
 use crate::game::services::pond_service::{PondService, PondServiceInterface};
 use crate::game::services::species_service::{SpeciesService, SpeciesServiceInterface};
@@ -31,6 +32,7 @@ pub trait ServiceProviderInterface: Send + Sync {
     fn user_repository(&self) -> Arc<dyn UserRepositoryInterface>;
     fn encounter_service(&self) -> Arc<dyn EncounterServiceInterface>;
     fn fishing_history_service(&self) -> Arc<dyn FishingHistoryServiceInterface>;
+    fn item_service(&self) -> Arc<dyn ItemServiceInterface>;
     fn location_service(&self) -> Arc<dyn LocationServiceInterface>;
     fn pond_service(&self) -> Arc<dyn PondServiceInterface>;
     fn species_service(&self) -> Arc<dyn SpeciesServiceInterface>;
@@ -49,6 +51,7 @@ pub struct ServiceProvider {
     user_repository: Arc<dyn UserRepositoryInterface>,
     encounter_service: Arc<dyn EncounterServiceInterface>,
     fishing_history_service: Arc<dyn FishingHistoryServiceInterface>,
+    item_service: Arc<dyn ItemServiceInterface>,
     location_service: Arc<dyn LocationServiceInterface>,
     pond_service: Arc<dyn PondServiceInterface>,
     species_service: Arc<dyn SpeciesServiceInterface>,
@@ -74,6 +77,7 @@ impl ServiceProvider {
             config.clone(),
             fishing_history_entry_repository.clone(),
         ));
+        let item_service = Arc::new(ItemService::new(config.clone(), item_repository.clone()));
         let location_service = Arc::new(LocationService::new(config.clone()));
         let pond_service = Arc::new(PondService::new(pond_repository.clone()));
         let species_service = Arc::new(SpeciesService::new(config.clone()));
@@ -94,6 +98,7 @@ impl ServiceProvider {
             user_repository,
             encounter_service,
             fishing_history_service,
+            item_service,
             location_service,
             pond_service,
             species_service,
@@ -146,6 +151,10 @@ impl ServiceProviderInterface for ServiceProvider {
 
     fn fishing_history_service(&self) -> Arc<dyn FishingHistoryServiceInterface> {
         self.fishing_history_service.clone()
+    }
+
+    fn item_service(&self) -> Arc<dyn ItemServiceInterface> {
+        self.item_service.clone()
     }
 
     fn location_service(&self) -> Arc<dyn LocationServiceInterface> {

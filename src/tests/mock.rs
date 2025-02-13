@@ -1,15 +1,15 @@
 use crate::config::{Config, ConfigBuilderInterface, ConfigInterface};
 use crate::database::{Database, DatabaseInterface};
 use crate::game::service_provider::{ServiceProvider, ServiceProviderInterface};
+use std::env;
 use std::path::Path;
 use std::sync::{Arc, RwLock};
 
 pub fn mock_default_db() -> Arc<RwLock<dyn DatabaseInterface>> {
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+
     let db = Database::create();
-    db.write()
-        .unwrap()
-        .connect("postgresql://admin:root@db:5432/test_db")
-        .unwrap();
+    db.write().unwrap().connect(&database_url).unwrap();
     db.read().unwrap().clear().unwrap();
     db
 }

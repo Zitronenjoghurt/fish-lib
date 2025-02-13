@@ -14,6 +14,7 @@ use crate::game::repositories::user_repository::UserRepositoryInterface;
 use crate::game::service_provider::{ServiceProvider, ServiceProviderInterface};
 use crate::game::services::encounter_service::EncounterServiceInterface;
 use crate::game::services::fishing_history_service::FishingHistoryServiceInterface;
+use crate::game::services::item_service::ItemServiceInterface;
 use crate::game::services::location_service::LocationServiceInterface;
 use crate::game::services::pond_service::PondServiceInterface;
 use crate::game::services::species_service::SpeciesServiceInterface;
@@ -75,6 +76,7 @@ impl GameInterface for Game {
     ///
     /// ```
     /// use std::collections::HashMap;
+    /// use std::env;
     /// use fish_lib::config::{Config, ConfigBuilderInterface};
     /// use fish_lib::game::prelude::*;
     /// use fish_lib::data::location_data::LocationData;
@@ -94,7 +96,8 @@ impl GameInterface for Game {
     /// let config = Config::builder().locations(location_data_map).build().unwrap();
     ///
     /// // Create game and clear database for a blank test state
-    /// let game = Game::new("postgresql://admin:root@db:5432/test_db", Some(config)).unwrap();
+    /// let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    /// let game = Game::new(&database_url, Some(config)).unwrap();
     /// game.database().write().unwrap().clear().unwrap();
     ///
     /// // Finding the location data
@@ -132,6 +135,7 @@ impl GameInterface for Game {
     ///
     /// ```
     /// use std::collections::HashMap;
+    /// use std::env;
     /// use fish_lib::config::{Config, ConfigBuilderInterface};
     /// use fish_lib::data::location_data::LocationData;
     /// use fish_lib::data::season_data::SeasonData;
@@ -159,7 +163,8 @@ impl GameInterface for Game {
     /// let config = Config::builder().locations(location_data_map).build().unwrap();
     ///
     /// // Create game and clear database for a blank test state
-    /// let game = Game::new("postgresql://admin:root@db:5432/test_db", Some(config)).unwrap();
+    /// let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    /// let game = Game::new(&database_url, Some(config)).unwrap();
     /// game.database().write().unwrap().clear().unwrap();
     ///
     /// // Get the current weather
@@ -187,6 +192,7 @@ impl GameInterface for Game {
     ///
     /// ```
     /// use std::collections::HashMap;
+    /// use std::env;
     /// use fish_lib::config::{Config, ConfigBuilderInterface};
     /// use fish_lib::data::species_data::SpeciesData;
     /// use fish_lib::game::prelude::*;
@@ -206,7 +212,8 @@ impl GameInterface for Game {
     /// let config = Config::builder().species(species_data_map).build().unwrap();
     ///
     /// // Create game and clear database for a blank test state
-    /// let game = Game::new("postgresql://admin:root@db:5432/test_db", Some(config)).unwrap();
+    /// let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    /// let game = Game::new(&database_url, Some(config)).unwrap();
     /// game.database().write().unwrap().clear().unwrap();
     ///
     /// // Finding the species data
@@ -244,6 +251,7 @@ impl GameInterface for Game {
     ///
     /// ```
     /// use std::collections::HashMap;
+    /// use std::env;
     /// use fish_lib::config::{Config, ConfigBuilderInterface};
     /// use fish_lib::data::species_data::SpeciesData;
     /// use fish_lib::game::prelude::*;
@@ -266,7 +274,8 @@ impl GameInterface for Game {
     /// let config = Config::builder().species(species_data_map).build().unwrap();
     ///
     /// // Create game and clear database for a blank test state
-    /// let game = Game::new("postgresql://admin:root@db:5432/test_db", Some(config)).unwrap();
+    /// let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    /// let game = Game::new(&database_url, Some(config)).unwrap();
     /// game.database().write().unwrap().clear().unwrap();
     ///
     /// // Fetch the species data
@@ -324,6 +333,7 @@ impl GameInterface for Game {
     ///
     /// ```
     /// use std::collections::HashMap;
+    /// use std::env;
     /// use fish_lib::config::{Config, ConfigBuilderInterface};
     /// use fish_lib::data::species_data::SpeciesData;
     /// use fish_lib::game::prelude::*;
@@ -349,7 +359,8 @@ impl GameInterface for Game {
     /// let config = Config::builder().species(species_data_map).build().unwrap();
     ///
     /// // Create game and clear database for a blank test state
-    /// let game = Game::new("postgresql://admin:root@db:5432/test_db", Some(config)).unwrap();
+    /// let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    /// let game = Game::new(&database_url, Some(config)).unwrap();
     /// game.database().write().unwrap().clear().unwrap();
     ///
     /// // Create a user
@@ -411,13 +422,15 @@ impl GameInterface for Game {
     /// # Examples
     ///
     /// ```
+    /// use std::env;
     /// use fish_lib::game::prelude::*;
     /// use fish_lib::game::service_provider::ServiceProviderInterface;
     ///
     /// const EXTERNAL_ID: i64 = 1337;
     ///
     /// // Create game and clear database for a blank test state
-    /// let game = Game::new("postgresql://admin:root@db:5432/test_db", None).unwrap();
+    /// let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    /// let game = Game::new(&database_url, None).unwrap();
     /// game.database().write().unwrap().clear().unwrap();
     ///
     /// // Finding an existing user
@@ -457,6 +470,7 @@ impl GameInterface for Game {
     ///
     /// ```
     /// use std::collections::HashMap;
+    /// use std::env;
     /// use fish_lib::config::{Config, ConfigBuilderInterface};
     /// use fish_lib::data::location_data::LocationData;
     /// use fish_lib::game::prelude::*;
@@ -477,7 +491,8 @@ impl GameInterface for Game {
     /// let config = Config::builder().locations(location_data_map).build().unwrap();
     ///
     /// // Create game and clear database for a blank test state
-    /// let game = Game::new("postgresql://admin:root@db:5432/test_db", Some(config)).unwrap();
+    /// let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    /// let game = Game::new(&database_url, Some(config)).unwrap();
     /// game.database().write().unwrap().clear().unwrap();
     ///
     /// // Registering a new user
@@ -518,13 +533,15 @@ impl GameInterface for Game {
     /// # Examples
     ///
     /// ```
+    /// use std::env;
     /// use fish_lib::game::prelude::*;
     /// use fish_lib::game::service_provider::ServiceProviderInterface;
     ///
     /// const EXTERNAL_ID: i64 = 1337;
     ///
     /// // Create game and clear database for a blank test state
-    /// let game = Game::new("postgresql://admin:root@db:5432/test_db", None).unwrap();
+    /// let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    /// let game = Game::new(&database_url, None).unwrap();
     /// game.database().write().unwrap().clear().unwrap();
     ///
     /// // Registering a new user
@@ -562,6 +579,7 @@ impl GameInterface for Game {
     /// # Examples
     ///
     /// ```
+    /// use std::env;
     /// use fish_lib::game::prelude::*;
     /// use fish_lib::game::service_provider::ServiceProviderInterface;    ///
     ///
@@ -572,7 +590,8 @@ impl GameInterface for Game {
     /// const USER_CREDITS: i64 = 293;
     ///
     /// // Create game and clear database for a blank test state
-    /// let game = Game::new("postgresql://admin:root@db:5432/test_db", None).unwrap();
+    /// let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    /// let game = Game::new(&database_url, None).unwrap();
     /// game.database().write().unwrap().clear().unwrap();
     ///
     /// // Create a new user and update their credits
@@ -621,6 +640,7 @@ impl GameInterface for Game {
     /// ```
     /// use fish_lib::game::prelude::*;
     /// use std::collections::HashMap;
+    /// use std::env;
     /// use fish_lib::config::{Config, ConfigBuilderInterface};
     /// use fish_lib::data::location_data::LocationData;
     /// use fish_lib::game::prelude::*;
@@ -651,7 +671,8 @@ impl GameInterface for Game {
     /// let config = Config::builder().locations(location_data_map).build().unwrap();
     ///
     /// // Create game and clear database for a blank test state
-    /// let game = Game::new("postgresql://admin:root@db:5432/test_db", Some(config)).unwrap();
+    /// let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    /// let game = Game::new(&database_url, Some(config)).unwrap();
     /// game.database().write().unwrap().clear().unwrap();
     ///
     /// // Registering a new user
@@ -732,6 +753,10 @@ impl ServiceProviderInterface for Game {
 
     fn fishing_history_service(&self) -> Arc<dyn FishingHistoryServiceInterface> {
         self.service_provider.fishing_history_service()
+    }
+
+    fn item_service(&self) -> Arc<dyn ItemServiceInterface> {
+        self.service_provider.item_service()
     }
 
     fn location_service(&self) -> Arc<dyn LocationServiceInterface> {

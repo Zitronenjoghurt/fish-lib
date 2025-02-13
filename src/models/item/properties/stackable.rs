@@ -2,8 +2,12 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Clone, PartialEq, Serialize, Deserialize)]
 pub struct StackableComponent {
-    #[serde(default)]
+    #[serde(default = "default_one")]
     count: u64,
+}
+
+fn default_one() -> u64 {
+    1
 }
 
 impl StackableComponent {

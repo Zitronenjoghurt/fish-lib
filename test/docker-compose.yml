@@ -6,7 +6,7 @@ services:
     volumes:
       - postgres_data_test:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "5432:5432"
     env_file:
       - .env
 
@@ -23,6 +23,8 @@ services:
     depends_on:
       - db
     privileged: true
+    tty: true
+    stdin_open: true
 
 volumes:
   postgres_data_test:

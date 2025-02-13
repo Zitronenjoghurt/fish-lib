@@ -4,6 +4,12 @@ use thiserror::Error;
 pub enum GameResourceError {
     #[error("User with id '{user_id}' has no fishing history with species with id '{species_id}'")]
     FishingHistoryNotFound { user_id: i64, species_id: i32 },
+    #[error("User with external id '{external_id}' has reached the maximum amount of instances for item of type id '{item_type_id}'")]
+    ItemMaxCountExceeded { item_type_id: i32, external_id: i64 },
+    #[error("Item of type id '{item_type_id}' does not exist")]
+    ItemNotFound { item_type_id: i32 },
+    #[error("Item of type id '{item_type_id}' was unable to be stacked: {msg}")]
+    ItemUnstackable { msg: String, item_type_id: i32 },
     #[error("User with external id '{external_id}' has already unlocked location with id '{location_id}'")]
     LocationAlreadyUnlocked { external_id: i64, location_id: i32 },
     #[error("Location with id '{location_id}' does not exist")]
@@ -29,6 +35,24 @@ impl GameResourceError {
         Self::FishingHistoryNotFound {
             user_id,
             species_id,
+        }
+    }
+
+    pub fn item_max_count_exceeded(item_type_id: i32, external_id: i64) -> Self {
+        Self::ItemMaxCountExceeded {
+            item_type_id,
+            external_id,
+        }
+    }
+
+    pub fn item_not_found(item_type_id: i32) -> Self {
+        Self::ItemNotFound { item_type_id }
+    }
+
+    pub fn item_unstackable(item_type_id: i32, message: &str) -> Self {
+        Self::ItemUnstackable {
+            item_type_id,
+            msg: message.to_string(),
         }
     }
 
@@ -74,6 +98,18 @@ impl GameResourceError {
         matches!(self, Self::FishingHistoryNotFound { .. })
     }
 
+    pub fn is_item_max_count_exceeded(&self) -> bool {
+        matches!(self, Self::ItemMaxCountExceeded { .. })
+    }
+
+    pub fn is_item_not_found(&self) -> bool {
+        matches!(self, Self::ItemNotFound { .. })
+    }
+
+    pub fn is_item_unstackable(&self) -> bool {
+        matches!(self, Self::ItemUnstackable { .. })
+    }
+
     pub fn is_location_already_unlocked(&self) -> bool {
         matches!(self, Self::LocationAlreadyUnlocked { .. })
     }
@@ -108,10 +144,20 @@ impl GameResourceError {
 
     pub fn get_external_id(&self) -> Option<i64> {
         match self {
+            Self::ItemMaxCountExceeded { external_id, .. } => Some(*external_id),
             Self::LocationAlreadyUnlocked { external_id, .. } => Some(*external_id),
             Self::NoFishingHistory { external_id, .. } => Some(*external_id),
             Self::UserAlreadyExists { external_id } => Some(*external_id),
             Self::UserNotFound { external_id } => Some(*external_id),
+            _ => None,
+        }
+    }
+
+    pub fn get_item_type_id(&self) -> Option<i32> {
+        match self {
+            Self::ItemMaxCountExceeded { item_type_id, .. } => Some(*item_type_id),
+            Self::ItemNotFound { item_type_id, .. } => Some(*item_type_id),
+            Self::ItemUnstackable { item_type_id, .. } => Some(*item_type_id),
             _ => None,
         }
     }
@@ -121,6 +167,13 @@ impl GameResourceError {
             Self::LocationAlreadyUnlocked { location_id, .. } => Some(*location_id),
             Self::LocationNotFound { location_id } => Some(*location_id),
             Self::UnmetLocationUnlockRequirements { location_id, .. } => Some(*location_id),
+            _ => None,
+        }
+    }
+
+    pub fn get_message(&self) -> Option<&str> {
+        match self {
+            Self::ItemUnstackable { msg, .. } => Some(msg),
             _ => None,
         }
     }

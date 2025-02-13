@@ -1,5 +1,6 @@
 use crate::config::{Config, ConfigBuilderInterface, ConfigInterface};
 use crate::data::encounter_data::EncounterData;
+use crate::data::item_data::ItemData;
 use crate::data::location_data::LocationData;
 use crate::data::species_data::SpeciesData;
 use crate::models::item::attributes::ItemAttributesType;
@@ -60,26 +61,30 @@ fn test_validation() {
         ..Default::default()
     };
 
-    let mut species_data_map = HashMap::new();
-    species_data_map.insert(4, species_data);
-
     let location_data = LocationData {
         required_locations_unlocked: vec![800],
         required_species_caught: vec![700],
         ..Default::default()
     };
 
-    let mut locations_data_map = HashMap::new();
-    locations_data_map.insert(5, location_data);
+    let item_data = ItemData {
+        max_count: 0,
+        ..Default::default()
+    };
+
+    let species_data_map = HashMap::from([(4, species_data)]);
+    let locations_data_map = HashMap::from([(5, location_data)]);
+    let items_data_map = HashMap::from([(1, item_data)]);
 
     let validation_report = Config::builder()
         .locations(locations_data_map)
         .species(species_data_map)
+        .items(items_data_map)
         .build()
         .unwrap_err();
 
     let errors = validation_report.errors();
-    assert_eq!(errors.len(), 3);
+    assert_eq!(errors.len(), 4);
 
     let species_encounter_location_error = &errors[0];
     assert!(species_encounter_location_error.is_species_encounter_location());
@@ -113,6 +118,10 @@ fn test_validation() {
         location_required_species_error.get_target_species_id(),
         Some(700)
     );
+
+    let item_invalid_max_count_error = &errors[3];
+    assert!(item_invalid_max_count_error.is_item_invalid_max_count());
+    assert_eq!(item_invalid_max_count_error.get_source_item_id(), Some(1));
 }
 
 #[test]

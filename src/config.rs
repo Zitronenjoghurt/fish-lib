@@ -7,6 +7,7 @@ use crate::data::settings::Settings;
 use crate::data::species_data::SpeciesData;
 use crate::models::item::attributes::ItemAttributesType;
 use crate::models::item::properties::ItemPropertiesType;
+use crate::models::item::properties_container::ItemPropertiesContainerInterface;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::fs::File;
@@ -319,6 +320,7 @@ impl ConfigBuilder {
         let mut report = ConfigValidationReport::new();
         self.validate_species(&mut report);
         self.validate_locations(&mut report);
+        self.validate_items(&mut report);
         report
     }
 
@@ -394,6 +396,14 @@ impl ConfigBuilder {
                 species_data.id,
                 location_id,
             ));
+        }
+    }
+
+    fn validate_items(&self, report: &mut ConfigValidationReport) {
+        for item_data in self.config.items.values() {
+            if item_data.max_count < 1 {
+                report.add_error(ConfigValidationError::item_invalid_max_count(item_data.id));
+            }
         }
     }
 }

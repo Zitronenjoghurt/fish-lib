@@ -1,4 +1,5 @@
 use crate::game::errors::database::GameDatabaseError;
+use crate::game::errors::item_event::GameItemEventError;
 use crate::game::errors::repository::GameRepositoryError;
 use crate::game::errors::resource::GameResourceError;
 use thiserror::Error;
@@ -14,6 +15,8 @@ pub type GameResult<T> = Result<T, GameError>;
 pub enum GameError {
     #[error(transparent)]
     Database(#[from] GameDatabaseError),
+    #[error(transparent)]
+    ItemEvent(#[from] GameItemEventError),
     #[error(transparent)]
     Repository(#[from] GameRepositoryError),
     #[error(transparent)]
@@ -41,6 +44,13 @@ impl GameError {
         }
     }
 
+    pub fn as_item_event_error(&self) -> Option<&GameItemEventError> {
+        match self {
+            Self::ItemEvent(e) => Some(e),
+            _ => None,
+        }
+    }
+
     pub fn as_repository_error(&self) -> Option<&GameRepositoryError> {
         match self {
             Self::Repository(e) => Some(e),
@@ -57,6 +67,10 @@ impl GameError {
 
     pub fn is_database_error(&self) -> bool {
         matches!(self, Self::Database(_))
+    }
+
+    pub fn is_item_event_error(&self) -> bool {
+        matches!(self, Self::ItemEvent(_))
     }
 
     pub fn is_repository_error(&self) -> bool {

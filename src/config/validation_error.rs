@@ -2,13 +2,8 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum ConfigValidationError {
-    #[error(
-        "Species (ID: {source_species_id}): Invalid encounter location_id '{target_location_id}'"
-    )]
-    SpeciesEncounterLocation {
-        source_species_id: i32,
-        target_location_id: i32,
-    },
+    #[error("Item (ID: {source_item_id}): max_count has to be greater or equal 1")]
+    ItemInvalidMaxCount { source_item_id: i32 },
     #[error("Location (ID: {source_location_id}): Invalid required_locations_unlocked location_id '{target_location_id}'")]
     LocationRequiredLocation {
         source_location_id: i32,
@@ -19,14 +14,18 @@ pub enum ConfigValidationError {
         source_location_id: i32,
         target_species_id: i32,
     },
+    #[error(
+        "Species (ID: {source_species_id}): Invalid encounter location_id '{target_location_id}'"
+    )]
+    SpeciesEncounterLocation {
+        source_species_id: i32,
+        target_location_id: i32,
+    },
 }
 
 impl ConfigValidationError {
-    pub fn species_encounter_location(source_species_id: i32, target_location_id: i32) -> Self {
-        Self::SpeciesEncounterLocation {
-            source_species_id,
-            target_location_id,
-        }
+    pub fn item_invalid_max_count(source_item_id: i32) -> Self {
+        Self::ItemInvalidMaxCount { source_item_id }
     }
 
     pub fn location_required_location(source_location_id: i32, target_location_id: i32) -> Self {
@@ -43,8 +42,15 @@ impl ConfigValidationError {
         }
     }
 
-    pub fn is_species_encounter_location(&self) -> bool {
-        matches!(self, Self::SpeciesEncounterLocation { .. })
+    pub fn species_encounter_location(source_species_id: i32, target_location_id: i32) -> Self {
+        Self::SpeciesEncounterLocation {
+            source_species_id,
+            target_location_id,
+        }
+    }
+
+    pub fn is_item_invalid_max_count(&self) -> bool {
+        matches!(self, Self::ItemInvalidMaxCount { .. })
     }
 
     pub fn is_location_required_location(&self) -> bool {
@@ -53,6 +59,10 @@ impl ConfigValidationError {
 
     pub fn is_location_required_species(&self) -> bool {
         matches!(self, Self::LocationRequiredSpecies { .. })
+    }
+
+    pub fn is_species_encounter_location(&self) -> bool {
+        matches!(self, Self::SpeciesEncounterLocation { .. })
     }
 
     pub fn get_source_species_id(&self) -> Option<i32> {
@@ -93,6 +103,13 @@ impl ConfigValidationError {
             Self::LocationRequiredLocation {
                 target_location_id, ..
             } => Some(*target_location_id),
+            _ => None,
+        }
+    }
+
+    pub fn get_source_item_id(&self) -> Option<i32> {
+        match self {
+            Self::ItemInvalidMaxCount { source_item_id, .. } => Some(*source_item_id),
             _ => None,
         }
     }
