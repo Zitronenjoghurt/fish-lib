@@ -101,6 +101,13 @@ pub trait ItemPropertiesContainerInterface {
         }
     }
 
+    // Direct manipulation
+    fn set_count(&mut self, count: u64) {
+        self.get_stackable_properties_mut().map(|stackable| {
+            stackable.set_count(count);
+        });
+    }
+
     // Properties-existence functions
     fn is_stackable(&self) -> bool {
         self.get_stackable_properties().is_some()

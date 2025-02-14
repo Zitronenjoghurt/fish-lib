@@ -4,6 +4,8 @@ use thiserror::Error;
 pub enum ConfigValidationError {
     #[error("Item (ID: {source_item_id}): max_count has to be greater or equal 1")]
     ItemInvalidMaxCount { source_item_id: i32 },
+    #[error("Item (ID: {source_item_id}): stackable items must have a max_count of 1")]
+    ItemNonUniqueNotStackable { source_item_id: i32 },
     #[error("Location (ID: {source_location_id}): Invalid required_locations_unlocked location_id '{target_location_id}'")]
     LocationRequiredLocation {
         source_location_id: i32,
@@ -26,6 +28,10 @@ pub enum ConfigValidationError {
 impl ConfigValidationError {
     pub fn item_invalid_max_count(source_item_id: i32) -> Self {
         Self::ItemInvalidMaxCount { source_item_id }
+    }
+
+    pub fn item_non_unique_not_stackable(source_item_id: i32) -> Self {
+        Self::ItemNonUniqueNotStackable { source_item_id }
     }
 
     pub fn location_required_location(source_location_id: i32, target_location_id: i32) -> Self {
@@ -51,6 +57,10 @@ impl ConfigValidationError {
 
     pub fn is_item_invalid_max_count(&self) -> bool {
         matches!(self, Self::ItemInvalidMaxCount { .. })
+    }
+
+    pub fn is_item_non_unique_not_stackable(&self) -> bool {
+        matches!(self, Self::ItemNonUniqueNotStackable { .. })
     }
 
     pub fn is_location_required_location(&self) -> bool {
@@ -110,6 +120,7 @@ impl ConfigValidationError {
     pub fn get_source_item_id(&self) -> Option<i32> {
         match self {
             Self::ItemInvalidMaxCount { source_item_id, .. } => Some(*source_item_id),
+            Self::ItemNonUniqueNotStackable { source_item_id, .. } => Some(*source_item_id),
             _ => None,
         }
     }

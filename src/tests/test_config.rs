@@ -6,7 +6,9 @@ use crate::data::species_data::SpeciesData;
 use crate::models::item::attributes::ItemAttributesType;
 use crate::models::item::attributes_container::ItemAttributesContainerInterface;
 use crate::models::item::properties::ItemPropertiesType;
-use crate::models::item::properties_container::ItemPropertiesContainerInterface;
+use crate::models::item::properties_container::{
+    ItemPropertiesContainer, ItemPropertiesContainerInterface,
+};
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::Arc;
@@ -72,9 +74,15 @@ fn test_validation() {
         ..Default::default()
     };
 
+    let item_data2 = ItemData {
+        max_count: 2,
+        default_properties: ItemPropertiesContainer::new().with_stackable(0),
+        ..Default::default()
+    };
+
     let species_data_map = HashMap::from([(4, species_data)]);
     let locations_data_map = HashMap::from([(5, location_data)]);
-    let items_data_map = HashMap::from([(1, item_data)]);
+    let items_data_map = HashMap::from([(1, item_data), (2, item_data2)]);
 
     let validation_report = Config::builder()
         .locations(locations_data_map)
@@ -84,44 +92,33 @@ fn test_validation() {
         .unwrap_err();
 
     let errors = validation_report.errors();
-    assert_eq!(errors.len(), 4);
+    assert_eq!(errors.len(), 5);
 
-    let species_encounter_location_error = &errors[0];
-    assert!(species_encounter_location_error.is_species_encounter_location());
-    assert_eq!(
-        species_encounter_location_error.get_source_species_id(),
-        Some(4)
-    );
-    assert_eq!(
-        species_encounter_location_error.get_target_location_id(),
-        Some(67)
-    );
+    assert!(errors.iter().any(|e| {
+        e.is_species_encounter_location()
+            && e.get_source_species_id() == Some(4)
+            && e.get_target_location_id() == Some(67)
+    }));
 
-    let location_required_location_error = &errors[1];
-    assert!(location_required_location_error.is_location_required_location());
-    assert_eq!(
-        location_required_location_error.get_source_location_id(),
-        Some(5)
-    );
-    assert_eq!(
-        location_required_location_error.get_target_location_id(),
-        Some(800)
-    );
+    assert!(errors.iter().any(|e| {
+        e.is_location_required_location()
+            && e.get_source_location_id() == Some(5)
+            && e.get_target_location_id() == Some(800)
+    }));
 
-    let location_required_species_error = &errors[2];
-    assert!(location_required_species_error.is_location_required_species());
-    assert_eq!(
-        location_required_species_error.get_source_location_id(),
-        Some(5)
-    );
-    assert_eq!(
-        location_required_species_error.get_target_species_id(),
-        Some(700)
-    );
+    assert!(errors.iter().any(|e| {
+        e.is_location_required_species()
+            && e.get_source_location_id() == Some(5)
+            && e.get_target_species_id() == Some(700)
+    }));
 
-    let item_invalid_max_count_error = &errors[3];
-    assert!(item_invalid_max_count_error.is_item_invalid_max_count());
-    assert_eq!(item_invalid_max_count_error.get_source_item_id(), Some(1));
+    assert!(errors
+        .iter()
+        .any(|e| { e.is_item_invalid_max_count() && e.get_source_item_id() == Some(1) }));
+
+    assert!(errors
+        .iter()
+        .any(|e| { e.is_item_non_unique_not_stackable() && e.get_source_item_id() == Some(2) }));
 }
 
 #[test]

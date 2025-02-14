@@ -19,6 +19,10 @@ impl StackableComponent {
         self.count
     }
 
+    pub fn set_count(&mut self, count: u64) {
+        self.count = count;
+    }
+
     // Events
     pub fn on_use(&mut self, times: u64) {
         self.count = self.count.saturating_sub(times);

@@ -11,6 +11,13 @@ use std::sync::Arc;
 pub trait ItemServiceInterface: Send + Sync {
     fn get_item_data(&self, type_id: i32) -> GameResult<Arc<ItemData>>;
     fn add_new_item(&self, item: NewItem, user: &User) -> GameResult<Item>;
+    fn create_and_save_item(&self, item_data: Arc<ItemData>, user: &User) -> GameResult<Item>;
+    fn create_and_save_item_with_count(
+        &self,
+        item_data: Arc<ItemData>,
+        user: &User,
+        count: u64,
+    ) -> GameResult<Item>;
     fn manipulate(
         &self,
         item: Item,
@@ -87,6 +94,30 @@ impl ItemServiceInterface for ItemService {
         };
 
         Ok(item)
+    }
+
+    fn create_and_save_item(&self, item_data: Arc<ItemData>, user: &User) -> GameResult<Item> {
+        let new_item = NewItem::new(user.id, item_data.clone());
+        self.add_new_item(new_item, user)
+    }
+
+    fn create_and_save_item_with_count(
+        &self,
+        item_data: Arc<ItemData>,
+        user: &User,
+        count: u64,
+    ) -> GameResult<Item> {
+        let mut new_item = NewItem::new(user.id, item_data.clone());
+        if !item_data.is_stackable() {
+            return Err(GameResourceError::item_unstackable(
+                item_data.id,
+                "count provided on item creation, but item is unstackable",
+            )
+            .into());
+        } else {
+            new_item.properties.set_count(count);
+        }
+        self.add_new_item(new_item, user)
     }
 
     fn manipulate(

@@ -1,4 +1,5 @@
 use crate::config::ConfigInterface;
+use crate::data::item_data::ItemData;
 use crate::game::errors::item_event::GameItemEventError;
 use crate::models::item::attributes_container::ItemAttributesContainerInterface;
 use crate::models::item::properties::{ItemProperties, ItemPropertiesType};
@@ -51,6 +52,16 @@ pub struct NewItem {
     pub user_id: i64,
     pub type_id: i32,
     pub properties: ItemPropertiesContainer,
+}
+
+impl NewItem {
+    pub fn new(user_id: i64, item_data: Arc<ItemData>) -> Self {
+        Self {
+            user_id,
+            type_id: item_data.id,
+            properties: item_data.default_properties.clone(),
+        }
+    }
 }
 
 pub type ItemEventResult = Result<ItemEventSuccess, GameItemEventError>;

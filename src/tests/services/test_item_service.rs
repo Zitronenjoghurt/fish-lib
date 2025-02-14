@@ -180,3 +180,35 @@ fn test_add_new_item() {
         panic!("Expected ItemMaxCountExceeded error")
     }
 }
+
+#[test]
+fn test_create_and_save_item() {
+    let config = mock_config();
+    let sp = mock_service_provider(config.clone());
+
+    let user = sp.user_service().create_and_save_user(1337).unwrap();
+
+    let rod_data = config.get_item_data(NON_UNIQUE_ROD_ID).unwrap();
+    let rod_item = sp
+        .item_service()
+        .create_and_save_item(rod_data.clone(), &user)
+        .unwrap();
+    assert!(rod_item.attributes(config.clone()).unwrap().is_rod());
+
+    let bait_data = config.get_item_data(BAIT_ID).unwrap();
+    let bait_item = sp
+        .item_service()
+        .create_and_save_item_with_count(bait_data, &user, 5)
+        .unwrap();
+    assert!(bait_item.attributes(config.clone()).unwrap().is_bait());
+    assert_eq!(bait_item.get_count(), Some(5));
+
+    let error = sp
+        .item_service()
+        .create_and_save_item_with_count(rod_data, &user, 5)
+        .unwrap_err();
+    if let Some(resource_error) = error.as_resource_error() {
+        assert!(resource_error.is_item_unstackable());
+        assert_eq!(resource_error.get_item_type_id(), Some(NON_UNIQUE_ROD_ID));
+    }
+}

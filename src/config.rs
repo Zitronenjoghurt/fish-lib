@@ -404,6 +404,12 @@ impl ConfigBuilder {
             if item_data.max_count < 1 {
                 report.add_error(ConfigValidationError::item_invalid_max_count(item_data.id));
             }
+
+            if item_data.is_stackable() && item_data.max_count != 1 {
+                report.add_error(ConfigValidationError::item_non_unique_not_stackable(
+                    item_data.id,
+                ));
+            }
         }
     }
 }
