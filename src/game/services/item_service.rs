@@ -140,6 +140,6 @@ impl ItemServiceInterface for ItemService {
 
     fn get_inventory(&self, user: &User) -> GameResult<Inventory> {
         let items = self.item_repository.find_by_user(user.id)?;
-        Ok(Inventory::new(items))
+        Ok(Inventory::new(self.config.clone(), items))
     }
 }

@@ -3,6 +3,7 @@ use crate::data::encounter_data::EncounterData;
 use crate::data::item_data::ItemData;
 use crate::data::location_data::LocationData;
 use crate::data::species_data::SpeciesData;
+use crate::enums::item_category::ItemCategory;
 use crate::models::item::attributes::ItemAttributesType;
 use crate::models::item::attributes_container::ItemAttributesContainerInterface;
 use crate::models::item::properties::ItemPropertiesType;
@@ -45,10 +46,16 @@ fn test_building() {
     assert_eq!(item1.get_bait_level(), Some(1));
     assert_eq!(item1.get_cost(), Some(50));
     assert_eq!(item1.name, "Bob");
+    assert!(config.is_item_in_category(item1.clone(), ItemCategory::Bait));
+    assert!(config.is_item_in_category(item1.clone(), ItemCategory::Shop));
+    assert!(!config.is_item_in_category(item1.clone(), ItemCategory::Rod));
 
     let item2 = config.get_item_data(2).unwrap();
     assert!(item2.is_rod());
     assert_eq!(item2.get_times_used(), Some(0));
+    assert!(!config.is_item_in_category(item2.clone(), ItemCategory::Bait));
+    assert!(!config.is_item_in_category(item2.clone(), ItemCategory::Shop));
+    assert!(config.is_item_in_category(item2.clone(), ItemCategory::Rod));
 }
 
 #[test]

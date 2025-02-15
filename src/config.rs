@@ -5,7 +5,9 @@ use crate::data::item_data::ItemData;
 use crate::data::location_data::LocationData;
 use crate::data::settings::Settings;
 use crate::data::species_data::SpeciesData;
+use crate::enums::item_category::ItemCategory;
 use crate::models::item::attributes::ItemAttributesType;
+use crate::models::item::attributes_container::ItemAttributesContainerInterface;
 use crate::models::item::properties::ItemPropertiesType;
 use crate::models::item::properties_container::ItemPropertiesContainerInterface;
 use std::collections::HashMap;
@@ -27,6 +29,8 @@ pub trait ConfigInterface: Debug + Send + Sync {
     fn item_names(&self) -> Arc<HashMap<i32, String>>;
     fn items_by_attributes(&self) -> Arc<HashMap<ItemAttributesType, Arc<Vec<Arc<ItemData>>>>>;
     fn items_by_properties(&self) -> Arc<HashMap<ItemPropertiesType, Arc<Vec<Arc<ItemData>>>>>;
+    fn items_by_category(&self) -> Arc<HashMap<ItemCategory, Arc<Vec<Arc<ItemData>>>>>;
+    fn item_ids_by_category(&self) -> Arc<HashMap<ItemCategory, Arc<Vec<i32>>>>;
 
     fn get_species_data(&self, species_id: i32) -> Option<Arc<SpeciesData>> {
         self.species().get(&species_id).cloned()
@@ -53,6 +57,27 @@ pub trait ConfigInterface: Debug + Send + Sync {
     ) -> Option<Arc<Vec<Arc<ItemData>>>> {
         self.items_by_properties().get(&properties_type).cloned()
     }
+
+    fn get_items_by_category(
+        &self,
+        item_category: ItemCategory,
+    ) -> Option<Arc<Vec<Arc<ItemData>>>> {
+        self.items_by_category().get(&item_category).cloned()
+    }
+
+    fn get_item_ids_by_category(&self, item_category: ItemCategory) -> Option<Arc<Vec<i32>>> {
+        self.item_ids_by_category().get(&item_category).cloned()
+    }
+
+    fn is_item_in_category(&self, item_data: Arc<ItemData>, category: ItemCategory) -> bool {
+        self.is_item_id_in_category(item_data.id, category)
+    }
+
+    fn is_item_id_in_category(&self, item_id: i32, item_category: ItemCategory) -> bool {
+        self.get_item_ids_by_category(item_category)
+            .unwrap_or_default()
+            .contains(&item_id)
+    }
 }
 
 #[derive(Debug, Default, PartialEq)]
@@ -67,6 +92,8 @@ pub struct Config {
     item_names: Arc<HashMap<i32, String>>,
     items_by_attributes: Arc<HashMap<ItemAttributesType, Arc<Vec<Arc<ItemData>>>>>,
     items_by_properties: Arc<HashMap<ItemPropertiesType, Arc<Vec<Arc<ItemData>>>>>,
+    items_by_category: Arc<HashMap<ItemCategory, Arc<Vec<Arc<ItemData>>>>>,
+    item_ids_by_category: Arc<HashMap<ItemCategory, Arc<Vec<i32>>>>,
 }
 
 impl ConfigInterface for Config {
@@ -104,6 +131,14 @@ impl ConfigInterface for Config {
 
     fn items_by_properties(&self) -> Arc<HashMap<ItemPropertiesType, Arc<Vec<Arc<ItemData>>>>> {
         self.items_by_properties.clone()
+    }
+
+    fn items_by_category(&self) -> Arc<HashMap<ItemCategory, Arc<Vec<Arc<ItemData>>>>> {
+        self.items_by_category.clone()
+    }
+
+    fn item_ids_by_category(&self) -> Arc<HashMap<ItemCategory, Arc<Vec<i32>>>> {
+        self.item_ids_by_category.clone()
     }
 }
 
@@ -208,6 +243,7 @@ impl ConfigBuilder {
 
         self.map_item_names();
         self.map_items_by_attributes_and_properties_types();
+        self.map_items_by_category();
 
         self
     }
@@ -313,6 +349,57 @@ impl ConfigBuilder {
 
         self.config.items_by_attributes = Arc::new(by_attributes);
         self.config.items_by_properties = Arc::new(by_properties);
+    }
+
+    pub fn map_items_by_category(&mut self) {
+        let mut by_category: HashMap<ItemCategory, Vec<Arc<ItemData>>> = HashMap::new();
+        let mut ids_by_category: HashMap<ItemCategory, Vec<i32>> = HashMap::new();
+
+        self.config.items.values().for_each(|item| {
+            if item.is_purchasable() {
+                by_category
+                    .entry(ItemCategory::Shop)
+                    .or_default()
+                    .push(item.clone());
+                ids_by_category
+                    .entry(ItemCategory::Shop)
+                    .or_default()
+                    .push(item.id);
+            }
+
+            if item.is_bait() {
+                by_category
+                    .entry(ItemCategory::Bait)
+                    .or_default()
+                    .push(item.clone());
+                ids_by_category
+                    .entry(ItemCategory::Bait)
+                    .or_default()
+                    .push(item.id);
+            }
+
+            if item.is_rod() {
+                by_category
+                    .entry(ItemCategory::Rod)
+                    .or_default()
+                    .push(item.clone());
+                ids_by_category
+                    .entry(ItemCategory::Rod)
+                    .or_default()
+                    .push(item.id);
+            }
+        });
+
+        let by_category = by_category
+            .into_iter()
+            .map(|(k, v)| (k, Arc::new(v)))
+            .collect();
+        let ids_by_category = ids_by_category
+            .into_iter()
+            .map(|(k, v)| (k, Arc::new(v)))
+            .collect();
+        self.config.items_by_category = Arc::new(by_category);
+        self.config.item_ids_by_category = Arc::new(ids_by_category);
     }
 
     // Validation

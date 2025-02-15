@@ -1,5 +1,6 @@
 use crate::config::{Config, ConfigBuilderInterface, ConfigInterface};
 use crate::data::item_data::ItemData;
+use crate::enums::item_category::ItemCategory;
 use crate::game::service_provider::ServiceProviderInterface;
 use crate::models::item::attributes_container::ItemAttributesContainer;
 use crate::models::item::properties_container::{
@@ -228,4 +229,11 @@ fn test_get_inventory() {
     let items = inventory.get_items();
     assert_eq!(items.len(), 1);
     assert_eq!(items[0], rod);
+
+    let rod_items = inventory.get_items_by_category(ItemCategory::Rod);
+    assert_eq!(rod_items.len(), 1);
+    assert_eq!(rod_items[0], &rod);
+
+    let no_items = inventory.get_items_by_category(ItemCategory::Bait);
+    assert_eq!(no_items.len(), 0);
 }
