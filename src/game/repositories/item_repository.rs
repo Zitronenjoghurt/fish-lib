@@ -8,6 +8,7 @@ use diesel::prelude::*;
 use std::sync::{Arc, RwLock};
 
 pub trait ItemRepositoryInterface: Repository<Item> + Send + Sync {
+    fn find_by_user(&self, user_id: i64) -> Result<Vec<Item>, GameRepositoryError>;
     fn find_by_type_and_user(
         &self,
         type_id: i32,
@@ -26,6 +27,16 @@ impl ItemRepository {
 }
 
 impl ItemRepositoryInterface for ItemRepository {
+    fn find_by_user(&self, user_id: i64) -> Result<Vec<Item>, GameRepositoryError> {
+        let mut connection = self.get_connection()?;
+
+        let results = fish_items::table
+            .filter(fish_items::user_id.eq(user_id))
+            .load::<Item>(&mut connection)?;
+
+        Ok(results)
+    }
+
     fn find_by_type_and_user(
         &self,
         type_id: i32,

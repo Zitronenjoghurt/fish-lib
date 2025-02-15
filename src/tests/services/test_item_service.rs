@@ -212,3 +212,20 @@ fn test_create_and_save_item() {
         assert_eq!(resource_error.get_item_type_id(), Some(NON_UNIQUE_ROD_ID));
     }
 }
+
+#[test]
+fn test_get_inventory() {
+    let sp = mock_service_provider(mock_config());
+    let user = sp.user_service().create_and_save_user(1337).unwrap();
+
+    let item_data = sp.item_service().get_item_data(UNIQUE_ROD_ID).unwrap();
+    let rod = sp
+        .item_service()
+        .create_and_save_item(item_data, &user)
+        .unwrap();
+
+    let inventory = sp.item_service().get_inventory(&user).unwrap();
+    let items = inventory.get_items();
+    assert_eq!(items.len(), 1);
+    assert_eq!(items[0], rod);
+}

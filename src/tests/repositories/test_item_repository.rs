@@ -84,3 +84,15 @@ fn test_delete() {
     sp.item_repository().delete(found_item).unwrap();
     assert_eq!(sp.item_repository().find(found_item_id).unwrap(), None);
 }
+
+#[test]
+fn test_find_by_user() {
+    let sp = mock_service_provider(mock_config());
+    let user = sp.user_service().create_and_save_user(1337).unwrap();
+
+    let item = create_and_save_item(&sp, user.id, 1);
+
+    let found_items = sp.item_repository().find_by_user(user.id).unwrap();
+    assert_eq!(found_items.len(), 1);
+    assert_eq!(found_items[0], item);
+}

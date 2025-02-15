@@ -1,5 +1,6 @@
 use crate::config::ConfigInterface;
 use crate::data::item_data::ItemData;
+use crate::dto::inventory::Inventory;
 use crate::game::errors::resource::GameResourceError;
 use crate::game::errors::GameResult;
 use crate::game::repositories::item_repository::ItemRepositoryInterface;
@@ -23,6 +24,7 @@ pub trait ItemServiceInterface: Send + Sync {
         item: Item,
         function: Box<dyn Fn(&mut Item) -> ItemEventResult>,
     ) -> GameResult<ItemEventSuccess>;
+    fn get_inventory(&self, user: &User) -> GameResult<Inventory>;
 }
 
 pub struct ItemService {
@@ -134,5 +136,10 @@ impl ItemServiceInterface for ItemService {
         }
 
         Ok(success)
+    }
+
+    fn get_inventory(&self, user: &User) -> GameResult<Inventory> {
+        let items = self.item_repository.find_by_user(user.id)?;
+        Ok(Inventory::new(items))
     }
 }
