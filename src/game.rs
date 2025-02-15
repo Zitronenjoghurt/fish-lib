@@ -1,7 +1,9 @@
 use crate::config::{Config, ConfigBuilderInterface, ConfigInterface};
+use crate::data::item_data::ItemData;
 use crate::data::location_data::LocationData;
 use crate::data::species_data::SpeciesData;
 use crate::database::{Database, DatabaseInterface};
+use crate::dto::inventory::Inventory;
 use crate::dto::user_location_unlock::UserLocationUnlock;
 use crate::game::errors::resource::GameResourceError;
 use crate::game::errors::GameResult;
@@ -23,6 +25,8 @@ use crate::game::services::user_service::UserServiceInterface;
 use crate::game::services::weather_service::WeatherServiceInterface;
 use crate::game::systems::weather_system::weather::Weather;
 use crate::models::fishing_history_entry::FishingHistoryEntry;
+use crate::models::item::properties_container::ItemPropertiesContainerInterface;
+use crate::models::item::Item;
 use crate::models::specimen::Specimen;
 use crate::models::user::User;
 use std::sync::{Arc, RwLock};
@@ -60,6 +64,67 @@ impl Game {
 }
 
 impl GameInterface for Game {
+    /// Get [ItemData] for the specified item ID.
+    ///
+    /// # Arguments
+    ///
+    /// * `item_id`: The ID of the item to get the data of. (See [Config])
+    ///
+    /// # Returns
+    ///
+    /// Result<Arc<[ItemData], Global>, [errors::GameError]>
+    /// - The [ItemData], if an item with the given ID exists
+    /// - An error, if no item with the given id exists
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::collections::HashMap;
+    /// use std::env;
+    /// use fish_lib::config::{Config, ConfigBuilderInterface};
+    /// use fish_lib::data::item_data::ItemData;
+    /// use fish_lib::game::prelude::*;
+    /// use fish_lib::game::service_provider::ServiceProviderInterface;
+    ///
+    /// const ITEM_ID: i32 = 1;
+    /// const ITEM_NAME: &str = "Super Bad Rod";
+    ///
+    /// // Define some item data
+    /// let item_data = ItemData {
+    ///     name: ITEM_NAME.to_string(),
+    ///     ..Default::default()
+    /// };
+    /// let item_data_map = HashMap::from([(ITEM_ID, item_data)]);
+    ///
+    /// // Add the location data to the config
+    /// let config = Config::builder().items(item_data_map).build().unwrap();
+    ///
+    /// // Create game and clear database for a blank test state
+    /// let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    /// let game = Game::new(&database_url, Some(config)).unwrap();
+    /// game.database().write().unwrap().clear().unwrap();
+    ///
+    /// // Finding the item data
+    /// let found_item_data = game.item_find(ITEM_ID).unwrap();
+    /// assert_eq!(&found_item_data.name, ITEM_NAME);
+    ///
+    /// // Searching for non-existent item data
+    /// let error = game.item_find(ITEM_ID + 1).unwrap_err();
+    /// assert!(error.is_not_found());
+    /// if let Some(resource_error) = error.as_resource_error() {
+    ///     assert!(resource_error.is_item_not_found());
+    ///     assert_eq!(resource_error.get_item_type_id(), Some(ITEM_ID + 1));
+    /// } else {
+    ///     panic!("{:?}", error);
+    /// }
+    /// ```
+    fn item_find(&self, item_id: i32) -> GameResult<Arc<ItemData>> {
+        match self.config().get_item_data(item_id) {
+            Some(item_data) => Ok(item_data.clone()),
+            None => Err(GameResourceError::item_not_found(item_id).into()),
+        }
+    }
+
     /// Get [LocationData] for the specified location ID.
     ///
     /// # Arguments
@@ -115,7 +180,7 @@ impl GameInterface for Game {
     /// }
     /// ```
     fn location_find(&self, location_id: i32) -> GameResult<Arc<LocationData>> {
-        match self.config().locations().get(&location_id) {
+        match self.config().get_location_data(location_id) {
             Some(data) => Ok(data.clone()),
             None => Err(GameResourceError::location_not_found(location_id).into()),
         }
@@ -231,7 +296,7 @@ impl GameInterface for Game {
     /// }
     /// ```
     fn species_find(&self, species_id: i32) -> GameResult<Arc<SpeciesData>> {
-        match self.config().species().get(&species_id) {
+        match self.config().get_species_data(species_id) {
             Some(data) => Ok(data.clone()),
             None => Err(GameResourceError::species_not_found(species_id).into()),
         }
@@ -514,6 +579,136 @@ impl GameInterface for Game {
                 self.location_find(location_id).ok()
             });
         Ok(location_unlocks)
+    }
+
+    /// Get the [Inventory] of a specified [User].
+    ///
+    /// # Arguments
+    ///
+    /// * `user`: The [User] to get the [Inventory] from.
+    ///
+    /// # Returns
+    ///
+    /// Result<[Inventory], [errors::GameError]>
+    /// - The user's inventory, if the user exists
+    /// - An error, if a database error occurred
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::collections::HashMap;
+    /// use std::env;
+    /// use fish_lib::config::{Config, ConfigBuilderInterface};
+    /// use fish_lib::data::item_data::ItemData;
+    /// use fish_lib::game::prelude::*;
+    /// use fish_lib::game::service_provider::ServiceProviderInterface;
+    ///
+    /// const EXTERNAL_ID: i64 = 1337;
+    /// const ITEM_ID: i32 = 1;
+    /// const ITEM_NAME: &str = "Super Bad Rod";
+    ///
+    /// // Define some item data
+    /// let item_data = ItemData {
+    ///     name: ITEM_NAME.to_string(),
+    ///     ..Default::default()
+    /// };
+    /// let item_data_map = HashMap::from([(ITEM_ID, item_data)]);
+    ///
+    /// // Add the location data to the config
+    /// let config = Config::builder().items(item_data_map).build().unwrap();
+    ///
+    /// // Create game and clear database for a blank test state
+    /// let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    /// let game = Game::new(&database_url, Some(config)).unwrap();
+    /// game.database().write().unwrap().clear().unwrap();
+    ///
+    /// // Registering a new user
+    /// let user = game.user_register(EXTERNAL_ID).unwrap();
+    /// assert_eq!(user.external_id, EXTERNAL_ID);
+    ///
+    /// /// Giving the user an item
+    /// let item_data = game.item_find(ITEM_ID).unwrap();
+    /// let item = game.user_item_give(&user, item_data, 1).unwrap();
+    ///
+    /// let inventory = game.user_inventory(&user).unwrap();
+    /// let items = inventory.get_items();
+    /// assert_eq!(items[0], item);
+    ///
+    /// ```
+    fn user_inventory(&self, user: &User) -> GameResult<Inventory> {
+        self.item_service().get_inventory(user)
+    }
+
+    /// Give a [User] a specified [ItemData].
+    ///
+    /// # Arguments
+    ///
+    /// * `user`: The [User] to give the item to.
+    /// * `item_data`: The [ItemData] to give the user. (See [Config])
+    /// * `count`: How much of the item to give the user.
+    ///     0 or 1 results in the default specified count if the item is stackable.
+    ///     If the item is not stackable (unique) it'll be added once (no matter the specified count).
+    ///
+    /// # Returns
+    ///
+    /// Result<[Item], [errors::GameError]>
+    /// - The newly created item when the operation was successful
+    /// - An error, if there was an error stacking the item or database operations failed
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::collections::HashMap;
+    /// use std::env;
+    /// use fish_lib::config::{Config, ConfigBuilderInterface};
+    /// use fish_lib::data::item_data::ItemData;
+    /// use fish_lib::game::prelude::*;
+    /// use fish_lib::game::service_provider::ServiceProviderInterface;
+    ///
+    /// const EXTERNAL_ID: i64 = 1337;
+    /// const ITEM_ID: i32 = 1;
+    /// const ITEM_NAME: &str = "Super Bad Rod";
+    ///
+    /// // Define some item data
+    /// let item_data = ItemData {
+    ///     name: ITEM_NAME.to_string(),
+    ///     ..Default::default()
+    /// };
+    /// let item_data_map = HashMap::from([(ITEM_ID, item_data)]);
+    ///
+    /// // Add the location data to the config
+    /// let config = Config::builder().items(item_data_map).build().unwrap();
+    ///
+    /// // Create game and clear database for a blank test state
+    /// let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    /// let game = Game::new(&database_url, Some(config)).unwrap();
+    /// game.database().write().unwrap().clear().unwrap();
+    ///
+    /// // Registering a new user
+    /// let user = game.user_register(EXTERNAL_ID).unwrap();
+    /// assert_eq!(user.external_id, EXTERNAL_ID);
+    ///
+    /// // Giving the user an item
+    /// let item_data = game.item_find(ITEM_ID).unwrap();
+    /// let item = game.user_item_give(&user, item_data, 1).unwrap();
+    ///
+    /// let inventory = game.user_inventory(&user).unwrap();
+    /// let items = inventory.get_items();
+    /// assert_eq!(items[0], item);
+    /// ```
+    fn user_item_give(
+        &self,
+        user: &User,
+        item_data: Arc<ItemData>,
+        count: u64,
+    ) -> GameResult<Item> {
+        let item = if count <= 1 || !item_data.is_stackable() {
+            self.item_service().create_and_save_item(item_data, user)?
+        } else {
+            self.item_service()
+                .create_and_save_item_with_count(item_data, user, count)?
+        };
+        Ok(item)
     }
 
     /// Register a new [User] by their external ID.

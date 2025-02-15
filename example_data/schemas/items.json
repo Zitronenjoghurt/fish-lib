@@ -83,8 +83,19 @@
                       "minimum": 0
                     }
                   }
+                },
+                "Stackable": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "default": 1
+                    }
+                  }
                 }
-              }
+              },
+              "additionalProperties": false
             }
           },
           "additionalProperties": false

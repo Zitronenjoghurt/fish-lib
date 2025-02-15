@@ -98,6 +98,7 @@ impl GameError {
                 | Self::Resource(GameResourceError::SpeciesNotFound { .. })
                 | Self::Resource(GameResourceError::NoFishingHistory { .. })
                 | Self::Repository(GameRepositoryError::Database(GameDatabaseError::NotFound))
+                | Self::Resource(GameResourceError::ItemNotFound { .. })
         )
     }
 

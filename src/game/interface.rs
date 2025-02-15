@@ -1,9 +1,12 @@
+use crate::data::item_data::ItemData;
 use crate::data::location_data::LocationData;
 use crate::data::species_data::SpeciesData;
+use crate::dto::inventory::Inventory;
 use crate::dto::user_location_unlock::UserLocationUnlock;
 use crate::game::errors::GameResult;
 use crate::game::systems::weather_system::weather::Weather;
 use crate::models::fishing_history_entry::FishingHistoryEntry;
+use crate::models::item::Item;
 use crate::models::specimen::Specimen;
 use crate::models::user::User;
 use std::sync::Arc;
@@ -15,6 +18,7 @@ use std::sync::Arc;
 /// contract to ensure all required functionality is implemented and to prevent
 /// accidental breaking changes.
 pub trait GameInterface: Send + Sync {
+    fn item_find(&self, item_id: i32) -> GameResult<Arc<ItemData>>;
     fn location_find(&self, location_id: i32) -> GameResult<Arc<LocationData>>;
     fn location_weather_current(&self, location: Arc<LocationData>) -> GameResult<Weather>;
     fn species_find(&self, species_id: i32) -> GameResult<Arc<SpeciesData>>;
@@ -30,6 +34,8 @@ pub trait GameInterface: Send + Sync {
     ) -> GameResult<FishingHistoryEntry>;
     fn user_find(&self, external_id: i64) -> GameResult<User>;
     fn user_get_unlocked_locations(&self, user: &User) -> GameResult<Vec<UserLocationUnlock>>;
+    fn user_inventory(&self, user: &User) -> GameResult<Inventory>;
+    fn user_item_give(&self, user: &User, item: Arc<ItemData>, count: u64) -> GameResult<Item>;
     fn user_register(&self, external_id: i64) -> GameResult<User>;
     fn user_save(&self, user: User) -> GameResult<User>;
     fn user_unlock_location(

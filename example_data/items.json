@@ -25,7 +25,8 @@
       "components": {
         "Usage": {
           "times_used": 0
-        }
+        },
+        "Stackable": {}
       }
     }
   }
