@@ -5,6 +5,7 @@ use crate::data::species_data::SpeciesData;
 use crate::database::{Database, DatabaseInterface};
 use crate::dto::inventory::Inventory;
 use crate::dto::user_location_unlock::UserLocationUnlock;
+use crate::game::asset_server::AssetServerInterface;
 use crate::game::errors::resource::GameResourceError;
 use crate::game::errors::GameResult;
 use crate::game::interface::GameInterface;
@@ -31,6 +32,7 @@ use crate::models::specimen::Specimen;
 use crate::models::user::User;
 use std::sync::{Arc, RwLock};
 
+pub mod asset_server;
 pub mod errors;
 pub mod interface;
 pub mod prelude;
@@ -914,6 +916,10 @@ impl GameInterface for Game {
 }
 
 impl ServiceProviderInterface for Game {
+    fn asset_server(&self) -> Arc<dyn AssetServerInterface> {
+        self.service_provider.asset_server()
+    }
+
     fn config(&self) -> Arc<dyn ConfigInterface> {
         self.service_provider.config()
     }

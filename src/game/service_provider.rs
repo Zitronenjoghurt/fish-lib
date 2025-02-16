@@ -1,5 +1,6 @@
 use crate::config::ConfigInterface;
 use crate::database::DatabaseInterface;
+use crate::game::asset_server::{AssetServer, AssetServerInterface};
 use crate::game::repositories::fishing_history_entry_repository::{
     FishingHistoryEntryRepository, FishingHistoryEntryRepositoryInterface,
 };
@@ -23,6 +24,7 @@ use crate::game::services::weather_service::{WeatherService, WeatherServiceInter
 use std::sync::{Arc, RwLock};
 
 pub trait ServiceProviderInterface: Send + Sync {
+    fn asset_server(&self) -> Arc<dyn AssetServerInterface>;
     fn config(&self) -> Arc<dyn ConfigInterface>;
     fn database(&self) -> Arc<RwLock<dyn DatabaseInterface>>;
     fn fishing_history_entry_repository(&self) -> Arc<dyn FishingHistoryEntryRepositoryInterface>;
@@ -42,6 +44,7 @@ pub trait ServiceProviderInterface: Send + Sync {
 }
 
 pub struct ServiceProvider {
+    asset_server: Arc<dyn AssetServerInterface>,
     config: Arc<dyn ConfigInterface>,
     database: Arc<RwLock<dyn DatabaseInterface>>,
     fishing_history_entry_repository: Arc<dyn FishingHistoryEntryRepositoryInterface>,
@@ -89,6 +92,7 @@ impl ServiceProvider {
         let weather_service = Arc::new(WeatherService::new(config.clone()));
 
         Self {
+            asset_server: Arc::new(AssetServer::new(1024 * 1024)),
             config,
             database,
             fishing_history_entry_repository,
@@ -117,6 +121,10 @@ impl ServiceProvider {
 }
 
 impl ServiceProviderInterface for ServiceProvider {
+    fn asset_server(&self) -> Arc<dyn AssetServerInterface> {
+        self.asset_server.clone()
+    }
+
     fn config(&self) -> Arc<dyn ConfigInterface> {
         self.config.clone()
     }
